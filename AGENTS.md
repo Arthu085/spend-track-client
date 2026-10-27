@@ -1,6 +1,8 @@
-# Frontend
+# Spend Track Client
 
-React 19 web template: TypeScript, Vite, Ant Design, TanStack Query, Axios, Zod, React Router,
+Web client for Spend Track, a personal financial organization system.
+
+React 19: TypeScript, Vite, Ant Design, TanStack Query, Axios, Zod, React Router,
 i18next, Vitest, ESLint, Prettier, npm.
 
 ## Read before changing code

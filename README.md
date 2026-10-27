@@ -1,6 +1,8 @@
-# Frontend
+# Spend Track Client
 
-A React 19 + TypeScript web template built with Vite.
+The web client for **Spend Track**, a personal financial organization system, built with React 19,
+TypeScript, and Vite.
+
 The application foundation (providers, routing, HTTP client, localization, and tests) and
 authentication (sign-in, sign-out, password recovery, and route guards) are in place, along with
 users management, a self-service account page, and admin change requests.
@@ -8,10 +10,10 @@ See [`docs/PROJECT.md`](docs/PROJECT.md) for scope, architecture, and source lay
 
 ## Related repository
 
-The related API project is [backend-template](https://github.com/Arthu085/backend-template).
+The related API project is [spend-track-api](https://github.com/Arthu085/spend-track-api).
 The repositories have separate setup, configuration, and validation. The HTTP client follows the
 API contract (cookie sessions, session refresh, session-bound CSRF tokens, `Accept-Language`).
-The default tests stub HTTP, so this template builds and validates without the API running.
+The default tests stub HTTP, so this client builds and validates without the API running.
 The optional [API integration tests](#api-integration-tests) check real requests and response schemas
 against a disposable backend. Sign in with an API
 user, such as the seeded admin from the API's `SEED_ADMIN_*` settings.
@@ -88,12 +90,12 @@ run this optional suite from the frontend:
 
 ```sh
 npm ci
-npm --prefix ../backend-template ci
-BACKEND_TEMPLATE_PATH=../backend-template npm run test:integration
+npm --prefix ../spend-track-api ci
+SPEND_TRACK_API_PATH=../spend-track-api npm run test:integration
 ```
 
-`BACKEND_TEMPLATE_PATH` is a test-only path to the backend checkout; it defaults to
-`../backend-template`. That checkout must include `test/frontend/server.ts`. The suite starts an
+`SPEND_TRACK_API_PATH` is a test-only path to the API checkout; it defaults to
+`../spend-track-api`. That checkout must include `test/frontend/server.ts`. The suite starts an
 ephemeral PostgreSQL Testcontainer, applies the backend's migrations and seeds, and listens on an
 available localhost port. It closes the API and container after the run, using no developer database
 or running API. Both repositories keep their existing validation gates.

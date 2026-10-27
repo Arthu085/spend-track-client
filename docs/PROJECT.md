@@ -5,8 +5,8 @@ Purpose, current scope, architecture, and source layout. Engineering rules are i
 
 ## Purpose
 
-A reusable React web template for the
-[backend-template](https://github.com/Arthu085/backend-template) REST API.
+The web client of Spend Track, a personal financial organization system, built on the
+[spend-track-api](https://github.com/Arthu085/spend-track-api) REST API.
 
 ## Stack
 
