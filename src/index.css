@@ -1,0 +1,15 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+}
+
+.ant-input-password .ant-input-password-icon {
+  min-inline-size: 24px;
+  min-block-size: 24px;
+  align-items: center;
+  justify-content: center;
+  margin-block: -1px;
+}

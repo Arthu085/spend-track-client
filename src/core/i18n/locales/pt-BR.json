@@ -1,0 +1,276 @@
+{
+  "common": {
+    "backToHome": "Voltar ao início",
+    "reload": "Recarregar página",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir"
+  },
+  "home": {
+    "greeting": "Olá, {{name}}",
+    "description": "Escolha para onde ir.",
+    "shortcuts": {
+      "users": "Cadastre, edite e desative usuários.",
+      "roles": "Veja e ajuste as permissões de cada perfil.",
+      "account": "Altere seu nome e e-mail e veja o seu acesso.",
+      "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil."
+    }
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "subtitle": "A página que você procura não existe ou foi movida."
+  },
+  "forbidden": {
+    "title": "Acesso negado",
+    "subtitle": "Você não tem permissão para acessar esta página."
+  },
+  "routeError": {
+    "title": "Algo deu errado",
+    "subtitle": "Ocorreu um erro inesperado. Recarregue a página para tentar novamente."
+  },
+  "theme": {
+    "switchToLight": "Mudar para o tema claro",
+    "switchToDark": "Mudar para o tema escuro",
+    "light": "Tema claro",
+    "dark": "Tema escuro"
+  },
+  "language": {
+    "label": "Idioma",
+    "names": {
+      "pt-BR": "Português (Brasil)",
+      "en": "English"
+    }
+  },
+  "layout": {
+    "navigation": "Menu de navegação",
+    "toggleSidebar": "Expandir ou recolher o menu lateral"
+  },
+  "navigation": {
+    "home": "Início",
+    "users": "Usuários",
+    "roles": "Perfis"
+  },
+  "navigationSections": {
+    "general": "Geral",
+    "administration": "Administração"
+  },
+  "feedback": {
+    "error": "Não foi possível concluir a ação",
+    "success": "Operação realizada com sucesso."
+  },
+  "list": {
+    "filters": {
+      "label": "Filtros",
+      "clear": "Limpar"
+    },
+    "total_one": "{{count}} registro",
+    "total_other": "{{count}} registros"
+  },
+  "recordStatus": {
+    "ACTIVE": "Ativo",
+    "INACTIVE": "Inativo"
+  },
+  "authorization": {
+    "actions": {
+      "CREATE": "Criar",
+      "READ": "Ler",
+      "UPDATE": "Atualizar",
+      "DELETE": "Excluir"
+    },
+    "subjects": {
+      "USER": "Usuários",
+      "ROLE": "Perfis",
+      "ABILITY": "Permissões"
+    },
+    "noAbilities": "Nenhuma permissão."
+  },
+  "roles": {
+    "title": "Perfis",
+    "fields": {
+      "role": "Perfil",
+      "status": "Situação",
+      "actions": "Ações",
+      "subject": "Recurso"
+    },
+    "actions": {
+      "abilities": "Permissões de {{role}}"
+    },
+    "abilities": {
+      "cell": "{{action}} {{subject}}",
+      "adminImmutable": "As permissões do perfil Administrador são fixas e não podem ser alteradas.",
+      "catalogRestricted": "Seu acesso não permite consultar o catálogo completo de permissões. Apenas as permissões atribuídas são exibidas; a edição exige acesso de leitura ao catálogo."
+    },
+    "select": {
+      "limited": "Apenas os perfis da sua conta e do usuário em edição estão disponíveis. É necessário acesso de leitura aos perfis para ver a lista completa."
+    }
+  },
+  "users": {
+    "title": "Usuários",
+    "currentUser": "(você)",
+    "fields": {
+      "name": "Nome",
+      "email": "E-mail",
+      "password": "Senha",
+      "roles": "Perfis",
+      "role": "Perfil",
+      "status": "Situação",
+      "actions": "Ações",
+      "emailConfirmedAt": "E-mail confirmado em",
+      "createdBy": "Criado por",
+      "createdAt": "Criado em",
+      "updatedBy": "Atualizado por",
+      "updatedAt": "Atualizado em"
+    },
+    "create": {
+      "title": "Novo usuário"
+    },
+    "details": {
+      "title": "Detalhes do usuário"
+    },
+    "edit": {
+      "title": "Editar usuário"
+    },
+    "actions": {
+      "details": "Ver detalhes de {{name}}",
+      "edit": "Editar {{name}}",
+      "delete": "Excluir {{name}}",
+      "toggleStatus": "Ativar ou desativar {{name}}"
+    },
+    "delete": {
+      "title": "Excluir usuário",
+      "description": "Excluir {{name}}? Esta ação não pode ser desfeita."
+    },
+    "changeRequest": {
+      "title": "Aprovação necessária",
+      "offer": "Enviar estas alterações a {{name}} como uma solicitação de alteração? Elas só serão aplicadas após a aprovação e substituem qualquer solicitação pendente.",
+      "send": "Enviar solicitação",
+      "sent": "Solicitação de alteração enviada. As alterações serão aplicadas quando {{name}} aprovar."
+    }
+  },
+  "account": {
+    "title": "Minha conta",
+    "fields": {
+      "currentPassword": "Senha atual",
+      "newPassword": "Nova senha",
+      "confirmNewPassword": "Confirmar nova senha"
+    },
+    "currentPasswordHelp": "Necessária para alterar seu e-mail.",
+    "updated": {
+      "title": "Perfil atualizado",
+      "description": "Todas as sessões foram encerradas, inclusive esta. Entre novamente.",
+      "confirmNewEmail": "Antes de entrar, confirme seu novo endereço de e-mail pelo link que enviamos para ele."
+    },
+    "profile": {
+      "title": "Perfil"
+    },
+    "access": {
+      "title": "Acesso",
+      "permissions": "Permissões"
+    },
+    "password": {
+      "title": "Senha",
+      "description": "Alterar a senha encerra todas as sessões, inclusive esta.",
+      "submit": "Alterar senha",
+      "changed": "Senha alterada"
+    }
+  },
+  "changeRequests": {
+    "title": "Solicitações de alteração",
+    "description": "Outro administrador pediu para alterar o seu perfil. Revise cada alteração e aprove ou rejeite.",
+    "empty": "Nenhuma solicitação de alteração pendente.",
+    "requestedBy": "Solicitada por {{name}}",
+    "unknownRequester": "um usuário removido",
+    "dates": "Solicitada em {{createdAt}} · expira em {{expiresAt}}",
+    "changed": "Alterado",
+    "columns": {
+      "field": "Campo",
+      "current": "Atual",
+      "requested": "Solicitado"
+    },
+    "approve": {
+      "submit": "Aprovar",
+      "title": "Aprovar esta solicitação de alteração?",
+      "description": "As alterações serão aplicadas agora e todas as sessões serão encerradas, inclusive esta. Você precisará entrar novamente.",
+      "done": "Solicitação de alteração aprovada"
+    },
+    "reject": {
+      "submit": "Rejeitar",
+      "title": "Rejeitar esta solicitação de alteração?",
+      "description": "O seu perfil continua como está."
+    },
+    "pending_one": "Você tem {{count}} solicitação de alteração pendente.",
+    "pending_other": "Você tem {{count}} solicitações de alteração pendentes.",
+    "review": "Revisar"
+  },
+  "auth": {
+    "logout": "Sair",
+    "backToLogin": "Voltar ao login",
+    "fields": {
+      "email": "E-mail",
+      "password": "Senha",
+      "newPassword": "Nova senha",
+      "confirmPassword": "Confirmar nova senha"
+    },
+    "login": {
+      "title": "Entrar",
+      "submit": "Entrar",
+      "forgotPassword": "Esqueceu sua senha?",
+      "resendConfirmation": "Reenviar e-mail de confirmação"
+    },
+    "forgotPassword": {
+      "title": "Recuperar senha",
+      "subtitle": "Informe seu e-mail para receber um link de redefinição de senha.",
+      "submit": "Enviar link",
+      "sentTitle": "Verifique seu e-mail",
+      "sentSubtitle": "Se houver uma conta com esse e-mail, você receberá um link para redefinir sua senha."
+    },
+    "resetPassword": {
+      "title": "Redefinir senha",
+      "submit": "Redefinir senha",
+      "passwordMismatch": "As senhas não coincidem.",
+      "successTitle": "Senha redefinida",
+      "successSubtitle": "Entre com sua nova senha.",
+      "missingTokenTitle": "Link inválido",
+      "missingTokenSubtitle": "O link de redefinição de senha está incompleto.",
+      "requestNewLink": "Solicitar um novo link"
+    },
+    "resendConfirmation": {
+      "title": "Reenviar confirmação",
+      "subtitle": "Informe seu e-mail para receber um novo link de confirmação.",
+      "submit": "Enviar link",
+      "sentTitle": "Verifique seu e-mail",
+      "sentSubtitle": "Se houver uma conta não confirmada com esse e-mail, você receberá um novo link de confirmação."
+    },
+    "confirmEmail": {
+      "title": "Confirmar e-mail",
+      "subtitle": "Confirme seu endereço de e-mail para ativar sua conta.",
+      "submit": "Confirmar e-mail",
+      "successTitle": "E-mail confirmado",
+      "successSubtitle": "Agora você já pode entrar.",
+      "missingTokenTitle": "Link inválido",
+      "missingTokenSubtitle": "O link de confirmação de e-mail está incompleto.",
+      "requestNewLink": "Solicitar um novo link"
+    }
+  },
+  "validation": {
+    "required": "Campo obrigatório.",
+    "email": "Informe um e-mail válido.",
+    "maxLength": "Use no máximo {{max}} caracteres.",
+    "passwordMismatch": "As senhas não coincidem.",
+    "strongPassword": "Use pelo menos {{min}} caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um símbolo."
+  },
+  "apiErrors": {
+    "network": "Não foi possível conectar ao servidor.",
+    "timeout": "O servidor demorou muito para responder.",
+    "unexpected": "Ocorreu um erro inesperado.",
+    "auditReference": "Referência: {{auditId}}"
+  },
+  "pwa": {
+    "offline": "Você está offline. Páginas que dependem do servidor não carregarão até a conexão voltar.",
+    "update": {
+      "title": "Nova versão disponível",
+      "description": "Recarregue para usar a versão mais recente da aplicação.",
+      "reload": "Recarregar"
+    }
+  }
+}

@@ -1,0 +1,276 @@
+{
+  "common": {
+    "backToHome": "Back to home",
+    "reload": "Reload page",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "home": {
+    "greeting": "Hello, {{name}}",
+    "description": "Choose where to go.",
+    "shortcuts": {
+      "users": "Create, edit, and deactivate users.",
+      "roles": "Review and adjust each role's permissions.",
+      "account": "Change your name and email and review your access.",
+      "changeRequests": "Approve or reject changes another administrator requested for your profile."
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "The page you are looking for does not exist or has been moved."
+  },
+  "forbidden": {
+    "title": "Access denied",
+    "subtitle": "You do not have permission to access this page."
+  },
+  "routeError": {
+    "title": "Something went wrong",
+    "subtitle": "An unexpected error occurred. Reload the page to try again."
+  },
+  "theme": {
+    "switchToLight": "Switch to light theme",
+    "switchToDark": "Switch to dark theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "language": {
+    "label": "Language",
+    "names": {
+      "pt-BR": "Português (Brasil)",
+      "en": "English"
+    }
+  },
+  "layout": {
+    "navigation": "Navigation menu",
+    "toggleSidebar": "Expand or collapse the sidebar"
+  },
+  "navigation": {
+    "home": "Home",
+    "users": "Users",
+    "roles": "Roles"
+  },
+  "navigationSections": {
+    "general": "General",
+    "administration": "Administration"
+  },
+  "feedback": {
+    "error": "Could not complete the action",
+    "success": "Operation completed successfully."
+  },
+  "list": {
+    "filters": {
+      "label": "Filters",
+      "clear": "Clear"
+    },
+    "total_one": "{{count}} record",
+    "total_other": "{{count}} records"
+  },
+  "recordStatus": {
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive"
+  },
+  "authorization": {
+    "actions": {
+      "CREATE": "Create",
+      "READ": "Read",
+      "UPDATE": "Update",
+      "DELETE": "Delete"
+    },
+    "subjects": {
+      "USER": "Users",
+      "ROLE": "Roles",
+      "ABILITY": "Permissions"
+    },
+    "noAbilities": "No permissions."
+  },
+  "roles": {
+    "title": "Roles",
+    "fields": {
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions",
+      "subject": "Resource"
+    },
+    "actions": {
+      "abilities": "Permissions of {{role}}"
+    },
+    "abilities": {
+      "cell": "{{action}} {{subject}}",
+      "adminImmutable": "The Administrator role's permissions are fixed and cannot be changed.",
+      "catalogRestricted": "The complete permission catalog is unavailable with your access. Only the assigned permissions are shown; editing requires permission to read the catalog."
+    },
+    "select": {
+      "limited": "Only roles from your account and the user being edited are available. Permission to read roles is required to see the complete list."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "currentUser": "(you)",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "roles": "Roles",
+      "role": "Role",
+      "status": "Status",
+      "actions": "Actions",
+      "emailConfirmedAt": "Email confirmed at",
+      "createdBy": "Created by",
+      "createdAt": "Created at",
+      "updatedBy": "Updated by",
+      "updatedAt": "Updated at"
+    },
+    "create": {
+      "title": "New user"
+    },
+    "details": {
+      "title": "User details"
+    },
+    "edit": {
+      "title": "Edit user"
+    },
+    "actions": {
+      "details": "View details of {{name}}",
+      "edit": "Edit {{name}}",
+      "delete": "Delete {{name}}",
+      "toggleStatus": "Activate or deactivate {{name}}"
+    },
+    "delete": {
+      "title": "Delete user",
+      "description": "Delete {{name}}? This cannot be undone."
+    },
+    "changeRequest": {
+      "title": "Approval required",
+      "offer": "Send these changes to {{name}} as a change request? They apply only after approval and replace any pending request.",
+      "send": "Send change request",
+      "sent": "Change request sent. The changes apply once {{name}} approves them."
+    }
+  },
+  "account": {
+    "title": "My account",
+    "fields": {
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmNewPassword": "Confirm new password"
+    },
+    "currentPasswordHelp": "Required to change your email.",
+    "updated": {
+      "title": "Profile updated",
+      "description": "Every session ended, including this one. Sign in again.",
+      "confirmNewEmail": "Before signing in, confirm your new email address with the link we sent to it."
+    },
+    "profile": {
+      "title": "Profile"
+    },
+    "access": {
+      "title": "Access",
+      "permissions": "Permissions"
+    },
+    "password": {
+      "title": "Password",
+      "description": "Changing your password ends every session, including this one.",
+      "submit": "Change password",
+      "changed": "Password changed"
+    }
+  },
+  "changeRequests": {
+    "title": "Change requests",
+    "description": "Another administrator asked to change your profile. Review each change and approve or reject it.",
+    "empty": "No pending change requests.",
+    "requestedBy": "Requested by {{name}}",
+    "unknownRequester": "a removed user",
+    "dates": "Requested at {{createdAt}} · expires at {{expiresAt}}",
+    "changed": "Changed",
+    "columns": {
+      "field": "Field",
+      "current": "Current",
+      "requested": "Requested"
+    },
+    "approve": {
+      "submit": "Approve",
+      "title": "Approve this change request?",
+      "description": "The changes apply now and every session ends, including this one. You will need to sign in again.",
+      "done": "Change request approved"
+    },
+    "reject": {
+      "submit": "Reject",
+      "title": "Reject this change request?",
+      "description": "Your profile stays as it is."
+    },
+    "pending_one": "You have {{count}} pending change request.",
+    "pending_other": "You have {{count}} pending change requests.",
+    "review": "Review"
+  },
+  "auth": {
+    "logout": "Sign out",
+    "backToLogin": "Back to sign in",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password"
+    },
+    "login": {
+      "title": "Sign in",
+      "submit": "Sign in",
+      "forgotPassword": "Forgot your password?",
+      "resendConfirmation": "Resend confirmation email"
+    },
+    "forgotPassword": {
+      "title": "Recover password",
+      "subtitle": "Enter your email to receive a password reset link.",
+      "submit": "Send link",
+      "sentTitle": "Check your email",
+      "sentSubtitle": "If an account exists for that email, you will receive a link to reset your password."
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "submit": "Reset password",
+      "passwordMismatch": "The passwords do not match.",
+      "successTitle": "Password reset",
+      "successSubtitle": "Sign in with your new password.",
+      "missingTokenTitle": "Invalid link",
+      "missingTokenSubtitle": "The password reset link is incomplete.",
+      "requestNewLink": "Request a new link"
+    },
+    "resendConfirmation": {
+      "title": "Resend confirmation",
+      "subtitle": "Enter your email to receive a new confirmation link.",
+      "submit": "Send link",
+      "sentTitle": "Check your email",
+      "sentSubtitle": "If an unconfirmed account exists for that email, you will receive a new confirmation link."
+    },
+    "confirmEmail": {
+      "title": "Confirm email",
+      "subtitle": "Confirm your email address to activate your account.",
+      "submit": "Confirm email",
+      "successTitle": "Email confirmed",
+      "successSubtitle": "You can now sign in.",
+      "missingTokenTitle": "Invalid link",
+      "missingTokenSubtitle": "The email confirmation link is incomplete.",
+      "requestNewLink": "Request a new link"
+    }
+  },
+  "validation": {
+    "required": "This field is required.",
+    "email": "Enter a valid email.",
+    "maxLength": "Use at most {{max}} characters.",
+    "passwordMismatch": "The passwords do not match.",
+    "strongPassword": "Use at least {{min}} characters, including an uppercase letter, a lowercase letter, a number, and a symbol."
+  },
+  "apiErrors": {
+    "network": "Could not connect to the server.",
+    "timeout": "The server took too long to respond.",
+    "unexpected": "An unexpected error occurred.",
+    "auditReference": "Reference: {{auditId}}"
+  },
+  "pwa": {
+    "offline": "You are offline. Pages that need the server will not load until the connection returns.",
+    "update": {
+      "title": "New version available",
+      "description": "Reload to use the latest version of the application.",
+      "reload": "Reload"
+    }
+  }
+}
