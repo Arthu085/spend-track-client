@@ -431,9 +431,11 @@ to match the mode. Style components through theme tokens instead of hardcoded co
 - **Development:** `npm run dev` registers a development service worker (`devOptions.enabled`),
   generated into the ignored `dev-dist/` folder, and serves the manifest and generated icons, so
   installation, registration, and the update prompt can be tried without a build. It precaches
-  only `index.html` for `/`, so offline loading works only in builds. The worker stays registered
-  for the dev server's origin; unregister it in the browser's developer tools before serving
-  another project from the same port.
+  only `index.html` for `/`, so offline loading works only in builds. `devOptions.suppressWarnings`
+  replaces the build's glob patterns, which match nothing in `dev-dist/`, with an empty
+  `suppress-warnings.js`, so Workbox does not warn about them. The worker stays registered for the
+  dev server's origin; unregister it in the browser's developer tools before serving another
+  project from the same port.
 - **Manifest:** generated from `VITE_APP_NAME` (`name`) and `VITE_APP_MARK`
   (`short_name`), with `display: standalone`, `lang: pt-BR`, and white theme and background colors.
   `index.html` declares a white or black `theme-color` per `prefers-color-scheme`.

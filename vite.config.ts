@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
       mode !== 'test' &&
         VitePWA({
           registerType: 'prompt',
-          devOptions: { enabled: true },
+          devOptions: { enabled: true, suppressWarnings: true },
           pwaAssets: { injectThemeColor: false },
           manifest: {
             name: VITE_APP_NAME,
