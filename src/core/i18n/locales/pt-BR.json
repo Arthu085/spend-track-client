@@ -23,8 +23,10 @@
   },
   "dashboard": {
     "greeting": "Olá, {{name}}",
-    "description": "Acompanhe seus saldos do mês.",
+    "description": "Acompanhe os saldos, as receitas e as despesas do mês.",
     "actions": {
+      "addTransaction": "Adicionar transação",
+      "transactions": "Transações",
       "accounts": "Gerenciar contas",
       "settings": "Configurações financeiras"
     },
@@ -47,6 +49,32 @@
       "title": "Saldos por conta",
       "empty": "Você ainda não cadastrou nenhuma conta.",
       "add": "Adicionar conta"
+    },
+    "income": {
+      "title": "Receitas",
+      "completed": "Recebido",
+      "pending": "A receber",
+      "completedShare": "Parcela das receitas já recebida",
+      "empty": "Nenhuma receita registrada neste mês."
+    },
+    "expenses": {
+      "title": "Despesas",
+      "completed": "Pago",
+      "pending": "A pagar",
+      "completedShare": "Parcela das despesas já paga",
+      "empty": "Nenhuma despesa registrada neste mês."
+    },
+    "expensesByCategory": {
+      "title": "Despesas por categoria",
+      "breakdown": "Pago {{completed}} · A pagar {{pending}}",
+      "empty": "Nenhuma despesa para detalhar por categoria."
+    },
+    "upcoming": {
+      "title": "Próximas transações",
+      "hint": "Transações previstas até o fim do mês, incluindo as atrasadas.",
+      "viewAll": "Ver mês",
+      "partial": "Exibindo {{shown}} de {{count}}.",
+      "empty": "Nada previsto até o fim deste mês."
     }
   },
   "month": {

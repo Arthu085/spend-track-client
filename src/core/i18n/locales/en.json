@@ -23,8 +23,10 @@
   },
   "dashboard": {
     "greeting": "Hello, {{name}}",
-    "description": "Track your balances for the month.",
+    "description": "Track the month's balances, income, and expenses.",
     "actions": {
+      "addTransaction": "Add transaction",
+      "transactions": "Transactions",
       "accounts": "Manage accounts",
       "settings": "Financial settings"
     },
@@ -47,6 +49,32 @@
       "title": "Balances by account",
       "empty": "You have not added any account yet.",
       "add": "Add account"
+    },
+    "income": {
+      "title": "Income",
+      "completed": "Received",
+      "pending": "Expected",
+      "completedShare": "Share of income received",
+      "empty": "No income recorded for this month."
+    },
+    "expenses": {
+      "title": "Expenses",
+      "completed": "Paid",
+      "pending": "To pay",
+      "completedShare": "Share of expenses paid",
+      "empty": "No expenses recorded for this month."
+    },
+    "expensesByCategory": {
+      "title": "Expenses by category",
+      "breakdown": "Paid {{completed}} · To pay {{pending}}",
+      "empty": "No spending to break down by category."
+    },
+    "upcoming": {
+      "title": "Upcoming",
+      "hint": "Planned transactions up to the end of the month, overdue ones included.",
+      "viewAll": "View month",
+      "partial": "Showing {{shown}} of {{count}}.",
+      "empty": "Nothing planned up to the end of this month."
     }
   },
   "month": {

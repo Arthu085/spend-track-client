@@ -236,6 +236,11 @@ describe('real backend finance contracts', () => {
       actualBalance: '1000.00',
       projectedBalance: '749.60',
     });
+    expect((await fetchDashboard(month)).expenses).toEqual({
+      total: '250.40',
+      completed: '0.00',
+      pending: '250.40',
+    });
 
     const completed = await updateTransactionState({
       uuid: rent.data.uuid,
@@ -263,6 +268,14 @@ describe('real backend finance contracts', () => {
       destinationAccountUuid: savings.data.uuid,
     });
 
+    const dashboard = await fetchDashboard(month);
+
+    expect(dashboard.expenses).toEqual({
+      total: '250.40',
+      completed: '250.40',
+      pending: '0.00',
+    });
+    expect(dashboard.upcomingCount).toBe(0);
     expect(await balanceOf(savings.data.uuid)).toMatchObject({
       actualBalance: '100.00',
     });

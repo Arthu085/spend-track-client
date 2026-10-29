@@ -308,9 +308,25 @@ the period (with its timing and remaining days), the spending perspective, the a
 balances, and the balance of each active account, with an invitation to add an account when there is
 none. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
-saves the preference with `PATCH /preferences` and reloads the dashboard. Account and preference
-mutations invalidate the dashboard query. Until transactions exist, the projected balance equals
-the actual balance.
+saves the preference with `PATCH /preferences` and reloads the dashboard. Account, preference, and
+transaction mutations invalidate the dashboard query. The projected balance adds every planned
+transaction dated up to the end of the month, overdue ones included, to the actual balance.
+
+Transaction indicators, each with its own empty state:
+
+- **Income and expenses:** the month's total of each, split into completed (received or paid) and
+  pending (planned), with a bar showing the completed share. Canceled transactions and transfers
+  never count.
+- **Upcoming:** up to ten planned transactions dated up to the end of the month, oldest first, with
+  an overdue tag, the category or transfer route, and a quick action that marks one as completed
+  (asking for the effective date, today by default). When more exist, the card says how many and
+  links to the month on the transactions page.
+- **Expenses by category:** each category's total with a bar for its share of the month's expenses
+  (in the category color) and its paid and pending amounts.
+- **Add transaction:** a header action opens the transactions form modal.
+
+Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
+comes from the API's decimal strings.
 
 ### Transactions
 
