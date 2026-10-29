@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import i18n from '@/core/i18n/i18n.config';
+import { recordStatusSchema } from '@/shared/domain/record-status.schema';
+import type { ListFilters } from '@/shared/list/use-list-params';
 import { categoryKindSchema } from './category.schema';
 
 export const CATEGORY_NAME_MAX_LENGTH = 100;
@@ -19,5 +21,16 @@ export const categoryFormSchema = z.object({
   kind: z.enum(categoryKindSchema.options, { error: required }),
   color: z.string().regex(HEX_COLOR_PATTERN).optional(),
 });
+
+export const categoryFiltersShape = {
+  kind: categoryKindSchema,
+  status: recordStatusSchema,
+};
+
+export const defaultCategoryFilters: ListFilters<typeof categoryFiltersShape> =
+  {
+    kind: 'EXPENSE',
+    status: 'ACTIVE',
+  };
 
 export type CategoryForm = z.infer<typeof categoryFormSchema>;

@@ -1,7 +1,9 @@
 import type { Dayjs } from 'dayjs';
 import { z } from 'zod';
 import i18n from '@/core/i18n/i18n.config';
+import { recordStatusSchema } from '@/shared/domain/record-status.schema';
 import { DATE_ONLY_FORMAT } from '@/shared/date/date-only';
+import type { ListFilters } from '@/shared/list/use-list-params';
 import { moneyInputSchema } from '@/shared/money/money';
 import { accountTypeSchema } from './account.schema';
 
@@ -24,6 +26,14 @@ export const accountFormSchema = z.object({
   }),
   isDefault: z.boolean().optional(),
 });
+
+export const accountFiltersShape = {
+  status: recordStatusSchema,
+};
+
+export const defaultAccountFilters: ListFilters<typeof accountFiltersShape> = {
+  status: 'ACTIVE',
+};
 
 export type AccountForm = z.infer<typeof accountFormSchema>;
 

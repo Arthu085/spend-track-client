@@ -1,4 +1,4 @@
-import { Segmented } from 'antd';
+import { Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   type SpendingPerspective,
@@ -17,14 +17,21 @@ export const PerspectiveSwitch = ({ value }: PerspectiveSwitchProps) => {
   const mutation = useUpdatePreferences();
 
   return (
-    <Segmented<SpendingPerspective>
+    <Radio.Group
       aria-label={t('preferences.fields.spendingPerspective')}
+      optionType="button"
+      buttonStyle="solid"
       value={
         mutation.isPending ? mutation.variables.spendingPerspective : value
       }
       disabled={mutation.isPending}
-      onChange={(spendingPerspective) =>
-        mutation.mutate({ spendingPerspective }, { onError: showError })
+      onChange={({ target }) =>
+        mutation.mutate(
+          {
+            spendingPerspective: spendingPerspectiveSchema.parse(target.value),
+          },
+          { onError: showError },
+        )
       }
       options={spendingPerspectiveSchema.options.map((option) => ({
         value: option,

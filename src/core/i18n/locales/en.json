@@ -67,19 +67,15 @@
     "default": "Default",
     "openingBalanceOn": "On {{date}}",
     "actions": {
-      "toggleStatus": "Activate or archive {{name}}",
+      "toggleStatus": "Activate or deactivate {{name}}",
       "edit": "Edit {{name}}",
       "delete": "Delete {{name}}"
     },
     "delete": {
       "title": "Delete account",
-      "description": "Delete {{name}}? Prefer archiving accounts that were already used. Deleting cannot be undone."
+      "description": "Delete {{name}}? Prefer deactivating accounts that were already used. Deleting cannot be undone."
     },
-    "empty": "No accounts found.",
-    "filters": {
-      "active": "Active",
-      "archived": "Archived"
-    }
+    "empty": "No accounts found."
   },
   "categories": {
     "title": "Categories",
@@ -105,12 +101,8 @@
       "INCOME": "Income"
     },
     "actions": {
-      "toggleStatus": "Activate or archive {{name}}",
+      "toggleStatus": "Activate or deactivate {{name}}",
       "edit": "Edit {{name}}"
-    },
-    "filters": {
-      "active": "Active",
-      "archived": "Archived"
     }
   },
   "preferences": {

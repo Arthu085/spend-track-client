@@ -162,7 +162,14 @@ describe('FinancialSettingsPage', () => {
       }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText(i18n.t('categories.kinds.INCOME')));
+    fireEvent.mouseDown(
+      within(screen.getByRole('search')).getByLabelText(
+        i18n.t('categories.fields.kind'),
+      ),
+    );
+    fireEvent.click(
+      await screen.findByTitle(i18n.t('categories.kinds.INCOME')),
+    );
 
     await waitFor(() => {
       expect(sent('GET /categories').at(-1)?.params).toEqual({
@@ -199,11 +206,58 @@ describe('FinancialSettingsPage', () => {
     });
   });
 
-  it('archives a personal category', async () => {
+  it('saves the picked color as a hex code', async () => {
+    const { sent } = renderSettings({
+      [`PATCH /categories/${pets.uuid}`]: envelope(
+        { ...pets, color: '#1677FF' },
+        'Categoria atualizada',
+      ),
+    });
+
+    const row = await findRow(pets.uuid);
+    fireEvent.click(
+      within(row).getByRole('button', {
+        name: i18n.t('categories.actions.edit', { name: pets.name }),
+      }),
+    );
+    const dialog = await findDialog(i18n.t('categories.edit.title'));
+    const trigger = dialog.querySelector<HTMLElement>(
+      '.ant-color-picker-trigger',
+    );
+
+    if (!trigger) {
+      throw new Error('Color picker not found');
+    }
+
+    fireEvent.click(trigger);
+    const hexInput = await waitFor(() => {
+      const input = document.querySelector<HTMLInputElement>(
+        '.ant-color-picker-hex-input input',
+      );
+
+      if (!input) {
+        throw new Error('Hex input not found');
+      }
+
+      return input;
+    });
+    fireEvent.change(hexInput, { target: { value: '1677ff' } });
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: i18n.t('common.save') }),
+    );
+
+    expect(await screen.findByText('Categoria atualizada')).toBeInTheDocument();
+    expect(requestBody(sent(`PATCH /categories/${pets.uuid}`)[0])).toEqual({
+      name: pets.name,
+      color: '#1677FF',
+    });
+  });
+
+  it('deactivates a personal category', async () => {
     const { sent } = renderSettings({
       [`PUT /categories/${pets.uuid}/status`]: envelope(
         { ...pets, status: 'INACTIVE', statusLabel: 'Inativo' },
-        'Categoria arquivada',
+        'Categoria inativada',
       ),
     });
 
@@ -214,7 +268,7 @@ describe('FinancialSettingsPage', () => {
       }),
     );
 
-    expect(await screen.findByText('Categoria arquivada')).toBeInTheDocument();
+    expect(await screen.findByText('Categoria inativada')).toBeInTheDocument();
     expect(requestBody(sent(`PUT /categories/${pets.uuid}/status`)[0])).toEqual(
       { status: 'INACTIVE' },
     );

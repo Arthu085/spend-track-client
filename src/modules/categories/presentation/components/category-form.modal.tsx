@@ -1,4 +1,4 @@
-import { ColorPicker, Form, Input, Radio } from 'antd';
+import { ColorPicker, type ColorPickerProps, Form, Input, Radio } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
@@ -16,6 +16,10 @@ import {
   useCreateCategory,
   useUpdateCategory,
 } from '../../infra/categories.queries';
+
+type PickedColor = Parameters<NonNullable<ColorPickerProps['onChange']>>[0];
+
+const toHexColor = (color: PickedColor) => color.toHexString().toUpperCase();
 
 interface CategoryFormModalProps {
   open: boolean;
@@ -84,7 +88,7 @@ export const CategoryFormModal = ({
       <Form.Item
         name="color"
         label={t('categories.fields.color')}
-        getValueFromEvent={(_, hex: string) => hex.toUpperCase()}
+        getValueFromEvent={toHexColor}
       >
         <ColorPicker format="hex" disabledAlpha showText />
       </Form.Item>

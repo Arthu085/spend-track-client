@@ -1,19 +1,24 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Flex, Segmented, Typography } from 'antd';
+import { Button, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { RecordStatus } from '@/shared/domain/record-status.schema';
+import { useListParams } from '@/shared/list/use-list-params';
+import {
+  accountFiltersShape,
+  defaultAccountFilters,
+} from '../../domain/account-form.schemas';
 import type { Account } from '../../domain/account.schema';
 import { useAccounts } from '../../infra/accounts.queries';
 import { AccountFormModal } from '../components/account-form.modal';
+import { AccountsFilters } from '../components/accounts-filters';
 import { AccountsTable } from '../components/accounts-table';
 
 type EditorState = { mode: 'create' } | { mode: 'edit'; account: Account };
 
 export const AccountsPage = () => {
   const { t } = useTranslation();
-  const [status, setStatus] = useState<RecordStatus>('ACTIVE');
-  const accountsQuery = useAccounts({ status });
+  const listParams = useListParams(accountFiltersShape, defaultAccountFilters);
+  const accountsQuery = useAccounts(listParams.filters);
   const [editor, setEditor] = useState<EditorState | null>(null);
 
   return (
@@ -30,15 +35,7 @@ export const AccountsPage = () => {
           {t('accounts.create.title')}
         </Button>
       </Flex>
-      <Segmented<RecordStatus>
-        aria-label={t('accounts.fields.status')}
-        value={status}
-        onChange={setStatus}
-        options={[
-          { value: 'ACTIVE', label: t('accounts.filters.active') },
-          { value: 'INACTIVE', label: t('accounts.filters.archived') },
-        ]}
-      />
+      <AccountsFilters listParams={listParams} />
       <AccountsTable
         query={accountsQuery}
         onEdit={(account) => setEditor({ mode: 'edit', account })}

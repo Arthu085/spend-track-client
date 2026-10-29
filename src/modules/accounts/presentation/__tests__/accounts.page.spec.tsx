@@ -85,8 +85,8 @@ const findRow = (uuid: string) =>
   });
 
 describe('AccountsPage', () => {
-  it('lists active accounts by default and archived ones on request', async () => {
-    const { sent } = renderAccounts();
+  it('lists active accounts by default and inactive ones through the status filter', async () => {
+    const { router, sent } = renderAccounts();
 
     const row = await findRow(checking.uuid);
     expect(within(row).getByText(checking.typeLabel)).toBeInTheDocument();
@@ -95,8 +95,16 @@ describe('AccountsPage', () => {
     ).toBeInTheDocument();
     expect(sent('GET /accounts')[0].params).toEqual({ status: 'ACTIVE' });
 
-    fireEvent.click(screen.getByText(i18n.t('accounts.filters.archived')));
+    fireEvent.mouseDown(
+      within(screen.getByRole('search')).getByLabelText(
+        i18n.t('accounts.fields.status'),
+      ),
+    );
+    fireEvent.click(await screen.findByTitle(i18n.t('recordStatus.INACTIVE')));
 
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('?status=INACTIVE');
+    });
     await waitFor(() => {
       expect(sent('GET /accounts').at(-1)?.params).toEqual({
         status: 'INACTIVE',
@@ -152,11 +160,11 @@ describe('AccountsPage', () => {
     });
   });
 
-  it('archives an account and shows the API message', async () => {
+  it('deactivates an account and shows the API message', async () => {
     const { sent } = renderAccounts({
       [`PUT /accounts/${checking.uuid}/status`]: envelope(
         { ...checking, status: 'INACTIVE', isDefault: false },
-        'Conta arquivada',
+        'Conta inativada',
       ),
     });
 
@@ -167,7 +175,7 @@ describe('AccountsPage', () => {
       }),
     );
 
-    expect(await screen.findByText('Conta arquivada')).toBeInTheDocument();
+    expect(await screen.findByText('Conta inativada')).toBeInTheDocument();
     expect(
       requestBody(sent(`PUT /accounts/${checking.uuid}/status`)[0]),
     ).toEqual({ status: 'INACTIVE' });

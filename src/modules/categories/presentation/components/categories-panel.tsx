@@ -5,7 +5,6 @@ import {
   Button,
   Card,
   Flex,
-  Segmented,
   Space,
   Switch,
   Table,
@@ -15,12 +14,14 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getApiErrorMessage } from '@/core/http/api-error';
-import type { RecordStatus } from '@/shared/domain/record-status.schema';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
+import { useListParams } from '@/shared/list/use-list-params';
+import {
+  categoryFiltersShape,
+  defaultCategoryFilters,
+} from '../../domain/category-form.schemas';
 import {
   type Category,
-  type CategoryKind,
-  categoryKindSchema,
   isPersonalCategory,
   sortCategoriesByName,
 } from '../../domain/category.schema';
@@ -28,6 +29,7 @@ import {
   useCategories,
   useUpdateCategoryStatus,
 } from '../../infra/categories.queries';
+import { CategoriesFilters } from './categories-filters';
 import { CategoryFormModal } from './category-form.modal';
 
 type EditorState = { mode: 'create' } | { mode: 'edit'; category: Category };
@@ -35,10 +37,12 @@ type EditorState = { mode: 'create' } | { mode: 'edit'; category: Category };
 export const CategoriesPanel = () => {
   const { t, i18n } = useTranslation();
   const { showError } = useFeedbackModal();
-  const [kind, setKind] = useState<CategoryKind>('EXPENSE');
-  const [status, setStatus] = useState<RecordStatus>('ACTIVE');
+  const listParams = useListParams(
+    categoryFiltersShape,
+    defaultCategoryFilters,
+  );
   const [editor, setEditor] = useState<EditorState | null>(null);
-  const categoriesQuery = useCategories({ kind, status });
+  const categoriesQuery = useCategories(listParams.filters);
   const statusMutation = useUpdateCategoryStatus();
 
   const columns: TableColumnsType<Category> = [
@@ -119,26 +123,7 @@ export const CategoriesPanel = () => {
       }
     >
       <Flex vertical gap="middle">
-        <Flex gap="middle" wrap>
-          <Segmented<CategoryKind>
-            aria-label={t('categories.fields.kind')}
-            value={kind}
-            onChange={setKind}
-            options={categoryKindSchema.options.map((value) => ({
-              value,
-              label: t(`categories.kinds.${value}`),
-            }))}
-          />
-          <Segmented<RecordStatus>
-            aria-label={t('categories.fields.status')}
-            value={status}
-            onChange={setStatus}
-            options={[
-              { value: 'ACTIVE', label: t('categories.filters.active') },
-              { value: 'INACTIVE', label: t('categories.filters.archived') },
-            ]}
-          />
-        </Flex>
+        <CategoriesFilters listParams={listParams} />
         {categoriesQuery.isError && (
           <Alert
             type="error"
@@ -161,7 +146,7 @@ export const CategoriesPanel = () => {
       <CategoryFormModal
         open={editor !== null}
         category={editor?.mode === 'edit' ? editor.category : undefined}
-        defaultKind={kind}
+        defaultKind={listParams.filters.kind ?? 'EXPENSE'}
         onClose={() => setEditor(null)}
       />
     </Card>

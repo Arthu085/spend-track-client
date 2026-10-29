@@ -67,19 +67,15 @@
     "default": "Padrão",
     "openingBalanceOn": "Em {{date}}",
     "actions": {
-      "toggleStatus": "Ativar ou arquivar {{name}}",
+      "toggleStatus": "Ativar ou inativar {{name}}",
       "edit": "Editar {{name}}",
       "delete": "Excluir {{name}}"
     },
     "delete": {
       "title": "Excluir conta",
-      "description": "Excluir {{name}}? Prefira arquivar contas que já foram usadas. A exclusão não pode ser desfeita."
+      "description": "Excluir {{name}}? Prefira inativar contas que já foram usadas. A exclusão não pode ser desfeita."
     },
-    "empty": "Nenhuma conta encontrada.",
-    "filters": {
-      "active": "Ativas",
-      "archived": "Arquivadas"
-    }
+    "empty": "Nenhuma conta encontrada."
   },
   "categories": {
     "title": "Categorias",
@@ -105,12 +101,8 @@
       "INCOME": "Receita"
     },
     "actions": {
-      "toggleStatus": "Ativar ou arquivar {{name}}",
+      "toggleStatus": "Ativar ou inativar {{name}}",
       "edit": "Editar {{name}}"
-    },
-    "filters": {
-      "active": "Ativas",
-      "archived": "Arquivadas"
     }
   },
   "preferences": {

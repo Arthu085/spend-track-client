@@ -297,18 +297,21 @@ the actual balance.
 
 ### Accounts
 
-`/accounts` lists the user's active or archived accounts with their type, current balance, opening
-balance and date, and the default flag. A form modal creates and edits accounts; marking one as
-default clears the previous default on the API. The status switch archives or reactivates an
-account (archiving also clears its default flag), and delete asks for confirmation.
+`/accounts` lists the user's accounts with their type, current balance, opening balance and date,
+and the default flag. Like the users list, it filters by status through `ListFiltersForm` with
+`RecordStatusSelect`, kept in the URL and defaulting to active. A form modal creates and edits
+accounts; marking one as default clears the previous default on the API. The status switch
+deactivates or reactivates an account (deactivating also clears its default flag), and delete asks
+for confirmation.
 
 ### Financial settings
 
 `/settings` saves the spending perspective (purchase date or invoice month) and the dashboard's
-default month (current or next) as soon as they change. Its categories panel lists expense or income
-categories, active or archived. Global categories are seeded by the API, translated, and read-only;
-personal categories can be created with a name, kind, and optional color, renamed or recolored (the
-kind is fixed), and archived.
+default month (current or next) as soon as they change. Its categories panel filters by kind and
+status with the shared list filters (expense and active by default, kept in the URL). Global
+categories are seeded by the API, translated, and read-only; personal categories can be created with
+a name, kind, and optional color (stored as an uppercase hex code), renamed or recolored (the kind is
+fixed), and deactivated.
 
 ### Users
 
