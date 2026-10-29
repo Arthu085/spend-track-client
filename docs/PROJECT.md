@@ -311,8 +311,9 @@ the period (with its timing and remaining days), the spending perspective, the a
 balances, and the balance of each active account, with an invitation to add an account when there is
 none. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
-saves the preference with `PATCH /preferences` and reloads the dashboard. Account, preference, and
-transaction mutations invalidate the dashboard query. The projected balance adds every planned
+saves the preference with `PATCH /preferences` and reloads the dashboard. Account, category,
+preference, and transaction mutations invalidate the dashboard query; account and category mutations
+also invalidate the transactions queries, which show their names and colors. The projected balance adds every planned
 transaction dated up to the end of the month, overdue ones included, to the actual balance.
 
 Transaction indicators, each with its own empty state:

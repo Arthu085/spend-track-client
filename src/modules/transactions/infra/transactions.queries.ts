@@ -16,8 +16,7 @@ import {
   updateTransaction,
   updateTransactionState,
 } from './transactions.api';
-
-export const transactionsKey = ['transactions'] as const;
+import { transactionsKey } from './transactions.keys';
 
 export const useTransactions = (params: TransactionListParams = {}) =>
   useQuery({
