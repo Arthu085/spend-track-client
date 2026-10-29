@@ -19,11 +19,13 @@ import { useUpdateTransactionState } from '../../infra/transactions.queries';
 export type CompletableTransaction = Pick<Transaction, 'uuid' | 'description'>;
 
 interface CompleteTransactionModalProps {
-  transaction: CompletableTransaction | null;
+  open: boolean;
+  transaction?: CompletableTransaction;
   onClose: () => void;
 }
 
 export const CompleteTransactionModal = ({
+  open,
   transaction,
   onClose,
 }: CompleteTransactionModalProps) => {
@@ -50,7 +52,7 @@ export const CompleteTransactionModal = ({
 
   return (
     <FormModal<CompleteTransactionForm>
-      open={transaction !== null}
+      open={open}
       title={t('transactions.complete.title')}
       initialValues={{ completedOn: dayjs(todayDateOnly()) }}
       submitting={mutation.isPending}

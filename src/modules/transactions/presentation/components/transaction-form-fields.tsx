@@ -29,7 +29,10 @@ export const TransactionFormFields = ({
 }: TransactionFormFieldsProps) => {
   const { t, i18n } = useTranslation();
   const form = Form.useFormInstance<TransactionForm>();
-  const type = Form.useWatch<TransactionType | undefined>('type') ?? 'EXPENSE';
+  const type =
+    Form.useWatch<TransactionType | undefined>('type') ??
+    transaction?.type ??
+    'EXPENSE';
   const state = Form.useWatch<TransactionForm['state'] | undefined>('state');
   const accountUuid = Form.useWatch<string | undefined>('accountUuid');
   const { data: accounts } = useAccounts({

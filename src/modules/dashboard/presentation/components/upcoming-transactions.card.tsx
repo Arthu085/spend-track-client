@@ -11,7 +11,6 @@ import {
   Tag,
   Typography,
 } from 'antd';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -21,6 +20,7 @@ import {
 } from '@/modules/transactions/presentation/components/complete-transaction.modal';
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
 import { formatDateOnly } from '@/shared/date/date-only';
+import { useModalTarget } from '@/shared/forms/use-modal-target';
 import type {
   DashboardPeriod,
   DashboardUpcoming,
@@ -44,9 +44,7 @@ export const UpcomingTransactionsCard = ({
   upcomingCount,
 }: UpcomingTransactionsCardProps) => {
   const { t, i18n } = useTranslation();
-  const [completing, setCompleting] = useState<CompletableTransaction | null>(
-    null,
-  );
+  const completing = useModalTarget<CompletableTransaction>();
 
   const columns: TableColumnsType<DashboardUpcoming> = [
     {
@@ -95,7 +93,7 @@ export const UpcomingTransactionsCard = ({
           size="small"
           icon={<CheckOutlined />}
           aria-label={t('transactions.actions.complete', { description })}
-          onClick={() => setCompleting({ uuid, description })}
+          onClick={() => completing.show({ uuid, description })}
         />
       ),
     },
@@ -139,8 +137,9 @@ export const UpcomingTransactionsCard = ({
         </Flex>
       )}
       <CompleteTransactionModal
-        transaction={completing}
-        onClose={() => setCompleting(null)}
+        open={completing.open}
+        transaction={completing.target}
+        onClose={completing.close}
       />
     </Card>
   );

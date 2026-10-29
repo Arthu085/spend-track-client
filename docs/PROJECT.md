@@ -253,7 +253,9 @@ Shared building blocks for feature pages:
   with a submit button, disables it while submitting, and destroys its fields when hidden, so each
   opening starts from `initialValues`. A failed submit reports its error through the feedback
   modal, so the form stays open with the typed values. `readOnly` disables every field and leaves
-  only a close button, for records that can be viewed but not changed.
+  only a close button, for records that can be viewed but not changed. `useModalTarget` holds a
+  modal's open flag and the record it shows, and keeps that record while the modal closes, so the
+  title and fields do not change during the closing animation.
 - **Inputs:** `RecordStatusSelect` offers the shared `ACTIVE`/`INACTIVE` record status
   (`src/shared/domain/`) with localized labels.
 - **Success messages:** a mutation opts in by calling `useApiSuccessMessage()`

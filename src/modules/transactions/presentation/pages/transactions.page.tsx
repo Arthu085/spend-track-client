@@ -1,6 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Flex, Typography } from 'antd';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { usePreferences } from '@/modules/preferences/infra/preferences.queries';
 import { PageLoader } from '@/shared/components/page-loader';
@@ -13,6 +12,7 @@ import {
   shiftMonth,
 } from '@/shared/date/month-ref';
 import { useMonthParam } from '@/shared/date/use-month-param';
+import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { useListParams } from '@/shared/list/use-list-params';
 import { transactionFiltersShape } from '../../domain/transaction-form.schemas';
 import type { Transaction } from '../../domain/transaction.schema';
@@ -21,9 +21,6 @@ import { CompleteTransactionModal } from '../components/complete-transaction.mod
 import { TransactionFormModal } from '../components/transaction-form.modal';
 import { TransactionsFilters } from '../components/transactions-filters';
 import { TransactionsTable } from '../components/transactions-table';
-
-type EditorState =
-  { mode: 'create' } | { mode: 'edit'; transaction: Transaction };
 
 interface TransactionsOfMonthProps {
   month: MonthRef;
@@ -45,8 +42,8 @@ const TransactionsOfMonth = ({
     ...monthDateRange(month),
     ...filters,
   });
-  const [editor, setEditor] = useState<EditorState | null>(null);
-  const [completing, setCompleting] = useState<Transaction | null>(null);
+  const editor = useModalTarget<Transaction>();
+  const completing = useModalTarget<Transaction>();
 
   return (
     <Flex vertical gap="middle">
@@ -57,7 +54,7 @@ const TransactionsOfMonth = ({
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => setEditor({ mode: 'create' })}
+          onClick={() => editor.show()}
         >
           {t('transactions.create.title')}
         </Button>
@@ -73,17 +70,18 @@ const TransactionsOfMonth = ({
       <TransactionsTable
         query={transactionsQuery}
         listParams={listParams}
-        onEdit={(transaction) => setEditor({ mode: 'edit', transaction })}
-        onComplete={setCompleting}
+        onEdit={editor.show}
+        onComplete={completing.show}
       />
       <TransactionFormModal
-        open={editor !== null}
-        transaction={editor?.mode === 'edit' ? editor.transaction : undefined}
-        onClose={() => setEditor(null)}
+        open={editor.open}
+        transaction={editor.target}
+        onClose={editor.close}
       />
       <CompleteTransactionModal
-        transaction={completing}
-        onClose={() => setCompleting(null)}
+        open={completing.open}
+        transaction={completing.target}
+        onClose={completing.close}
       />
     </Flex>
   );
