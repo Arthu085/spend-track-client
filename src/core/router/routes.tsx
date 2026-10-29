@@ -37,6 +37,14 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: AppRoutes.TRANSACTIONS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/transactions/presentation/pages/transactions.page')
+                  ).TransactionsPage,
+                }),
+              },
+              {
                 path: AppRoutes.ACCOUNTS,
                 lazy: async () => ({
                   Component: (

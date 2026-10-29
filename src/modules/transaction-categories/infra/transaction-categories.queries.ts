@@ -5,6 +5,8 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import type { ApiResponse } from '@/core/http/api-envelope';
+import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
+import { transactionsKey } from '@/modules/transactions/infra/transactions.keys';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
 import {
   type TransactionCategoryListParams,
@@ -36,9 +38,11 @@ const useTransactionCategoryMutation = <TVariables, TData>(
     mutationFn,
     onSuccess: async (response) => {
       showSuccessMessage(response);
-      await queryClient.invalidateQueries({
-        queryKey: transactionCategoriesKey,
-      });
+      await Promise.all(
+        [transactionCategoriesKey, dashboardKey, transactionsKey].map(
+          (queryKey) => queryClient.invalidateQueries({ queryKey }),
+        ),
+      );
     },
   });
 };

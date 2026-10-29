@@ -4,16 +4,13 @@ import { z } from 'zod';
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 20;
 export const PAGE_SIZE_OPTIONS = [10, 20, 50];
+export const MAX_PAGE_SIZE = Math.max(...PAGE_SIZE_OPTIONS);
 
-const PAGE_PARAM = 'page';
+export const PAGE_PARAM = 'page';
 const LIMIT_PARAM = 'limit';
 
 const pageSchema = z.coerce.number().int().min(1);
-const limitSchema = z.coerce
-  .number()
-  .int()
-  .min(1)
-  .max(Math.max(...PAGE_SIZE_OPTIONS));
+const limitSchema = z.coerce.number().int().min(1).max(MAX_PAGE_SIZE);
 
 export type FilterShape = Record<string, z.ZodType<string>>;
 

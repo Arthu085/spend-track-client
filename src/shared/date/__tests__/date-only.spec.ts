@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dateInputFormat, formatDateOnly } from '../date-only';
+import { dateInputFormat, formatDateOnly, todayDateOnly } from '../date-only';
 
 describe('formatDateOnly', () => {
   it('formats a calendar date without shifting it by time zone', () => {
@@ -13,5 +13,12 @@ describe('dateInputFormat', () => {
     expect(dateInputFormat('pt-BR')).toBe('DD/MM/YYYY');
     expect(dateInputFormat('en')).toBe('MM/DD/YYYY');
     expect(dateInputFormat('fr')).toBe('DD/MM/YYYY');
+  });
+});
+
+describe('todayDateOnly', () => {
+  it('reads the calendar date in São Paulo, like the API', () => {
+    expect(todayDateOnly(new Date('2026-10-30T02:30:00Z'))).toBe('2026-10-29');
+    expect(todayDateOnly(new Date('2026-10-30T03:30:00Z'))).toBe('2026-10-30');
   });
 });

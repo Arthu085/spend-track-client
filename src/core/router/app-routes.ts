@@ -1,6 +1,7 @@
 export const AppRoutes = {
   DASHBOARD: '/',
   HOME: '/home',
+  TRANSACTIONS: '/transactions',
   ACCOUNTS: '/accounts',
   FINANCIAL_SETTINGS: '/settings',
   USERS: '/users',

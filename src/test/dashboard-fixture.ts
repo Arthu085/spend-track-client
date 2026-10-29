@@ -17,6 +17,11 @@ export const buildDashboard = (
   perspectiveLabel: 'Data da compra',
   balances: { actual: '0.00', projected: '0.00' },
   accounts: [],
+  income: { total: '0.00', completed: '0.00', pending: '0.00' },
+  expenses: { total: '0.00', completed: '0.00', pending: '0.00' },
+  expensesByCategory: [],
+  upcoming: [],
+  upcomingCount: 0,
   ...overrides,
 });
 
