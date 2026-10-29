@@ -97,7 +97,7 @@ describe('real backend finance contracts', () => {
     ).toBe('Contract cash');
 
     await login(backend.admin);
-    expect(await fetchAccounts()).toEqual([]);
+    expect((await fetchAccounts()).meta.total).toBe(0);
     await expectStatus(deleteAccount(created.data.uuid), 404);
 
     await login(backend.user);
@@ -110,7 +110,9 @@ describe('real backend finance contracts', () => {
       ).data.isDefault,
     ).toBe(false);
     expect(
-      (await fetchAccounts({ status: 'INACTIVE' })).map(({ uuid }) => uuid),
+      (await fetchAccounts({ status: 'INACTIVE' })).data.map(
+        ({ uuid }) => uuid,
+      ),
     ).toEqual([created.data.uuid]);
     await deleteAccount(created.data.uuid);
     await deleteAccount(wallet.data.uuid);
@@ -118,8 +120,12 @@ describe('real backend finance contracts', () => {
   });
 
   it('lists global categories and keeps personal ones private', async () => {
-    const globals = await fetchCategories({ kind: 'EXPENSE' });
-    const globalCategory = globals.find(({ scope }) => scope === 'GLOBAL');
+    const globals = await fetchCategories({ kind: 'EXPENSE', limit: 5 });
+    const globalCategory = globals.data.find(({ scope }) => scope === 'GLOBAL');
+
+    expect(globals.data).toHaveLength(5);
+    expect(globals.meta).toMatchObject({ page: 1, limit: 5 });
+    expect(globals.meta.total).toBeGreaterThanOrEqual(11);
 
     expect(globalCategory).toBeDefined();
     if (!globalCategory) {
@@ -142,7 +148,9 @@ describe('real backend finance contracts', () => {
 
     await login(backend.admin);
     expect(
-      (await fetchCategories()).some(({ uuid }) => uuid === created.data.uuid),
+      (await fetchCategories({ limit: 50 })).data.some(
+        ({ uuid }) => uuid === created.data.uuid,
+      ),
     ).toBe(false);
     await expectStatus(
       updateCategoryStatus({ uuid: created.data.uuid, status: 'INACTIVE' }),

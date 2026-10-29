@@ -50,21 +50,31 @@ const envelope = (data: unknown, message?: string): StubResponse => ({
   data: { data, meta: message ? { message } : {} },
 });
 
+const listPage = <T,>(
+  items: T[],
+  page = 1,
+  total = items.length,
+): StubResponse => ({
+  status: 200,
+  data: { data: items, meta: { total, page, limit: 20 } },
+});
+
 const renderAccounts = (
   routes: Record<
     string,
     StubResponse | ((config: InternalAxiosRequestConfig) => StubResponse)
   > = {},
+  path: string = AppRoutes.ACCOUNTS,
 ) => {
   const requests = stubHttpRoutes(httpClient, {
     'GET /auth/csrf': csrfResponse('csrf-token'),
     'GET /users/me': envelope(sessionUser),
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
-    'GET /accounts': envelope([checking]),
+    'GET /accounts': listPage([checking]),
     ...routes,
   });
-  const rendered = renderRoute(AppRoutes.ACCOUNTS);
+  const rendered = renderRoute(path);
   const sent = (key: string) =>
     requests.filter((request) => requestKey(request) === key);
 
@@ -93,7 +103,11 @@ describe('AccountsPage', () => {
     expect(
       within(row).getByText(i18n.t('accounts.default')),
     ).toBeInTheDocument();
-    expect(sent('GET /accounts')[0].params).toEqual({ status: 'ACTIVE' });
+    expect(sent('GET /accounts')[0].params).toEqual({
+      page: 1,
+      limit: 20,
+      status: 'ACTIVE',
+    });
 
     fireEvent.mouseDown(
       within(screen.getByRole('search')).getByLabelText(
@@ -107,6 +121,8 @@ describe('AccountsPage', () => {
     });
     await waitFor(() => {
       expect(sent('GET /accounts').at(-1)?.params).toEqual({
+        page: 1,
+        limit: 20,
         status: 'INACTIVE',
       });
     });
@@ -198,6 +214,39 @@ describe('AccountsPage', () => {
 
     expect(await screen.findByText('Conta excluída')).toBeInTheDocument();
     expect(sent(`DELETE /accounts/${checking.uuid}`)).toHaveLength(1);
+  });
+
+  it('pages through accounts and leaves a page its delete emptied', async () => {
+    const { router, sent } = renderAccounts(
+      {
+        'GET /accounts': listPage([checking], 2, 21),
+        [`DELETE /accounts/${checking.uuid}`]: envelope(null, 'Conta excluída'),
+      },
+      `${AppRoutes.ACCOUNTS}?page=2`,
+    );
+
+    const row = await findRow(checking.uuid);
+    expect(sent('GET /accounts')[0].params).toEqual({
+      page: 2,
+      limit: 20,
+      status: 'ACTIVE',
+    });
+    expect(
+      screen.getByText(i18n.t('list.total', { count: 21 })),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      within(row).getByRole('button', {
+        name: i18n.t('accounts.actions.delete', { name: checking.name }),
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: i18n.t('common.delete') }),
+    );
+
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('');
+    });
   });
 
   it('shows the API error when an account cannot be found', async () => {

@@ -1,8 +1,8 @@
-import { z } from 'zod';
 import {
   type ApiResponse,
-  parseApiData,
+  type PaginatedResponse,
   parseApiResponse,
+  parsePaginatedResponse,
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
 import type { RecordStatus } from '@/shared/domain/record-status.schema';
@@ -14,6 +14,8 @@ import {
 } from '../domain/category.schema';
 
 export interface CategoryListParams {
+  page?: number;
+  limit?: number;
   kind?: CategoryKind;
   status?: RecordStatus;
 }
@@ -31,10 +33,10 @@ export interface UpdateCategoryStatusPayload {
 
 export const fetchCategories = async (
   params: CategoryListParams = {},
-): Promise<Category[]> => {
+): Promise<PaginatedResponse<Category>> => {
   const response = await httpClient.get<unknown>('/categories', { params });
 
-  return parseApiData(z.array(categorySchema), response.data);
+  return parsePaginatedResponse(categorySchema, response.data);
 };
 
 export const createCategory = async (

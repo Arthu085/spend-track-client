@@ -1,20 +1,18 @@
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import {
-  Alert,
   Badge,
   Button,
   Card,
   Flex,
   Space,
   Switch,
-  Table,
   type TableColumnsType,
   Tag,
 } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getApiErrorMessage } from '@/core/http/api-error';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
+import { PaginatedTable } from '@/shared/list/paginated-table';
 import { useListParams } from '@/shared/list/use-list-params';
 import {
   categoryFiltersShape,
@@ -23,7 +21,6 @@ import {
 import {
   type Category,
   isPersonalCategory,
-  sortCategoriesByName,
 } from '../../domain/category.schema';
 import {
   useCategories,
@@ -35,14 +32,15 @@ import { CategoryFormModal } from './category-form.modal';
 type EditorState = { mode: 'create' } | { mode: 'edit'; category: Category };
 
 export const CategoriesPanel = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { showError } = useFeedbackModal();
   const listParams = useListParams(
     categoryFiltersShape,
     defaultCategoryFilters,
   );
   const [editor, setEditor] = useState<EditorState | null>(null);
-  const categoriesQuery = useCategories(listParams.filters);
+  const { page, limit, filters } = listParams;
+  const categoriesQuery = useCategories({ page, limit, ...filters });
   const statusMutation = useUpdateCategoryStatus();
 
   const columns: TableColumnsType<Category> = [
@@ -124,29 +122,17 @@ export const CategoriesPanel = () => {
     >
       <Flex vertical gap="middle">
         <CategoriesFilters listParams={listParams} />
-        {categoriesQuery.isError && (
-          <Alert
-            type="error"
-            showIcon
-            title={getApiErrorMessage(categoriesQuery.error)}
-          />
-        )}
-        <Table<Category>
+        <PaginatedTable
+          query={categoriesQuery}
+          listParams={listParams}
           rowKey="uuid"
           columns={columns}
-          dataSource={sortCategoriesByName(
-            categoriesQuery.data ?? [],
-            i18n.language,
-          )}
-          loading={categoriesQuery.isFetching}
-          pagination={false}
-          scroll={{ x: 'max-content' }}
         />
       </Flex>
       <CategoryFormModal
         open={editor !== null}
         category={editor?.mode === 'edit' ? editor.category : undefined}
-        defaultKind={listParams.filters.kind ?? 'EXPENSE'}
+        defaultKind={filters.kind ?? 'EXPENSE'}
         onClose={() => setEditor(null)}
       />
     </Card>

@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import {
   type ApiResponse,
-  parseApiData,
+  type PaginatedResponse,
   parseApiResponse,
+  parsePaginatedResponse,
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
 import type { RecordStatus } from '@/shared/domain/record-status.schema';
@@ -10,6 +11,8 @@ import type { AccountPayload } from '../domain/account-form.schemas';
 import { type Account, accountSchema } from '../domain/account.schema';
 
 export interface AccountListParams {
+  page?: number;
+  limit?: number;
   status?: RecordStatus;
 }
 
@@ -24,10 +27,10 @@ export interface UpdateAccountStatusPayload {
 
 export const fetchAccounts = async (
   params: AccountListParams = {},
-): Promise<Account[]> => {
+): Promise<PaginatedResponse<Account>> => {
   const response = await httpClient.get<unknown>('/accounts', { params });
 
-  return parseApiData(z.array(accountSchema), response.data);
+  return parsePaginatedResponse(accountSchema, response.data);
 };
 
 export const createAccount = async (

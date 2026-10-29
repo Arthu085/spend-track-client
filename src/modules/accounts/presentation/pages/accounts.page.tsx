@@ -18,7 +18,8 @@ type EditorState = { mode: 'create' } | { mode: 'edit'; account: Account };
 export const AccountsPage = () => {
   const { t } = useTranslation();
   const listParams = useListParams(accountFiltersShape, defaultAccountFilters);
-  const accountsQuery = useAccounts(listParams.filters);
+  const { page, limit, filters } = listParams;
+  const accountsQuery = useAccounts({ page, limit, ...filters });
   const [editor, setEditor] = useState<EditorState | null>(null);
 
   return (
@@ -38,6 +39,7 @@ export const AccountsPage = () => {
       <AccountsFilters listParams={listParams} />
       <AccountsTable
         query={accountsQuery}
+        listParams={listParams}
         onEdit={(account) => setEditor({ mode: 'edit', account })}
       />
       <AccountFormModal

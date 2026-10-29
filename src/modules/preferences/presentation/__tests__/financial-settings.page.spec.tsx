@@ -67,6 +67,15 @@ const envelope = (data: unknown, message?: string): StubResponse => ({
   data: { data, meta: message ? { message } : {} },
 });
 
+const listPage = <T,>(
+  items: T[],
+  page = 1,
+  total = items.length,
+): StubResponse => ({
+  status: 200,
+  data: { data: items, meta: { total, page, limit: 20 } },
+});
+
 const renderSettings = (
   routes: Record<
     string,
@@ -79,7 +88,7 @@ const renderSettings = (
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
     'GET /preferences': envelope(defaults),
-    'GET /categories': envelope([pets, food]),
+    'GET /categories': listPage([food, pets]),
     ...routes,
   });
   const rendered = renderRoute(AppRoutes.FINANCIAL_SETTINGS);
@@ -151,6 +160,8 @@ describe('FinancialSettingsPage', () => {
     const globalRow = await findRow(food.uuid);
     const personalRow = await findRow(pets.uuid);
     expect(sent('GET /categories')[0].params).toEqual({
+      page: 1,
+      limit: 20,
       kind: 'EXPENSE',
       status: 'ACTIVE',
     });
@@ -173,6 +184,8 @@ describe('FinancialSettingsPage', () => {
 
     await waitFor(() => {
       expect(sent('GET /categories').at(-1)?.params).toEqual({
+        page: 1,
+        limit: 20,
         kind: 'INCOME',
         status: 'ACTIVE',
       });

@@ -1,22 +1,23 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
-  Alert,
   Button,
   Flex,
   Popconfirm,
   Space,
   Switch,
-  Table,
   type TableColumnsType,
   Tag,
   Typography,
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { formatDateOnly } from '@/shared/date/date-only';
-import { getApiErrorMessage } from '@/core/http/api-error';
+import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
+import { PaginatedTable } from '@/shared/list/paginated-table';
+import type { ListParams } from '@/shared/list/use-list-params';
 import { MoneyText } from '@/shared/money/money-text';
+import type { accountFiltersShape } from '../../domain/account-form.schemas';
 import type { Account } from '../../domain/account.schema';
 import {
   useDeleteAccount,
@@ -24,15 +25,34 @@ import {
 } from '../../infra/accounts.queries';
 
 interface AccountsTableProps {
-  query: UseQueryResult<Account[]>;
+  query: UseQueryResult<PaginatedResponse<Account>>;
+  listParams: ListParams<typeof accountFiltersShape>;
   onEdit: (account: Account) => void;
 }
 
-export const AccountsTable = ({ query, onEdit }: AccountsTableProps) => {
+export const AccountsTable = ({
+  query,
+  listParams,
+  onEdit,
+}: AccountsTableProps) => {
   const { t, i18n } = useTranslation();
   const { showError } = useFeedbackModal();
+  const { page, limit, setPagination } = listParams;
   const statusMutation = useUpdateAccountStatus();
   const deleteMutation = useDeleteAccount();
+
+  const removeAccount = (uuid: string) => {
+    const isLastRowOfPage = query.data?.data.length === 1 && page > 1;
+
+    deleteMutation.mutate(uuid, {
+      onSuccess: () => {
+        if (isLastRowOfPage) {
+          setPagination(page - 1, limit);
+        }
+      },
+      onError: showError,
+    });
+  };
 
   const columns: TableColumnsType<Account> = [
     {
@@ -113,9 +133,7 @@ export const AccountsTable = ({ query, onEdit }: AccountsTableProps) => {
             okText={t('common.delete')}
             cancelText={t('common.cancel')}
             okButtonProps={{ danger: true }}
-            onConfirm={() => {
-              deleteMutation.mutate(account.uuid, { onError: showError });
-            }}
+            onConfirm={() => removeAccount(account.uuid)}
           >
             <Button
               size="small"
@@ -134,19 +152,12 @@ export const AccountsTable = ({ query, onEdit }: AccountsTableProps) => {
   ];
 
   return (
-    <Flex vertical gap="middle">
-      {query.isError && (
-        <Alert type="error" showIcon title={getApiErrorMessage(query.error)} />
-      )}
-      <Table<Account>
-        rowKey="uuid"
-        columns={columns}
-        dataSource={query.data}
-        loading={query.isFetching}
-        pagination={false}
-        scroll={{ x: 'max-content' }}
-        locale={{ emptyText: t('accounts.empty') }}
-      />
-    </Flex>
+    <PaginatedTable
+      query={query}
+      listParams={listParams}
+      rowKey="uuid"
+      columns={columns}
+      locale={{ emptyText: t('accounts.empty') }}
+    />
   );
 };

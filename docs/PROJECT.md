@@ -298,8 +298,9 @@ the actual balance.
 ### Accounts
 
 `/accounts` lists the user's accounts with their type, current balance, opening balance and date,
-and the default flag. Like the users list, it filters by status through `ListFiltersForm` with
-`RecordStatusSelect`, kept in the URL and defaulting to active. A form modal creates and edits
+and the default flag. Like the users list, it is a `PaginatedTable` with page and size in the URL,
+filtered by status through `ListFiltersForm` with `RecordStatusSelect` (active by default). Deleting
+the last row of a page returns to the previous page. A form modal creates and edits
 accounts; marking one as default clears the previous default on the API. The status switch
 deactivates or reactivates an account (deactivating also clears its default flag), and delete asks
 for confirmation.
@@ -307,8 +308,10 @@ for confirmation.
 ### Financial settings
 
 `/settings` saves the spending perspective (purchase date or invoice month) and the dashboard's
-default month (current or next) as soon as they change. Its categories panel filters by kind and
-status with the shared list filters (expense and active by default, kept in the URL). Global
+default month (current or next) as soon as they change. Its categories panel is a `PaginatedTable`
+filtered by kind and status with the shared list filters (expense and active by default), with
+filters, page, and size kept in the URL. Categories follow the API order (stored name), so global
+names translated into another language may not be alphabetical. Global
 categories are seeded by the API, translated, and read-only; personal categories can be created with
 a name, kind, and optional color (stored as an uppercase hex code), renamed or recolored (the kind is
 fixed), and deactivated.

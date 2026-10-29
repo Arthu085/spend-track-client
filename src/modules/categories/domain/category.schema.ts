@@ -24,11 +24,3 @@ export type Category = z.infer<typeof categorySchema>;
 
 export const isPersonalCategory = ({ scope }: Pick<Category, 'scope'>) =>
   scope === 'PERSONAL';
-
-export const sortCategoriesByName = (
-  categories: readonly Category[],
-  language: string,
-): Category[] =>
-  [...categories].sort((left, right) =>
-    left.name.localeCompare(right.name, language, { sensitivity: 'base' }),
-  );
