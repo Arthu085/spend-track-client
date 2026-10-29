@@ -16,7 +16,7 @@ import type { UserDetail } from '@/modules/users/domain/user.schema';
 import { csrfResponse, requestKey, stubHttpRoutes } from '@/test/http-stub';
 import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
-import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '../use-sidebar-collapsed';
+import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '../sidebar/use-sidebar-collapsed';
 
 const user: UserDetail = {
   uuid: '6f1c2a54-2d0e-4a4b-9a43-2f1f1d7c9b10',

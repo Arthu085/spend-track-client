@@ -46,7 +46,7 @@ existing shortcuts. The production build is an installable progressive web app (
 | `src/core/config/`      | Validated environment, Ant Design theme, TanStack Query client   |
 | `src/core/http/`        | Axios client and API error helpers                               |
 | `src/core/i18n/`        | i18next setup, language preference, switcher, and translations   |
-| `src/core/layout/`      | Main layout, header, sidebar, user menu, filtered navigation     |
+| `src/core/layout/`      | Main layout, with its `header/` and `sidebar/` parts             |
 | `src/core/providers/`   | Application-wide providers                                       |
 | `src/core/router/`      | Route paths (`app-routes.ts`), route tree (`routes.tsx`), router |
 | `src/core/theme/`       | Theme mode preference and the floating theme toggle              |
@@ -194,7 +194,7 @@ is limited, and avoids a forbidden catalog request. The API still decides whethe
 allowed. Role management is described under
 [Roles](#roles).
 
-`MainLayout` (`src/core/layout/`) wraps every signed-in page: a side menu whose title links home
+`MainLayout` (`src/core/layout/main.layout.tsx`, with header parts in `header/` and sidebar parts in `sidebar/`) wraps every signed-in page: a side menu whose title links home
 and whose bottom holds the theme toggle (see [Theme](#theme)) and a sign-out button, and a header with a sidebar toggle, the language switcher, and a user menu (opened from the user's
 name) that links to the account page and signs out. `MainLayout` only composes `MainSidebar` (side menu or drawer, rendering
 `SidebarNavigation`, `SidebarThemeToggle`, and `SidebarLogoutButton`) and `MainHeader` (sidebar toggle, language switcher,
@@ -206,7 +206,7 @@ title and menu in a drawer from the left, which closes when a link is followed, 
 it, or with Escape, and the header and page use narrower padding. For a user holding `ADMIN`, the
 user menu also links to the change requests page, and a dot on the user's name and a count on that entry show pending
 change requests. Menu
-entries are declared in `navigation.ts` as titled sections (`navigationSections`), with shared user
+entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and role page metadata in `core/router/page-metadata.ts` also used by home shortcuts. Each surface
 keeps its own entries, ordering, and overrides. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
