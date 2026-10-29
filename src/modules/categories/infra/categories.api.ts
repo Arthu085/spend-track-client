@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import {
   type ApiResponse,
   type PaginatedResponse,
@@ -57,6 +58,14 @@ export const updateCategory = async ({
   );
 
   return parseApiResponse(categorySchema, response.data);
+};
+
+export const deleteCategory = async (
+  uuid: string,
+): Promise<ApiResponse<null>> => {
+  const response = await httpClient.delete<unknown>(`/categories/${uuid}`);
+
+  return parseApiResponse(z.null(), response.data);
 };
 
 export const updateCategoryStatus = async ({

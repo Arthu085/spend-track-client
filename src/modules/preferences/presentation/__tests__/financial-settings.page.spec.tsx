@@ -192,7 +192,7 @@ describe('FinancialSettingsPage', () => {
     });
   });
 
-  it('creates a personal category of the selected kind', async () => {
+  it('creates a personal category of the selected kind with a default color', async () => {
     const { sent } = renderSettings({
       'POST /categories': envelope(pets, 'Categoria criada'),
     });
@@ -204,6 +204,7 @@ describe('FinancialSettingsPage', () => {
       }),
     );
     const dialog = await findDialog(i18n.t('categories.create.title'));
+    expect(within(dialog).getByText('#1677FF')).toBeInTheDocument();
     fireEvent.change(
       within(dialog).getByLabelText(i18n.t('categories.fields.name')),
       { target: { value: 'Pets' } },
@@ -216,6 +217,7 @@ describe('FinancialSettingsPage', () => {
     expect(requestBody(sent('POST /categories')[0])).toEqual({
       name: 'Pets',
       kind: 'EXPENSE',
+      color: '#1677FF',
     });
   });
 
@@ -285,5 +287,31 @@ describe('FinancialSettingsPage', () => {
     expect(requestBody(sent(`PUT /categories/${pets.uuid}/status`)[0])).toEqual(
       { status: 'INACTIVE' },
     );
+  });
+
+  it('deletes a personal category after confirmation', async () => {
+    const { sent } = renderSettings({
+      [`DELETE /categories/${pets.uuid}`]: envelope(null, 'Categoria excluída'),
+    });
+
+    const globalRow = await findRow(food.uuid);
+    expect(
+      within(globalRow).queryByRole('button', {
+        name: i18n.t('categories.actions.delete', { name: food.name }),
+      }),
+    ).not.toBeInTheDocument();
+
+    const row = await findRow(pets.uuid);
+    fireEvent.click(
+      within(row).getByRole('button', {
+        name: i18n.t('categories.actions.delete', { name: pets.name }),
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: i18n.t('common.delete') }),
+    );
+
+    expect(await screen.findByText('Categoria excluída')).toBeInTheDocument();
+    expect(sent(`DELETE /categories/${pets.uuid}`)).toHaveLength(1);
   });
 });

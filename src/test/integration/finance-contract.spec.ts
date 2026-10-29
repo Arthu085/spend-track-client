@@ -12,6 +12,7 @@ import {
 } from '@/modules/accounts/infra/accounts.api';
 import {
   createCategory,
+  deleteCategory,
   fetchCategories,
   updateCategory,
   updateCategoryStatus,
@@ -166,5 +167,12 @@ describe('real backend finance contracts', () => {
         })
       ).data.status,
     ).toBe('INACTIVE');
+
+    expect((await deleteCategory(created.data.uuid)).data).toBeNull();
+    expect(
+      (await fetchCategories({ status: 'INACTIVE', limit: 50 })).data.some(
+        ({ uuid }) => uuid === created.data.uuid,
+      ),
+    ).toBe(false);
   });
 });

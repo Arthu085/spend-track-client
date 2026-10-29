@@ -1,9 +1,10 @@
-import { EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Badge,
   Button,
   Card,
   Flex,
+  Popconfirm,
   Space,
   Switch,
   type TableColumnsType,
@@ -24,6 +25,7 @@ import {
 } from '../../domain/category.schema';
 import {
   useCategories,
+  useDeleteCategory,
   useUpdateCategoryStatus,
 } from '../../infra/categories.queries';
 import { CategoriesFilters } from './categories-filters';
@@ -42,6 +44,20 @@ export const CategoriesPanel = () => {
   const { page, limit, filters } = listParams;
   const categoriesQuery = useCategories({ page, limit, ...filters });
   const statusMutation = useUpdateCategoryStatus();
+  const deleteMutation = useDeleteCategory();
+
+  const removeCategory = (uuid: string) => {
+    const isLastRowOfPage = categoriesQuery.data?.data.length === 1 && page > 1;
+
+    deleteMutation.mutate(uuid, {
+      onSuccess: () => {
+        if (isLastRowOfPage) {
+          listParams.setPagination(page - 1, limit);
+        }
+      },
+      onError: showError,
+    });
+  };
 
   const columns: TableColumnsType<Category> = [
     {
@@ -97,13 +113,38 @@ export const CategoriesPanel = () => {
       key: 'actions',
       render: (_, category) =>
         isPersonalCategory(category) && (
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            aria-label={t('categories.actions.edit', { name: category.name })}
-            disabled={category.status === 'INACTIVE'}
-            onClick={() => setEditor({ mode: 'edit', category })}
-          />
+          <Space>
+            <Button
+              size="small"
+              icon={<EditOutlined />}
+              aria-label={t('categories.actions.edit', { name: category.name })}
+              disabled={category.status === 'INACTIVE'}
+              onClick={() => setEditor({ mode: 'edit', category })}
+            />
+            <Popconfirm
+              title={t('categories.delete.title')}
+              description={t('categories.delete.description', {
+                name: category.name,
+              })}
+              okText={t('common.delete')}
+              cancelText={t('common.cancel')}
+              okButtonProps={{ danger: true }}
+              onConfirm={() => removeCategory(category.uuid)}
+            >
+              <Button
+                size="small"
+                danger
+                icon={<DeleteOutlined />}
+                aria-label={t('categories.actions.delete', {
+                  name: category.name,
+                })}
+                loading={
+                  deleteMutation.isPending &&
+                  deleteMutation.variables === category.uuid
+                }
+              />
+            </Popconfirm>
+          </Space>
         ),
     },
   ];

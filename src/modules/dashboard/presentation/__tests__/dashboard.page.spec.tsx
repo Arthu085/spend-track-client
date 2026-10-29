@@ -87,7 +87,7 @@ const monthOf = ({ params }: InternalAxiosRequestConfig): Dashboard => {
 };
 
 const renderDashboard = (
-  path: string = AppRoutes.HOME,
+  path: string = AppRoutes.DASHBOARD,
   routes: Record<
     string,
     StubResponse | ((config: InternalAxiosRequestConfig) => StubResponse)
@@ -182,7 +182,9 @@ describe('DashboardPage', () => {
   });
 
   it('loads the month from the URL', async () => {
-    const { sent } = renderDashboard(`${AppRoutes.HOME}?year=2027&month=1`);
+    const { sent } = renderDashboard(
+      `${AppRoutes.DASHBOARD}?year=2027&month=1`,
+    );
 
     expect(
       await within(await main()).findByRole('heading', monthHeading(2027, 1)),
@@ -191,7 +193,7 @@ describe('DashboardPage', () => {
   });
 
   it('saves the spending perspective and reloads the dashboard', async () => {
-    const { sent } = renderDashboard(AppRoutes.HOME, {
+    const { sent } = renderDashboard(AppRoutes.DASHBOARD, {
       'PATCH /preferences': envelope(preferences, 'Preferências salvas'),
     });
 
@@ -212,7 +214,7 @@ describe('DashboardPage', () => {
   });
 
   it('invites the user to add an account when there is none', async () => {
-    const { router } = renderDashboard(AppRoutes.HOME, {
+    const { router } = renderDashboard(AppRoutes.DASHBOARD, {
       'GET /dashboard': envelope(buildDashboard()),
     });
 
@@ -232,7 +234,7 @@ describe('DashboardPage', () => {
   });
 
   it('shows the API error when the dashboard cannot load', async () => {
-    renderDashboard(AppRoutes.HOME, {
+    renderDashboard(AppRoutes.DASHBOARD, {
       'GET /dashboard': {
         status: 400,
         data: { statusCode: 400, message: 'Mês inválido' },

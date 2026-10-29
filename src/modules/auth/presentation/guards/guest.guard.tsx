@@ -11,7 +11,7 @@ export const GuestGuard = () => {
   }
 
   if (user) {
-    return <Navigate to={AppRoutes.HOME} replace />;
+    return <Navigate to={AppRoutes.DASHBOARD} replace />;
   }
 
   return <Outlet />;

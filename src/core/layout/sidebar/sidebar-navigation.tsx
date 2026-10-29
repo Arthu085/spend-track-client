@@ -61,7 +61,7 @@ export const SidebarNavigation = ({
         }}
       >
         <Link
-          to={AppRoutes.HOME}
+          to={AppRoutes.DASHBOARD}
           aria-label={collapsed ? env.appName : undefined}
           onClick={onNavigate}
         >

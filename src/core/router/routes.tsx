@@ -21,11 +21,19 @@ export const routes: RouteObject[] = [
             }),
             children: [
               {
-                path: AppRoutes.HOME,
+                path: AppRoutes.DASHBOARD,
                 lazy: async () => ({
                   Component: (
                     await import('@/modules/dashboard/presentation/pages/dashboard.page')
                   ).DashboardPage,
+                }),
+              },
+              {
+                path: AppRoutes.HOME,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/home/presentation/pages/home.page')
+                  ).HomePage,
                 }),
               },
               {

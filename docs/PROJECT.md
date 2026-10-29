@@ -30,7 +30,8 @@ which manages users at `/users`, lets every signed-in user edit their own profil
 own password at `/account`,
 and lets an admin approve or reject changes another admin requested at `/account/change-requests`.
 The `authorization` module shows each role's permissions at `/roles` and lets a user with the
-ability change them. The financial foundation covers the `dashboard` module at `/` (monthly
+ability change them. The `home` module's page at `/home` links to every page the user can reach. The
+financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
 balances with month navigation and the spending perspective), the `accounts` module at `/accounts`,
 and financial settings at `/settings` (the `preferences` module with the personal categories of the
 `categories` module). The production build is an installable progressive web app (see
@@ -208,9 +209,9 @@ it, or with Escape, and the header and page use narrower padding. For a user hol
 user menu also links to the change requests page, and a dot on the user's name and a count on that entry show pending
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
-and role page metadata in `core/router/page-metadata.ts`. The Finances section lists the dashboard,
-accounts, and financial settings for every signed-in user; Administration lists the
-ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
+and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
+shortcuts. General holds Home; Finances lists the dashboard, accounts, and financial settings for
+every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
@@ -283,6 +284,15 @@ they are never rounded through a JavaScript number. Calendar dates without a tim
 `YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, and `dateInputFormat` gives the
 date picker the day order of the current language (`shared/date/date-only.ts`).
 
+### Home
+
+`/home` greets the user by name and shows a card linking to each page they can reach, declared in
+`home-shortcuts.ts`: the dashboard, accounts, and financial settings for everyone, Users and Roles
+with the same abilities as their menu entries, My account for everyone, and Change requests only for
+a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
+abilities query settles, so late permission-based entries do not move existing shortcuts. The
+not-found and forbidden pages link back to it.
+
 ### Dashboard
 
 `/` is where sign-in lands unless the guards remembered another page (see
@@ -313,8 +323,10 @@ filtered by kind and status with the shared list filters (expense and active by 
 filters, page, and size kept in the URL. Categories follow the API order (stored name), so global
 names translated into another language may not be alphabetical. Global
 categories are seeded by the API, translated, and read-only; personal categories can be created with
-a name, kind, and optional color (stored as an uppercase hex code), renamed or recolored (the kind is
-fixed), and deactivated.
+a name, kind, and color, renamed or recolored (the kind is fixed), deactivated, and deleted after
+confirmation. The color picker offers preset swatches and starts from `DEFAULT_CATEGORY_COLOR`
+(also for older categories without a color), so it never shows an empty transparent value; colors are
+stored as uppercase hex codes.
 
 ### Users
 

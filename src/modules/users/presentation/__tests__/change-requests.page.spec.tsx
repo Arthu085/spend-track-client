@@ -268,7 +268,7 @@ describe('without the ADMIN role', () => {
   it('leaves the page out of the user menu', async () => {
     const { sent } = renderChangeRequests(
       { 'GET /users/me': envelope(regularUser) },
-      AppRoutes.HOME,
+      AppRoutes.DASHBOARD,
     );
 
     fireEvent.click(
@@ -287,7 +287,7 @@ describe('without the ADMIN role', () => {
 
 describe('pending change requests', () => {
   it('shows the pending count in the user menu and links to the page', async () => {
-    const { router } = renderChangeRequests({}, AppRoutes.HOME);
+    const { router } = renderChangeRequests({}, AppRoutes.DASHBOARD);
 
     fireEvent.click(
       await screen.findByRole('button', { name: new RegExp(user.name) }),

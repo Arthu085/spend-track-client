@@ -8,6 +8,21 @@ export const CATEGORY_NAME_MAX_LENGTH = 100;
 
 export const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
+export const CATEGORY_COLOR_PRESETS = [
+  '#1677FF',
+  '#13C2C2',
+  '#52C41A',
+  '#FADB14',
+  '#FA8C16',
+  '#F5222D',
+  '#EB2F96',
+  '#722ED1',
+  '#2F54EB',
+  '#8C8C8C',
+];
+
+export const DEFAULT_CATEGORY_COLOR = CATEGORY_COLOR_PRESETS[0];
+
 const required = () => i18n.t('validation.required');
 
 export const categoryFormSchema = z.object({
@@ -19,7 +34,7 @@ export const categoryFormSchema = z.object({
         i18n.t('validation.maxLength', { max: CATEGORY_NAME_MAX_LENGTH }),
     }),
   kind: z.enum(categoryKindSchema.options, { error: required }),
-  color: z.string().regex(HEX_COLOR_PATTERN).optional(),
+  color: z.string().regex(HEX_COLOR_PATTERN),
 });
 
 export const categoryFiltersShape = {

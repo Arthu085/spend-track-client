@@ -9,6 +9,7 @@ import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message'
 import {
   type CategoryListParams,
   createCategory,
+  deleteCategory,
   fetchCategories,
   updateCategory,
   updateCategoryStatus,
@@ -44,3 +45,5 @@ export const useUpdateCategory = () => useCategoryMutation(updateCategory);
 
 export const useUpdateCategoryStatus = () =>
   useCategoryMutation(updateCategoryStatus);
+
+export const useDeleteCategory = () => useCategoryMutation(deleteCategory);

@@ -1,4 +1,10 @@
-import { SafetyCertificateOutlined, TeamOutlined } from '@ant-design/icons';
+import {
+  DashboardOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  WalletOutlined,
+} from '@ant-design/icons';
 import type { ParseKeys } from 'i18next';
 import type { ComponentType } from 'react';
 import type { Ability } from '@/modules/authorization/domain/ability.schema';
@@ -10,6 +16,24 @@ interface PageMetadata {
   icon: ComponentType;
   ability?: Ability;
 }
+
+export const dashboardPage = {
+  path: AppRoutes.DASHBOARD,
+  labelKey: 'navigation.dashboard',
+  icon: DashboardOutlined,
+} satisfies PageMetadata;
+
+export const accountsPage = {
+  path: AppRoutes.ACCOUNTS,
+  labelKey: 'navigation.accounts',
+  icon: WalletOutlined,
+} satisfies PageMetadata;
+
+export const financialSettingsPage = {
+  path: AppRoutes.FINANCIAL_SETTINGS,
+  labelKey: 'navigation.financialSettings',
+  icon: SettingOutlined,
+} satisfies PageMetadata;
 
 export const usersPage = {
   path: AppRoutes.USERS,

@@ -85,7 +85,7 @@ beforeEach(() => {
 describe('user menu', () => {
   it('links to the account page from the header', async () => {
     stubHttpRoutes(httpClient, signedInRoutes);
-    const { router } = renderRoute(AppRoutes.HOME);
+    const { router } = renderRoute(AppRoutes.DASHBOARD);
 
     fireEvent.click(
       await screen.findByRole('button', { name: new RegExp(user.name) }),

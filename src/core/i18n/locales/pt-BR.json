@@ -6,6 +6,19 @@
     "cancel": "Cancelar",
     "delete": "Excluir"
   },
+  "home": {
+    "greeting": "Olá, {{name}}",
+    "description": "Escolha para onde ir.",
+    "shortcuts": {
+      "dashboard": "Acompanhe os saldos do mês e navegue entre os meses.",
+      "accounts": "Cadastre e organize suas contas e saldos iniciais.",
+      "financialSettings": "Ajuste suas preferências e categorias.",
+      "users": "Cadastre, edite e desative usuários.",
+      "roles": "Veja e ajuste as permissões de cada perfil.",
+      "account": "Altere seu nome e e-mail e veja o seu acesso.",
+      "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil."
+    }
+  },
   "dashboard": {
     "greeting": "Olá, {{name}}",
     "description": "Acompanhe seus saldos do mês.",
@@ -91,7 +104,8 @@
       "color": "Cor",
       "scope": "Origem",
       "status": "Situação",
-      "actions": "Ações"
+      "actions": "Ações",
+      "colorPresets": "Cores sugeridas"
     },
     "hints": {
       "kindFixed": "O tipo não pode ser alterado depois da criação."
@@ -102,7 +116,12 @@
     },
     "actions": {
       "toggleStatus": "Ativar ou inativar {{name}}",
-      "edit": "Editar {{name}}"
+      "edit": "Editar {{name}}",
+      "delete": "Excluir {{name}}"
+    },
+    "delete": {
+      "title": "Excluir categoria",
+      "description": "Excluir {{name}}? Prefira inativar categorias que já foram usadas. A exclusão não pode ser desfeita."
     }
   },
   "preferences": {
@@ -157,6 +176,7 @@
     "toggleSidebar": "Expandir ou recolher o menu lateral"
   },
   "navigation": {
+    "home": "Início",
     "dashboard": "Painel",
     "users": "Usuários",
     "roles": "Perfis",
@@ -164,6 +184,7 @@
     "financialSettings": "Configurações financeiras"
   },
   "navigationSections": {
+    "general": "Geral",
     "finances": "Finanças",
     "administration": "Administração"
   },

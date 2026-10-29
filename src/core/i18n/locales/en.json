@@ -6,6 +6,19 @@
     "cancel": "Cancel",
     "delete": "Delete"
   },
+  "home": {
+    "greeting": "Hello, {{name}}",
+    "description": "Choose where to go.",
+    "shortcuts": {
+      "dashboard": "Track the month balances and move between months.",
+      "accounts": "Create and organize your accounts and opening balances.",
+      "financialSettings": "Adjust your preferences and categories.",
+      "users": "Create, edit, and deactivate users.",
+      "roles": "Review and adjust each role's permissions.",
+      "account": "Change your name and email and review your access.",
+      "changeRequests": "Approve or reject changes another administrator requested for your profile."
+    }
+  },
   "dashboard": {
     "greeting": "Hello, {{name}}",
     "description": "Track your balances for the month.",
@@ -91,7 +104,8 @@
       "color": "Color",
       "scope": "Source",
       "status": "Status",
-      "actions": "Actions"
+      "actions": "Actions",
+      "colorPresets": "Suggested colors"
     },
     "hints": {
       "kindFixed": "The type cannot be changed after creation."
@@ -102,7 +116,12 @@
     },
     "actions": {
       "toggleStatus": "Activate or deactivate {{name}}",
-      "edit": "Edit {{name}}"
+      "edit": "Edit {{name}}",
+      "delete": "Delete {{name}}"
+    },
+    "delete": {
+      "title": "Delete category",
+      "description": "Delete {{name}}? Prefer deactivating categories that were already used. Deleting cannot be undone."
     }
   },
   "preferences": {
@@ -157,6 +176,7 @@
     "toggleSidebar": "Expand or collapse the sidebar"
   },
   "navigation": {
+    "home": "Home",
     "dashboard": "Dashboard",
     "users": "Users",
     "roles": "Roles",
@@ -164,6 +184,7 @@
     "financialSettings": "Financial settings"
   },
   "navigationSections": {
+    "general": "General",
     "finances": "Finances",
     "administration": "Administration"
   },

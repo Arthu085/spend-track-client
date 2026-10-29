@@ -4,8 +4,10 @@ import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
 import { zodRule } from '@/shared/forms/zod-rule';
 import {
+  CATEGORY_COLOR_PRESETS,
   type CategoryForm,
   categoryFormSchema,
+  DEFAULT_CATEGORY_COLOR,
 } from '../../domain/category-form.schemas';
 import {
   type Category,
@@ -58,7 +60,7 @@ export const CategoryFormModal = ({
       initialValues={{
         name: category?.name,
         kind: category?.kind ?? defaultKind,
-        color: category?.color ?? undefined,
+        color: category?.color ?? DEFAULT_CATEGORY_COLOR,
       }}
       submitting={createMutation.isPending || updateMutation.isPending}
       onSubmit={submit}
@@ -89,8 +91,19 @@ export const CategoryFormModal = ({
         name="color"
         label={t('categories.fields.color')}
         getValueFromEvent={toHexColor}
+        rules={[zodRule(shape.color)]}
       >
-        <ColorPicker format="hex" disabledAlpha showText />
+        <ColorPicker
+          format="hex"
+          disabledAlpha
+          showText
+          presets={[
+            {
+              label: t('categories.fields.colorPresets'),
+              colors: CATEGORY_COLOR_PRESETS,
+            },
+          ]}
+        />
       </Form.Item>
     </FormModal>
   );

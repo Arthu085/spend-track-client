@@ -105,7 +105,7 @@ describe('authentication guards', () => {
   it('sends a visitor without a session to the login page', async () => {
     stubHttpRoutes(httpClient, signedOutRoutes);
 
-    const { router } = renderRoute(AppRoutes.HOME);
+    const { router } = renderRoute(AppRoutes.DASHBOARD);
 
     expect(
       await screen.findByRole('heading', { name: i18n.t('auth.login.title') }),
@@ -126,7 +126,7 @@ describe('authentication guards', () => {
         i18n.t('dashboard.greeting', { name: user.name }),
       ),
     ).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe(AppRoutes.HOME);
+    expect(router.state.location.pathname).toBe(AppRoutes.DASHBOARD);
   });
 
   it('signs the user out when a request fails after the session ends', async () => {
@@ -138,7 +138,7 @@ describe('authentication guards', () => {
       'POST /auth/refresh': { status: 401 },
     });
 
-    const { router, queryClient } = renderRoute(AppRoutes.HOME);
+    const { router, queryClient } = renderRoute(AppRoutes.DASHBOARD);
     await screen.findByText(i18n.t('dashboard.greeting', { name: user.name }));
     await queryClient
       .fetchQuery({
@@ -187,7 +187,7 @@ describe('LoginPage', () => {
       ),
     ).toBeInTheDocument();
     expect(router.state.location).toMatchObject({
-      pathname: AppRoutes.HOME,
+      pathname: AppRoutes.DASHBOARD,
       search: '',
     });
 
@@ -232,7 +232,7 @@ describe('logout', () => {
       'POST /auth/logout': envelope(null),
       'POST /auth/login': envelope(user),
     });
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     fireEvent.click(
       await screen.findByRole('button', { name: new RegExp(user.name) }),
