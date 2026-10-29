@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
-import type { Category } from '@/modules/categories/domain/category.schema';
+import type { TransactionCategory } from '@/modules/transaction-categories/domain/transaction-category.schema';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
 import { findDialog } from '@/test/find-dialog';
 import {
@@ -39,7 +39,7 @@ const defaults: Preferences = {
   updatedAt: null,
 };
 
-const food: Category = {
+const food: TransactionCategory = {
   uuid: '3a1b2c3d-1111-4c3e-9f1a-1a2b3c4d5e6f',
   name: 'Alimentação',
   kind: 'EXPENSE',
@@ -53,7 +53,7 @@ const food: Category = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-const pets: Category = {
+const pets: TransactionCategory = {
   ...food,
   uuid: '4b2c3d4e-2222-4c3e-9f1a-1a2b3c4d5e6f',
   name: 'Pets',
@@ -88,7 +88,7 @@ const renderSettings = (
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
     'GET /preferences': envelope(defaults),
-    'GET /categories': listPage([food, pets]),
+    'GET /transaction-categories': listPage([food, pets]),
     ...routes,
   });
   const rendered = renderRoute(AppRoutes.FINANCIAL_SETTINGS);
@@ -159,7 +159,7 @@ describe('FinancialSettingsPage', () => {
 
     const globalRow = await findRow(food.uuid);
     const personalRow = await findRow(pets.uuid);
-    expect(sent('GET /categories')[0].params).toEqual({
+    expect(sent('GET /transaction-categories')[0].params).toEqual({
       page: 1,
       limit: 20,
       kind: 'EXPENSE',
@@ -169,21 +169,21 @@ describe('FinancialSettingsPage', () => {
     expect(within(globalRow).queryByRole('button')).not.toBeInTheDocument();
     expect(
       within(personalRow).getByRole('button', {
-        name: i18n.t('categories.actions.edit', { name: pets.name }),
+        name: i18n.t('transactionCategories.actions.edit', { name: pets.name }),
       }),
     ).toBeInTheDocument();
 
     fireEvent.mouseDown(
       within(screen.getByRole('search')).getByLabelText(
-        i18n.t('categories.fields.kind'),
+        i18n.t('transactionCategories.fields.kind'),
       ),
     );
     fireEvent.click(
-      await screen.findByTitle(i18n.t('categories.kinds.INCOME')),
+      await screen.findByTitle(i18n.t('transactionCategories.kinds.INCOME')),
     );
 
     await waitFor(() => {
-      expect(sent('GET /categories').at(-1)?.params).toEqual({
+      expect(sent('GET /transaction-categories').at(-1)?.params).toEqual({
         page: 1,
         limit: 20,
         kind: 'INCOME',
@@ -194,19 +194,23 @@ describe('FinancialSettingsPage', () => {
 
   it('creates a personal category of the selected kind with a default color', async () => {
     const { sent } = renderSettings({
-      'POST /categories': envelope(pets, 'Categoria criada'),
+      'POST /transaction-categories': envelope(pets, 'Categoria criada'),
     });
 
     await findRow(food.uuid);
     fireEvent.click(
       screen.getByRole('button', {
-        name: new RegExp(i18n.t('categories.create.title')),
+        name: new RegExp(i18n.t('transactionCategories.create.title')),
       }),
     );
-    const dialog = await findDialog(i18n.t('categories.create.title'));
+    const dialog = await findDialog(
+      i18n.t('transactionCategories.create.title'),
+    );
     expect(within(dialog).getByText('#1677FF')).toBeInTheDocument();
     fireEvent.change(
-      within(dialog).getByLabelText(i18n.t('categories.fields.name')),
+      within(dialog).getByLabelText(
+        i18n.t('transactionCategories.fields.name'),
+      ),
       { target: { value: 'Pets' } },
     );
     fireEvent.click(
@@ -214,7 +218,7 @@ describe('FinancialSettingsPage', () => {
     );
 
     expect(await screen.findByText('Categoria criada')).toBeInTheDocument();
-    expect(requestBody(sent('POST /categories')[0])).toEqual({
+    expect(requestBody(sent('POST /transaction-categories')[0])).toEqual({
       name: 'Pets',
       kind: 'EXPENSE',
       color: '#1677FF',
@@ -223,7 +227,7 @@ describe('FinancialSettingsPage', () => {
 
   it('saves the picked color as a hex code', async () => {
     const { sent } = renderSettings({
-      [`PATCH /categories/${pets.uuid}`]: envelope(
+      [`PATCH /transaction-categories/${pets.uuid}`]: envelope(
         { ...pets, color: '#1677FF' },
         'Categoria atualizada',
       ),
@@ -232,10 +236,10 @@ describe('FinancialSettingsPage', () => {
     const row = await findRow(pets.uuid);
     fireEvent.click(
       within(row).getByRole('button', {
-        name: i18n.t('categories.actions.edit', { name: pets.name }),
+        name: i18n.t('transactionCategories.actions.edit', { name: pets.name }),
       }),
     );
-    const dialog = await findDialog(i18n.t('categories.edit.title'));
+    const dialog = await findDialog(i18n.t('transactionCategories.edit.title'));
     const trigger = dialog.querySelector<HTMLElement>(
       '.ant-color-picker-trigger',
     );
@@ -262,7 +266,9 @@ describe('FinancialSettingsPage', () => {
     );
 
     expect(await screen.findByText('Categoria atualizada')).toBeInTheDocument();
-    expect(requestBody(sent(`PATCH /categories/${pets.uuid}`)[0])).toEqual({
+    expect(
+      requestBody(sent(`PATCH /transaction-categories/${pets.uuid}`)[0]),
+    ).toEqual({
       name: pets.name,
       color: '#1677FF',
     });
@@ -270,7 +276,7 @@ describe('FinancialSettingsPage', () => {
 
   it('deactivates a personal category', async () => {
     const { sent } = renderSettings({
-      [`PUT /categories/${pets.uuid}/status`]: envelope(
+      [`PUT /transaction-categories/${pets.uuid}/status`]: envelope(
         { ...pets, status: 'INACTIVE', statusLabel: 'Inativo' },
         'Categoria inativada',
       ),
@@ -279,32 +285,41 @@ describe('FinancialSettingsPage', () => {
     const row = await findRow(pets.uuid);
     fireEvent.click(
       within(row).getByRole('switch', {
-        name: i18n.t('categories.actions.toggleStatus', { name: pets.name }),
+        name: i18n.t('transactionCategories.actions.toggleStatus', {
+          name: pets.name,
+        }),
       }),
     );
 
     expect(await screen.findByText('Categoria inativada')).toBeInTheDocument();
-    expect(requestBody(sent(`PUT /categories/${pets.uuid}/status`)[0])).toEqual(
-      { status: 'INACTIVE' },
-    );
+    expect(
+      requestBody(sent(`PUT /transaction-categories/${pets.uuid}/status`)[0]),
+    ).toEqual({ status: 'INACTIVE' });
   });
 
   it('deletes a personal category after confirmation', async () => {
     const { sent } = renderSettings({
-      [`DELETE /categories/${pets.uuid}`]: envelope(null, 'Categoria excluída'),
+      [`DELETE /transaction-categories/${pets.uuid}`]: envelope(
+        null,
+        'Categoria excluída',
+      ),
     });
 
     const globalRow = await findRow(food.uuid);
     expect(
       within(globalRow).queryByRole('button', {
-        name: i18n.t('categories.actions.delete', { name: food.name }),
+        name: i18n.t('transactionCategories.actions.delete', {
+          name: food.name,
+        }),
       }),
     ).not.toBeInTheDocument();
 
     const row = await findRow(pets.uuid);
     fireEvent.click(
       within(row).getByRole('button', {
-        name: i18n.t('categories.actions.delete', { name: pets.name }),
+        name: i18n.t('transactionCategories.actions.delete', {
+          name: pets.name,
+        }),
       }),
     );
     fireEvent.click(
@@ -312,6 +327,6 @@ describe('FinancialSettingsPage', () => {
     );
 
     expect(await screen.findByText('Categoria excluída')).toBeInTheDocument();
-    expect(sent(`DELETE /categories/${pets.uuid}`)).toHaveLength(1);
+    expect(sent(`DELETE /transaction-categories/${pets.uuid}`)).toHaveLength(1);
   });
 });

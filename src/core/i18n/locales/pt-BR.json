@@ -90,7 +90,7 @@
     },
     "empty": "Nenhuma conta encontrada."
   },
-  "categories": {
+  "transactionCategories": {
     "title": "Categorias",
     "create": {
       "title": "Nova categoria"

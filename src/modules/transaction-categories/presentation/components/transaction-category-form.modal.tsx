@@ -4,46 +4,46 @@ import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
 import { zodRule } from '@/shared/forms/zod-rule';
 import {
-  CATEGORY_COLOR_PRESETS,
-  type CategoryForm,
-  categoryFormSchema,
-  DEFAULT_CATEGORY_COLOR,
-} from '../../domain/category-form.schemas';
+  TRANSACTION_CATEGORY_COLOR_PRESETS,
+  type TransactionCategoryForm,
+  transactionCategoryFormSchema,
+  DEFAULT_TRANSACTION_CATEGORY_COLOR,
+} from '../../domain/transaction-category-form.schemas';
 import {
-  type Category,
-  type CategoryKind,
-  categoryKindSchema,
-} from '../../domain/category.schema';
+  type TransactionCategory,
+  type TransactionCategoryKind,
+  transactionCategoryKindSchema,
+} from '../../domain/transaction-category.schema';
 import {
-  useCreateCategory,
-  useUpdateCategory,
-} from '../../infra/categories.queries';
+  useCreateTransactionCategory,
+  useUpdateTransactionCategory,
+} from '../../infra/transaction-categories.queries';
 
 type PickedColor = Parameters<NonNullable<ColorPickerProps['onChange']>>[0];
 
 const toHexColor = (color: PickedColor) => color.toHexString().toUpperCase();
 
-interface CategoryFormModalProps {
+interface TransactionCategoryFormModalProps {
   open: boolean;
-  category?: Category;
-  defaultKind: CategoryKind;
+  category?: TransactionCategory;
+  defaultKind: TransactionCategoryKind;
   onClose: () => void;
 }
 
-export const CategoryFormModal = ({
+export const TransactionCategoryFormModal = ({
   open,
   category,
   defaultKind,
   onClose,
-}: CategoryFormModalProps) => {
+}: TransactionCategoryFormModalProps) => {
   const { t } = useTranslation();
   const { showError } = useFeedbackModal();
-  const createMutation = useCreateCategory();
-  const updateMutation = useUpdateCategory();
-  const { shape } = categoryFormSchema;
+  const createMutation = useCreateTransactionCategory();
+  const updateMutation = useUpdateTransactionCategory();
+  const { shape } = transactionCategoryFormSchema;
 
-  const submit = (values: CategoryForm) => {
-    const { name, kind, color } = categoryFormSchema.parse(values);
+  const submit = (values: TransactionCategoryForm) => {
+    const { name, kind, color } = transactionCategoryFormSchema.parse(values);
     const options = { onSuccess: onClose, onError: showError };
 
     if (category) {
@@ -54,13 +54,17 @@ export const CategoryFormModal = ({
   };
 
   return (
-    <FormModal<CategoryForm>
+    <FormModal<TransactionCategoryForm>
       open={open}
-      title={t(category ? 'categories.edit.title' : 'categories.create.title')}
+      title={t(
+        category
+          ? 'transactionCategories.edit.title'
+          : 'transactionCategories.create.title',
+      )}
       initialValues={{
         name: category?.name,
         kind: category?.kind ?? defaultKind,
-        color: category?.color ?? DEFAULT_CATEGORY_COLOR,
+        color: category?.color ?? DEFAULT_TRANSACTION_CATEGORY_COLOR,
       }}
       submitting={createMutation.isPending || updateMutation.isPending}
       onSubmit={submit}
@@ -68,28 +72,30 @@ export const CategoryFormModal = ({
     >
       <Form.Item
         name="name"
-        label={t('categories.fields.name')}
+        label={t('transactionCategories.fields.name')}
         rules={[zodRule(shape.name)]}
       >
         <Input autoComplete="off" />
       </Form.Item>
       <Form.Item
         name="kind"
-        label={t('categories.fields.kind')}
-        extra={category ? t('categories.hints.kindFixed') : undefined}
+        label={t('transactionCategories.fields.kind')}
+        extra={
+          category ? t('transactionCategories.hints.kindFixed') : undefined
+        }
         rules={[zodRule(shape.kind)]}
       >
         <Radio.Group
           disabled={category !== undefined}
-          options={categoryKindSchema.options.map((kind) => ({
+          options={transactionCategoryKindSchema.options.map((kind) => ({
             value: kind,
-            label: t(`categories.kinds.${kind}`),
+            label: t(`transactionCategories.kinds.${kind}`),
           }))}
         />
       </Form.Item>
       <Form.Item
         name="color"
-        label={t('categories.fields.color')}
+        label={t('transactionCategories.fields.color')}
         getValueFromEvent={toHexColor}
         rules={[zodRule(shape.color)]}
       >
@@ -99,8 +105,8 @@ export const CategoryFormModal = ({
           showText
           presets={[
             {
-              label: t('categories.fields.colorPresets'),
-              colors: CATEGORY_COLOR_PRESETS,
+              label: t('transactionCategories.fields.colorPresets'),
+              colors: TRANSACTION_CATEGORY_COLOR_PRESETS,
             },
           ]}
         />

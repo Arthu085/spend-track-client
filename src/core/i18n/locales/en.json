@@ -90,7 +90,7 @@
     },
     "empty": "No accounts found."
   },
-  "categories": {
+  "transactionCategories": {
     "title": "Categories",
     "create": {
       "title": "New category"

@@ -11,12 +11,12 @@ import {
   updateAccountStatus,
 } from '@/modules/accounts/infra/accounts.api';
 import {
-  createCategory,
-  deleteCategory,
-  fetchCategories,
-  updateCategory,
-  updateCategoryStatus,
-} from '@/modules/categories/infra/categories.api';
+  createTransactionCategory,
+  deleteTransactionCategory,
+  fetchTransactionCategories,
+  updateTransactionCategory,
+  updateTransactionCategoryStatus,
+} from '@/modules/transaction-categories/infra/transaction-categories.api';
 import { fetchDashboard } from '@/modules/dashboard/infra/dashboard.api';
 import {
   fetchPreferences,
@@ -121,24 +121,32 @@ describe('real backend finance contracts', () => {
   });
 
   it('lists global categories and keeps personal ones private', async () => {
-    const globals = await fetchCategories({ kind: 'EXPENSE', limit: 5 });
-    const globalCategory = globals.data.find(({ scope }) => scope === 'GLOBAL');
+    const globals = await fetchTransactionCategories({
+      kind: 'EXPENSE',
+      limit: 5,
+    });
+    const globalTransactionCategory = globals.data.find(
+      ({ scope }) => scope === 'GLOBAL',
+    );
 
     expect(globals.data).toHaveLength(5);
     expect(globals.meta).toMatchObject({ page: 1, limit: 5 });
     expect(globals.meta.total).toBeGreaterThanOrEqual(11);
 
-    expect(globalCategory).toBeDefined();
-    if (!globalCategory) {
+    expect(globalTransactionCategory).toBeDefined();
+    if (!globalTransactionCategory) {
       throw new Error('The backend did not seed global categories.');
     }
 
     await expectStatus(
-      updateCategory({ uuid: globalCategory.uuid, name: 'Renamed' }),
+      updateTransactionCategory({
+        uuid: globalTransactionCategory.uuid,
+        name: 'Renamed',
+      }),
       403,
     );
 
-    const created = await createCategory({
+    const created = await createTransactionCategory({
       name: 'Contract pets',
       kind: 'EXPENSE',
       color: '#13C2C2',
@@ -149,30 +157,35 @@ describe('real backend finance contracts', () => {
 
     await login(backend.admin);
     expect(
-      (await fetchCategories({ limit: 50 })).data.some(
+      (await fetchTransactionCategories({ limit: 50 })).data.some(
         ({ uuid }) => uuid === created.data.uuid,
       ),
     ).toBe(false);
     await expectStatus(
-      updateCategoryStatus({ uuid: created.data.uuid, status: 'INACTIVE' }),
+      updateTransactionCategoryStatus({
+        uuid: created.data.uuid,
+        status: 'INACTIVE',
+      }),
       404,
     );
 
     await login(backend.user);
     expect(
       (
-        await updateCategoryStatus({
+        await updateTransactionCategoryStatus({
           uuid: created.data.uuid,
           status: 'INACTIVE',
         })
       ).data.status,
     ).toBe('INACTIVE');
 
-    expect((await deleteCategory(created.data.uuid)).data).toBeNull();
     expect(
-      (await fetchCategories({ status: 'INACTIVE', limit: 50 })).data.some(
-        ({ uuid }) => uuid === created.data.uuid,
-      ),
+      (await deleteTransactionCategory(created.data.uuid)).data,
+    ).toBeNull();
+    expect(
+      (
+        await fetchTransactionCategories({ status: 'INACTIVE', limit: 50 })
+      ).data.some(({ uuid }) => uuid === created.data.uuid),
     ).toBe(false);
   });
 });
