@@ -1,10 +1,11 @@
-import { Flex, Menu, type MenuProps, Typography } from 'antd';
+import { Flex, Menu, type MenuProps, theme, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router';
 import { env } from '@/core/config/env.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import { useAbilities } from '@/modules/authorization/infra/abilities.queries';
 import { navigationSections, visibleNavigationSections } from './navigation';
+import { SidebarLogoutButton } from './sidebar-logout-button';
 import { SidebarThemeToggle } from './sidebar-theme-toggle';
 import { useOpenSections } from './use-open-sections';
 
@@ -20,6 +21,7 @@ export const SidebarNavigation = ({
   onNavigate,
 }: SidebarNavigationProps) => {
   const { t } = useTranslation();
+  const { token } = theme.useToken();
   const { pathname } = useLocation();
   const { data: abilities = [] } = useAbilities();
 
@@ -69,6 +71,7 @@ export const SidebarNavigation = ({
         </Link>
       </Flex>
       <nav
+        className="sidebar-navigation"
         aria-label={t('layout.navigation')}
         style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}
       >
@@ -82,7 +85,17 @@ export const SidebarNavigation = ({
           style={{ borderInlineEnd: 'none' }}
         />
       </nav>
-      <SidebarThemeToggle collapsed={collapsed} />
+      <Flex
+        vertical
+        gap={token.paddingXXS}
+        style={{
+          padding: token.paddingXS,
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+        }}
+      >
+        <SidebarThemeToggle collapsed={collapsed} />
+        <SidebarLogoutButton collapsed={collapsed} />
+      </Flex>
     </Flex>
   );
 };

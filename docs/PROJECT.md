@@ -46,7 +46,7 @@ existing shortcuts. The production build is an installable progressive web app (
 | `src/core/config/`      | Validated environment, Ant Design theme, TanStack Query client   |
 | `src/core/http/`        | Axios client and API error helpers                               |
 | `src/core/i18n/`        | i18next setup, language preference, switcher, and translations   |
-| `src/core/layout/`      | Main layout, header, sidebar, user menu, filtered navigation     |
+| `src/core/layout/`      | Main layout, with its `header/` and `sidebar/` parts             |
 | `src/core/providers/`   | Application-wide providers                                       |
 | `src/core/router/`      | Route paths (`app-routes.ts`), route tree (`routes.tsx`), router |
 | `src/core/theme/`       | Theme mode preference and the floating theme toggle              |
@@ -194,10 +194,10 @@ is limited, and avoids a forbidden catalog request. The API still decides whethe
 allowed. Role management is described under
 [Roles](#roles).
 
-`MainLayout` (`src/core/layout/`) wraps every signed-in page: a side menu whose title links home
-and whose bottom holds the theme toggle (see [Theme](#theme)), and a header with a sidebar toggle, the language switcher, and a user menu (opened from the user's
+`MainLayout` (`src/core/layout/main.layout.tsx`, with header parts in `header/` and sidebar parts in `sidebar/`) wraps every signed-in page: a side menu whose title links home
+and whose bottom holds the theme toggle (see [Theme](#theme)) and a sign-out button, and a header with a sidebar toggle, the language switcher, and a user menu (opened from the user's
 name) that links to the account page and signs out. `MainLayout` only composes `MainSidebar` (side menu or drawer, rendering
-`SidebarNavigation` and `SidebarThemeToggle`) and `MainHeader` (sidebar toggle, language switcher,
+`SidebarNavigation`, `SidebarThemeToggle`, and `SidebarLogoutButton`) and `MainHeader` (sidebar toggle, language switcher,
 and `UserMenu`), and holds the sidebar state both share. The toggle collapses the side menu into an
 icon-only rail (the title becomes a short mark) and expands it again. The side menu starts expanded,
 and `useSidebarCollapsed` stores the choice in `localStorage` (`sidebar-collapsed`), so it survives
@@ -206,14 +206,15 @@ title and menu in a drawer from the left, which closes when a link is followed, 
 it, or with Escape, and the header and page use narrower padding. For a user holding `ADMIN`, the
 user menu also links to the change requests page, and a dot on the user's name and a count on that entry show pending
 change requests. Menu
-entries are declared in `navigation.ts` as titled sections (`navigationSections`), with shared user
+entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and role page metadata in `core/router/page-metadata.ts` also used by home shortcuts. Each surface
 keeps its own entries, ordering, and overrides. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
 current page opens whenever that page changes. The collapsed rail shows every entry's icon and
-separates sections with dividers. The menu scrolls vertically between the fixed title and theme toggle when
+separates sections with dividers. In the collapsed rail the bottom buttons show only their icons, with tooltips. The menu scrolls
+vertically between the fixed title and bottom buttons when
 its entries do not fit.
 
 ### Lists and forms
@@ -430,9 +431,11 @@ to match the mode. Style components through theme tokens instead of hardcoded co
 - **Development:** `npm run dev` registers a development service worker (`devOptions.enabled`),
   generated into the ignored `dev-dist/` folder, and serves the manifest and generated icons, so
   installation, registration, and the update prompt can be tried without a build. It precaches
-  only `index.html` for `/`, so offline loading works only in builds. The worker stays registered
-  for the dev server's origin; unregister it in the browser's developer tools before serving
-  another project from the same port.
+  only `index.html` for `/`, so offline loading works only in builds. `devOptions.suppressWarnings`
+  replaces the build's glob patterns, which match nothing in `dev-dist/`, with an empty
+  `suppress-warnings.js`, so Workbox does not warn about them. The worker stays registered for the
+  dev server's origin; unregister it in the browser's developer tools before serving another
+  project from the same port.
 - **Manifest:** generated from `VITE_APP_NAME` (`name`) and `VITE_APP_MARK`
   (`short_name`), with `display: standalone`, `lang: pt-BR`, and white theme and background colors.
   `index.html` declares a white or black `theme-color` per `prefers-color-scheme`.

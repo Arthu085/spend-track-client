@@ -2,9 +2,9 @@ import { Grid, Layout, theme } from 'antd';
 import { useId, useState } from 'react';
 import { Outlet } from 'react-router';
 import { OfflineAlert } from '@/core/pwa/offline-alert';
-import { MainHeader } from './main-header';
-import { MainSidebar } from './main-sidebar';
-import { useSidebarCollapsed } from './use-sidebar-collapsed';
+import { MainHeader } from './header/main-header';
+import { MainSidebar } from './sidebar/main-sidebar';
+import { useSidebarCollapsed } from './sidebar/use-sidebar-collapsed';
 
 export const MainLayout = () => {
   const { token } = theme.useToken();
