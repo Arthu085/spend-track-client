@@ -35,7 +35,11 @@ export const SidebarNavigation = ({
     const children = items.map(({ path, labelKey, icon: Icon }) => ({
       key: path,
       icon: <Icon />,
-      label: <Link to={path}>{t(labelKey)}</Link>,
+      label: (
+        <Link to={path} title={collapsed ? undefined : t(labelKey)}>
+          {t(labelKey)}
+        </Link>
+      ),
     }));
 
     if (collapsed) {
@@ -61,7 +65,7 @@ export const SidebarNavigation = ({
         }}
       >
         <Link
-          to={AppRoutes.HOME}
+          to={AppRoutes.DASHBOARD}
           aria-label={collapsed ? env.appName : undefined}
           onClick={onNavigate}
         >

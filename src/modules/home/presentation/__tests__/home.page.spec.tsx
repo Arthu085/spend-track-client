@@ -131,6 +131,18 @@ describe('HomePage', () => {
       'href',
       AppRoutes.ACCOUNT,
     );
+    expect(await findShortcut('navigation.dashboard')).toHaveAttribute(
+      'href',
+      AppRoutes.DASHBOARD,
+    );
+    expect(await findShortcut('navigation.accounts')).toHaveAttribute(
+      'href',
+      AppRoutes.ACCOUNTS,
+    );
+    expect(await findShortcut('navigation.financialSettings')).toHaveAttribute(
+      'href',
+      AppRoutes.FINANCIAL_SETTINGS,
+    );
     expect(queryShortcut('navigation.roles')).not.toBeInTheDocument();
     expect(queryShortcut('changeRequests.title')).not.toBeInTheDocument();
   });

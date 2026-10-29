@@ -30,9 +30,11 @@ which manages users at `/users`, lets every signed-in user edit their own profil
 own password at `/account`,
 and lets an admin approve or reject changes another admin requested at `/account/change-requests`.
 The `authorization` module shows each role's permissions at `/roles` and lets a user with the
-ability change them. The `home` module's page at `/` links to every page the user can reach. Its shortcut grid shows a
-skeleton until the initial abilities query settles, so late permission-based entries do not move
-existing shortcuts. The production build is an installable progressive web app (see
+ability change them. The `home` module's page at `/home` links to every page the user can reach. The
+financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
+balances with month navigation and the spending perspective), the `accounts` module at `/accounts`,
+and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
+`transaction-categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
 
 ## Architecture
@@ -199,7 +201,8 @@ and whose bottom holds the theme toggle (see [Theme](#theme)) and a sign-out but
 name) that links to the account page and signs out. `MainLayout` only composes `MainSidebar` (side menu or drawer, rendering
 `SidebarNavigation`, `SidebarThemeToggle`, and `SidebarLogoutButton`) and `MainHeader` (sidebar toggle, language switcher,
 and `UserMenu`), and holds the sidebar state both share. The toggle collapses the side menu into an
-icon-only rail (the title becomes a short mark) and expands it again. The side menu starts expanded,
+icon-only rail (the title becomes a short mark) and expands it again. Hovering an entry shows its
+full name: a tooltip in the rail and the link `title` in the expanded menu, where long names are cut. The side menu starts expanded,
 and `useSidebarCollapsed` stores the choice in `localStorage` (`sidebar-collapsed`), so it survives
 reloads and sign-ins. Below the `lg` breakpoint there is no side menu: the toggle opens the same
 title and menu in a drawer from the left, which closes when a link is followed, on a click outside
@@ -207,8 +210,9 @@ it, or with Escape, and the header and page use narrower padding. For a user hol
 user menu also links to the change requests page, and a dot on the user's name and a count on that entry show pending
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
-and role page metadata in `core/router/page-metadata.ts` also used by home shortcuts. Each surface
-keeps its own entries, ordering, and overrides. An entry with an `ability` is shown only when the
+and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
+shortcuts. General holds Home; Finances lists the dashboard, accounts, and financial settings for
+every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
@@ -270,13 +274,60 @@ Shared building blocks for feature pages:
   returns to it. Inline alerts remain for form field validation, failed page or table loads, and
   informational notices.
 
+### Financial data
+
+Every signed-in user, including an admin, sees only their own accounts, personal categories,
+preferences, and dashboard; the API enforces this and answers `404` for another user's records, so
+financial pages need no ability guard. Amounts travel as decimal strings in BRL (`"1020.80"`, up to
+two decimals) and stay strings in the client: `moneySchema` validates them, `MoneyText` formats them
+with `Intl.NumberFormat` and marks negative values, and `MoneyInput` edits them in string mode so
+they are never rounded through a JavaScript number. Calendar dates without a time travel as
+`YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, and `dateInputFormat` gives the
+date picker the day order of the current language (`shared/date/date-only.ts`).
+
 ### Home
 
+`/home` greets the user by name and shows a card linking to each page they can reach, declared in
+`home-shortcuts.ts`: the dashboard, accounts, and financial settings for everyone, Users and Roles
+with the same abilities as their menu entries, My account for everyone, and Change requests only for
+a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
+abilities query settles, so late permission-based entries do not move existing shortcuts. The
+not-found and forbidden pages link back to it.
+
+### Dashboard
+
 `/` is where sign-in lands unless the guards remembered another page (see
-[Authentication](#authentication)). It greets the user by name and shows a card linking to each
-page they can reach, declared in `home-shortcuts.ts`: Users and Roles with the same abilities as
-their menu entries, My account for everyone, and Change requests only for a user holding `ADMIN`,
-with the pending count. While abilities load, only cards without an ability are shown.
+[Authentication](#authentication)). It greets the user and reads `GET /dashboard` for one month:
+the period (with its timing and remaining days), the spending perspective, the actual and projected
+balances, and the balance of each active account, with an invitation to add an account when there is
+none. Previous and next buttons move through past and future months and keep the month in the URL
+(`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
+saves the preference with `PATCH /preferences` and reloads the dashboard. Account and preference
+mutations invalidate the dashboard query. Until transactions exist, the projected balance equals
+the actual balance.
+
+### Accounts
+
+`/accounts` lists the user's accounts with their type, current balance, opening balance and date,
+and the default flag. Like the users list, it is a `PaginatedTable` with page and size in the URL,
+filtered by status through `ListFiltersForm` with `RecordStatusSelect` (active by default). Deleting
+the last row of a page returns to the previous page. A form modal creates and edits
+accounts; marking one as default clears the previous default on the API. The status switch
+deactivates or reactivates an account (deactivating also clears its default flag), and delete asks
+for confirmation.
+
+### Financial settings
+
+`/settings` saves the spending perspective (purchase date or invoice month) and the dashboard's
+default month (current or next) as soon as they change. Its transaction categories panel is a `PaginatedTable`
+filtered by kind and status with the shared list filters (expense and active by default), with
+filters, page, and size kept in the URL. Categories follow the API order (stored name), so global
+names translated into another language may not be alphabetical. Global
+categories are seeded by the API, translated, and read-only; personal categories can be created with
+a name, kind, and color, renamed or recolored (the kind is fixed), deactivated, and deleted after
+confirmation. The color picker offers preset swatches and starts from `DEFAULT_TRANSACTION_CATEGORY_COLOR`
+(also for older categories without a color), so it never shows an empty transparent value; colors are
+stored as uppercase hex codes.
 
 ### Users
 

@@ -2,7 +2,13 @@ import { AuditOutlined, UserOutlined } from '@ant-design/icons';
 import type { ParseKeys } from 'i18next';
 import type { ComponentType } from 'react';
 import { AppRoutes } from '@/core/router/app-routes';
-import { rolesPage, usersPage } from '@/core/router/page-metadata';
+import {
+  accountsPage,
+  dashboardPage,
+  financialSettingsPage,
+  rolesPage,
+  usersPage,
+} from '@/core/router/page-metadata';
 import {
   type Ability,
   hasAbility,
@@ -18,6 +24,18 @@ export interface HomeShortcut {
 }
 
 export const homeShortcuts: HomeShortcut[] = [
+  {
+    ...dashboardPage,
+    descriptionKey: 'home.shortcuts.dashboard',
+  },
+  {
+    ...accountsPage,
+    descriptionKey: 'home.shortcuts.accounts',
+  },
+  {
+    ...financialSettingsPage,
+    descriptionKey: 'home.shortcuts.financialSettings',
+  },
   {
     ...usersPage,
     descriptionKey: 'home.shortcuts.users',

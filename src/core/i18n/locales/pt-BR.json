@@ -10,11 +10,141 @@
     "greeting": "Olá, {{name}}",
     "description": "Escolha para onde ir.",
     "shortcuts": {
+      "dashboard": "Acompanhe os saldos do mês e navegue entre os meses.",
+      "accounts": "Cadastre e organize suas contas e saldos iniciais.",
+      "financialSettings": "Ajuste suas preferências e categorias.",
       "users": "Cadastre, edite e desative usuários.",
       "roles": "Veja e ajuste as permissões de cada perfil.",
       "account": "Altere seu nome e e-mail e veja o seu acesso.",
       "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil."
     }
+  },
+  "dashboard": {
+    "greeting": "Olá, {{name}}",
+    "description": "Acompanhe seus saldos do mês.",
+    "actions": {
+      "accounts": "Gerenciar contas",
+      "settings": "Configurações financeiras"
+    },
+    "period": {
+      "previous": "Mês anterior",
+      "next": "Próximo mês",
+      "current": "Ir para o mês atual",
+      "timing": {
+        "PAST": "Mês encerrado",
+        "CURRENT": "Mês atual",
+        "FUTURE": "Mês futuro"
+      },
+      "remainingDays_one": "{{count}} dia restante",
+      "remainingDays_other": "{{count}} dias restantes"
+    },
+    "balances": {
+      "actual": "Saldo atual",
+      "actualHint": "Soma dos saldos das contas ativas.",
+      "projected": "Saldo previsto",
+      "projectedHint": "Saldo esperado no fim do mês, considerando o que está planejado."
+    },
+    "accounts": {
+      "title": "Saldos por conta",
+      "empty": "Você ainda não cadastrou nenhuma conta.",
+      "add": "Adicionar conta"
+    }
+  },
+  "accounts": {
+    "title": "Contas",
+    "create": {
+      "title": "Nova conta"
+    },
+    "edit": {
+      "title": "Editar conta"
+    },
+    "fields": {
+      "name": "Nome",
+      "type": "Tipo",
+      "openingBalance": "Saldo inicial",
+      "openingBalanceDate": "Data do saldo inicial",
+      "isDefault": "Conta padrão",
+      "currentBalance": "Saldo atual",
+      "status": "Situação",
+      "actions": "Ações"
+    },
+    "hints": {
+      "openingBalance": "Saldo da conta na data informada. Use valor negativo para saldo devedor."
+    },
+    "types": {
+      "CHECKING": "Conta corrente",
+      "SAVINGS": "Poupança",
+      "CASH": "Dinheiro",
+      "OTHER": "Outra"
+    },
+    "default": "Padrão",
+    "openingBalanceOn": "Em {{date}}",
+    "actions": {
+      "toggleStatus": "Ativar ou inativar {{name}}",
+      "edit": "Editar {{name}}",
+      "delete": "Excluir {{name}}"
+    },
+    "delete": {
+      "title": "Excluir conta",
+      "description": "Excluir {{name}}? Prefira inativar contas que já foram usadas. A exclusão não pode ser desfeita."
+    },
+    "empty": "Nenhuma conta encontrada."
+  },
+  "transactionCategories": {
+    "title": "Categorias",
+    "create": {
+      "title": "Nova categoria"
+    },
+    "edit": {
+      "title": "Editar categoria"
+    },
+    "fields": {
+      "name": "Nome",
+      "kind": "Tipo",
+      "color": "Cor",
+      "scope": "Origem",
+      "status": "Situação",
+      "actions": "Ações",
+      "colorPresets": "Cores sugeridas"
+    },
+    "hints": {
+      "kindFixed": "O tipo não pode ser alterado depois da criação."
+    },
+    "kinds": {
+      "EXPENSE": "Despesa",
+      "INCOME": "Receita"
+    },
+    "actions": {
+      "toggleStatus": "Ativar ou inativar {{name}}",
+      "edit": "Editar {{name}}",
+      "delete": "Excluir {{name}}"
+    },
+    "delete": {
+      "title": "Excluir categoria",
+      "description": "Excluir {{name}}? Prefira inativar categorias que já foram usadas. A exclusão não pode ser desfeita."
+    }
+  },
+  "preferences": {
+    "title": "Preferências",
+    "fields": {
+      "spendingPerspective": "Perspectiva de gastos",
+      "defaultMonth": "Mês inicial do painel"
+    },
+    "hints": {
+      "spendingPerspective": "Define se os gastos no cartão contam pela data da compra ou pelo mês da fatura.",
+      "defaultMonth": "Mês exibido ao abrir o painel."
+    },
+    "spendingPerspectives": {
+      "PURCHASE_DATE": "Data da compra",
+      "INVOICE_MONTH": "Mês da fatura"
+    },
+    "defaultMonths": {
+      "CURRENT": "Mês atual",
+      "NEXT": "Próximo mês"
+    }
+  },
+  "financialSettings": {
+    "title": "Configurações financeiras"
   },
   "notFound": {
     "title": "Página não encontrada",
@@ -47,11 +177,15 @@
   },
   "navigation": {
     "home": "Início",
+    "dashboard": "Painel",
     "users": "Usuários",
-    "roles": "Perfis"
+    "roles": "Perfis",
+    "accounts": "Contas",
+    "financialSettings": "Configurações financeiras"
   },
   "navigationSections": {
     "general": "Geral",
+    "finances": "Finanças",
     "administration": "Administração"
   },
   "feedback": {
@@ -257,7 +391,8 @@
     "email": "Informe um e-mail válido.",
     "maxLength": "Use no máximo {{max}} caracteres.",
     "passwordMismatch": "As senhas não coincidem.",
-    "strongPassword": "Use pelo menos {{min}} caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um símbolo."
+    "strongPassword": "Use pelo menos {{min}} caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um símbolo.",
+    "money": "Informe um valor válido com até duas casas decimais."
   },
   "apiErrors": {
     "network": "Não foi possível conectar ao servidor.",

@@ -5,6 +5,7 @@ import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import { findDialog } from '@/test/find-dialog';
 import {
   csrfResponse,
@@ -39,6 +40,7 @@ const user: UserDetail = {
 const envelope = (data: unknown) => ({ status: 200, data: { data, meta: {} } });
 
 const layoutRoutes = {
+  ...dashboardRoute,
   'GET /users/me/abilities': envelope([]),
   'GET /users/me/change-requests': envelope([]),
 };
@@ -103,7 +105,7 @@ describe('authentication guards', () => {
   it('sends a visitor without a session to the login page', async () => {
     stubHttpRoutes(httpClient, signedOutRoutes);
 
-    const { router } = renderRoute(AppRoutes.HOME);
+    const { router } = renderRoute(AppRoutes.DASHBOARD);
 
     expect(
       await screen.findByRole('heading', { name: i18n.t('auth.login.title') }),
@@ -120,9 +122,11 @@ describe('authentication guards', () => {
     const { router } = renderRoute(AppRoutes.LOGIN);
 
     expect(
-      await screen.findByText(i18n.t('home.greeting', { name: user.name })),
+      await screen.findByText(
+        i18n.t('dashboard.greeting', { name: user.name }),
+      ),
     ).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe(AppRoutes.HOME);
+    expect(router.state.location.pathname).toBe(AppRoutes.DASHBOARD);
   });
 
   it('signs the user out when a request fails after the session ends', async () => {
@@ -134,8 +138,8 @@ describe('authentication guards', () => {
       'POST /auth/refresh': { status: 401 },
     });
 
-    const { router, queryClient } = renderRoute(AppRoutes.HOME);
-    await screen.findByText(i18n.t('home.greeting', { name: user.name }));
+    const { router, queryClient } = renderRoute(AppRoutes.DASHBOARD);
+    await screen.findByText(i18n.t('dashboard.greeting', { name: user.name }));
     await queryClient
       .fetchQuery({
         queryKey: ['users'],
@@ -178,10 +182,12 @@ describe('LoginPage', () => {
     submit(i18n.t('auth.login.submit'));
 
     expect(
-      await screen.findByText(i18n.t('home.greeting', { name: user.name })),
+      await screen.findByText(
+        i18n.t('dashboard.greeting', { name: user.name }),
+      ),
     ).toBeInTheDocument();
     expect(router.state.location).toMatchObject({
-      pathname: AppRoutes.HOME,
+      pathname: AppRoutes.DASHBOARD,
       search: '',
     });
 
@@ -226,7 +232,7 @@ describe('logout', () => {
       'POST /auth/logout': envelope(null),
       'POST /auth/login': envelope(user),
     });
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     fireEvent.click(
       await screen.findByRole('button', { name: new RegExp(user.name) }),
@@ -241,7 +247,7 @@ describe('logout', () => {
     fillField(i18n.t('auth.fields.password'), 'secret');
     submit(i18n.t('auth.login.submit'));
 
-    await screen.findByText(i18n.t('home.greeting', { name: user.name }));
+    await screen.findByText(i18n.t('dashboard.greeting', { name: user.name }));
     expect(
       requests.map(requestKey).filter((key) => !(key in layoutRoutes)),
     ).toEqual([

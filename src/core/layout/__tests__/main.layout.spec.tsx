@@ -13,6 +13,7 @@ import { LANGUAGE_STORAGE_KEY } from '@/core/i18n/language-preference';
 import { AppRoutes } from '@/core/router/app-routes';
 import { setThemeMode } from '@/core/theme/use-theme-mode';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import { csrfResponse, requestKey, stubHttpRoutes } from '@/test/http-stub';
 import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
@@ -35,6 +36,7 @@ const user: UserDetail = {
 const envelope = (data: unknown) => ({ status: 200, data: { data, meta: {} } });
 
 const signedInRoutes = {
+  ...dashboardRoute,
   'GET /users/me': envelope(user),
   'GET /users/me/abilities': envelope([{ action: 'READ', subject: 'USER' }]),
   'GET /users/me/change-requests': envelope([]),
@@ -72,16 +74,16 @@ describe('MainLayout', () => {
   it('renders the navigation, the signed-in user, and the page', async () => {
     const requests = stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const navigation = await screen.findByRole('navigation', {
       name: i18n.t('layout.navigation'),
     });
     expect(
       within(navigation).getByRole('link', {
-        name: i18n.t('navigation.home'),
+        name: i18n.t('navigation.dashboard'),
       }),
-    ).toHaveAttribute('href', AppRoutes.HOME);
+    ).toHaveAttribute('href', AppRoutes.DASHBOARD);
     const administration = await sectionButton(
       i18n.t('navigationSections.administration'),
     );
@@ -101,7 +103,9 @@ describe('MainLayout', () => {
       }),
     ).toHaveAttribute('href', AppRoutes.USERS);
     expect(
-      await screen.findByText(i18n.t('home.greeting', { name: user.name })),
+      await screen.findByText(
+        i18n.t('dashboard.greeting', { name: user.name }),
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(user.name)).toBeInTheDocument();
     await waitFor(() => {
@@ -124,10 +128,24 @@ describe('MainLayout', () => {
     );
   });
 
+  it('shows the full page name when hovering an expanded sidebar link', async () => {
+    stubHttpRoutes(httpClient, signedInRoutes);
+
+    renderRoute(AppRoutes.DASHBOARD);
+
+    const toggle = await sidebarToggle();
+    const label = i18n.t('navigation.financialSettings');
+    expect(await navigationLink(label)).toHaveAttribute('title', label);
+
+    fireEvent.click(toggle);
+
+    expect(await navigationLink(label)).not.toHaveAttribute('title');
+  });
+
   it('switches the language, remembers the choice, and refetches localized data', async () => {
     const requests = stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const switcher = await screen.findByRole('combobox', {
       name: i18n.t('language.label'),
@@ -155,7 +173,7 @@ describe('MainLayout', () => {
     act(() => setThemeMode('light'));
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const sider = await screen.findByRole('complementary');
     fireEvent.click(
@@ -180,7 +198,7 @@ describe('MainLayout', () => {
       'POST /auth/logout': envelope(null),
     });
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const logoutButton = (await sidebarButtons()).at(-1);
     expect(logoutButton).toHaveAccessibleName(i18n.t('auth.logout'));
@@ -198,7 +216,7 @@ describe('MainLayout', () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, 'true');
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const logoutButton = (await sidebarButtons()).at(-1);
     expect(logoutButton).toHaveAccessibleName(i18n.t('auth.logout'));
@@ -211,14 +229,14 @@ describe('MainLayout', () => {
     renderRoute(AppRoutes.USERS);
 
     await sidebarToggle();
-    expect(titleLink()).toHaveAttribute('href', AppRoutes.HOME);
+    expect(titleLink()).toHaveAttribute('href', AppRoutes.DASHBOARD);
     expect(titleLink()).toHaveTextContent(env.appName);
   });
 
   it('opens the sidebar by default and remembers when it is collapsed', async () => {
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const toggle = await sidebarToggle();
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -227,10 +245,10 @@ describe('MainLayout', () => {
 
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY)).toBe('true');
-    expect(titleLink()).toHaveAttribute('href', AppRoutes.HOME);
+    expect(titleLink()).toHaveAttribute('href', AppRoutes.DASHBOARD);
     expect(titleLink()).toHaveTextContent(env.appMark);
     expect(
-      screen.queryByText(i18n.t('navigationSections.general')),
+      screen.queryByText(i18n.t('navigationSections.finances')),
     ).not.toBeInTheDocument();
 
     fireEvent.click(toggle);
@@ -243,7 +261,7 @@ describe('MainLayout', () => {
     localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, 'true');
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     expect(await sidebarToggle()).toHaveAttribute('aria-expanded', 'false');
   });
@@ -252,7 +270,7 @@ describe('MainLayout', () => {
     stubSmallScreen();
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const toggle = await sidebarToggle();
     expect(document.querySelector('.ant-layout-sider')).toBeNull();
@@ -289,7 +307,7 @@ describe('MainLayout', () => {
     stubSmallScreen();
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const toggle = await sidebarToggle();
     fireEvent.click(toggle);
@@ -305,7 +323,7 @@ describe('MainLayout', () => {
   it('keeps the collapsible sidebar on large screens', async () => {
     stubHttpRoutes(httpClient, signedInRoutes);
 
-    renderRoute(AppRoutes.HOME);
+    renderRoute(AppRoutes.DASHBOARD);
 
     const toggle = await sidebarToggle();
     const sider = document.querySelector('.ant-layout-sider');

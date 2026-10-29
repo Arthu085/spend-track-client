@@ -5,6 +5,7 @@ import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import { sessionQuery } from '@/modules/auth/infra/auth.queries';
 import type { UserDetail } from '../../domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import {
   csrfResponse,
   requestBody,
@@ -35,6 +36,7 @@ const envelope = (data: unknown): StubResponse => ({
 });
 
 const signedInRoutes = {
+  ...dashboardRoute,
   'GET /users/me': envelope(user),
   'GET /users/me/abilities': envelope([]),
   'GET /users/me/change-requests': envelope([]),
@@ -83,7 +85,7 @@ beforeEach(() => {
 describe('user menu', () => {
   it('links to the account page from the header', async () => {
     stubHttpRoutes(httpClient, signedInRoutes);
-    const { router } = renderRoute(AppRoutes.HOME);
+    const { router } = renderRoute(AppRoutes.DASHBOARD);
 
     fireEvent.click(
       await screen.findByRole('button', { name: new RegExp(user.name) }),

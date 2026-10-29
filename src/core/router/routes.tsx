@@ -21,11 +21,35 @@ export const routes: RouteObject[] = [
             }),
             children: [
               {
+                path: AppRoutes.DASHBOARD,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/dashboard/presentation/pages/dashboard.page')
+                  ).DashboardPage,
+                }),
+              },
+              {
                 path: AppRoutes.HOME,
                 lazy: async () => ({
                   Component: (
                     await import('@/modules/home/presentation/pages/home.page')
                   ).HomePage,
+                }),
+              },
+              {
+                path: AppRoutes.ACCOUNTS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/accounts/presentation/pages/accounts.page')
+                  ).AccountsPage,
+                }),
+              },
+              {
+                path: AppRoutes.FINANCIAL_SETTINGS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/preferences/presentation/pages/financial-settings.page')
+                  ).FinancialSettingsPage,
                 }),
               },
               {

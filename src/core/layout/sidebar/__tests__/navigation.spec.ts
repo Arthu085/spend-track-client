@@ -8,10 +8,10 @@ import {
 } from '../navigation';
 
 const items: NavigationItem[] = [
-  { path: '/', labelKey: 'navigation.home', icon: HomeOutlined },
+  { path: '/', labelKey: 'navigation.dashboard', icon: HomeOutlined },
   {
     path: '/users',
-    labelKey: 'navigation.home',
+    labelKey: 'navigation.dashboard',
     icon: HomeOutlined,
     ability: { action: 'READ', subject: 'USER' },
   },
@@ -37,7 +37,7 @@ describe('visibleNavigationItems', () => {
 
 describe('visibleNavigationSections', () => {
   const sections: NavigationSection[] = [
-    { labelKey: 'navigationSections.general', items: [items[0]] },
+    { labelKey: 'navigationSections.finances', items: [items[0]] },
     { labelKey: 'navigationSections.administration', items: [items[1]] },
   ];
 
@@ -47,7 +47,7 @@ describe('visibleNavigationSections', () => {
         { action: 'READ', subject: 'USER' },
       ]).map(({ labelKey, items }) => [labelKey, items.length]),
     ).toEqual([
-      ['navigationSections.general', 1],
+      ['navigationSections.finances', 1],
       ['navigationSections.administration', 1],
     ]);
   });
@@ -55,6 +55,6 @@ describe('visibleNavigationSections', () => {
   it('hides sections whose items are all hidden', () => {
     expect(
       visibleNavigationSections(sections, []).map(({ labelKey }) => labelKey),
-    ).toEqual(['navigationSections.general']);
+    ).toEqual(['navigationSections.finances']);
   });
 });
