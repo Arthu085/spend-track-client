@@ -5,7 +5,7 @@ export const DEFAULT_PAGE = 1;
 export const DEFAULT_PAGE_SIZE = 20;
 export const PAGE_SIZE_OPTIONS = [10, 20, 50];
 
-const PAGE_PARAM = 'page';
+export const PAGE_PARAM = 'page';
 const LIMIT_PARAM = 'limit';
 
 const pageSchema = z.coerce.number().int().min(1);

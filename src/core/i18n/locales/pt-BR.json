@@ -27,9 +27,6 @@
       "settings": "Configurações financeiras"
     },
     "period": {
-      "previous": "Mês anterior",
-      "next": "Próximo mês",
-      "current": "Ir para o mês atual",
       "timing": {
         "PAST": "Mês encerrado",
         "CURRENT": "Mês atual",
@@ -49,6 +46,11 @@
       "empty": "Você ainda não cadastrou nenhuma conta.",
       "add": "Adicionar conta"
     }
+  },
+  "month": {
+    "previous": "Mês anterior",
+    "next": "Próximo mês",
+    "current": "Ir para o mês atual"
   },
   "accounts": {
     "title": "Contas",

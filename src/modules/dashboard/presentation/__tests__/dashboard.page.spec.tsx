@@ -17,7 +17,7 @@ import {
 import { renderRoute } from '@/test/render-route';
 import { formatMoney } from '@/shared/money/money';
 import type { Dashboard } from '../../domain/dashboard.schema';
-import { formatMonthLabel } from '../../domain/month-ref';
+import { formatMonthLabel } from '@/shared/date/month-ref';
 
 const sessionUser: UserDetail = {
   uuid: '6f1c2a54-2d0e-4a4b-9a43-2f1f1d7c9b10',
@@ -154,7 +154,7 @@ describe('DashboardPage', () => {
     await within(page).findByRole('heading', monthHeading(2026, 10));
     fireEvent.click(
       within(page).getByRole('button', {
-        name: i18n.t('dashboard.period.next'),
+        name: i18n.t('month.next'),
       }),
     );
 
@@ -172,7 +172,7 @@ describe('DashboardPage', () => {
 
     fireEvent.click(
       within(page).getByRole('button', {
-        name: i18n.t('dashboard.period.current'),
+        name: i18n.t('month.current'),
       }),
     );
 

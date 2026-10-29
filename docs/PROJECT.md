@@ -283,7 +283,10 @@ two decimals) and stay strings in the client: `moneySchema` validates them, `Mon
 with `Intl.NumberFormat` and marks negative values, and `MoneyInput` edits them in string mode so
 they are never rounded through a JavaScript number. Calendar dates without a time travel as
 `YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, and `dateInputFormat` gives the
-date picker the day order of the current language (`shared/date/date-only.ts`).
+date picker the day order of the current language (`shared/date/date-only.ts`). Monthly pages share
+`MonthNavigator` (previous, next, and a link back to the current month) and `useMonthParam`, which
+keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list to its first page
+(`shared/date/`).
 
 ### Home
 

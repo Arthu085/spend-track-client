@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { formatMonthLabel, parseMonthRef, shiftMonth } from '../month-ref';
+import {
+  formatMonthLabel,
+  monthRefOfDate,
+  parseMonthRef,
+  shiftMonth,
+} from '../month-ref';
 
 describe('parseMonthRef', () => {
   it('reads a month only when both search params are valid', () => {
@@ -31,5 +36,11 @@ describe('formatMonthLabel', () => {
     expect(formatMonthLabel({ year: 2026, month: 3 }, 'pt-BR')).toBe(
       'março de 2026',
     );
+  });
+});
+
+describe('monthRefOfDate', () => {
+  it('reads the month of a calendar date', () => {
+    expect(monthRefOfDate('2026-10-29')).toEqual({ year: 2026, month: 10 });
   });
 });

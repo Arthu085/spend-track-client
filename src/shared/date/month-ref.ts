@@ -38,3 +38,9 @@ export const formatMonthLabel = ({ year, month }: MonthRef, language: string) =>
     year: 'numeric',
     timeZone: 'UTC',
   }).format(new Date(Date.UTC(year, month - 1, 1)));
+
+export const monthRefOfDate = (date: string): MonthRef => {
+  const [year, month] = date.split('-').map(Number);
+
+  return { year, month };
+};

@@ -27,9 +27,6 @@
       "settings": "Financial settings"
     },
     "period": {
-      "previous": "Previous month",
-      "next": "Next month",
-      "current": "Go to current month",
       "timing": {
         "PAST": "Closed month",
         "CURRENT": "Current month",
@@ -49,6 +46,11 @@
       "empty": "You have not added any account yet.",
       "add": "Add account"
     }
+  },
+  "month": {
+    "previous": "Previous month",
+    "next": "Next month",
+    "current": "Go to current month"
   },
   "accounts": {
     "title": "Accounts",

@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import type { MonthRef } from '../domain/month-ref';
+import type { MonthRef } from '@/shared/date/month-ref';
 import { fetchDashboard } from './dashboard.api';
 
 export const dashboardKey = ['dashboard'] as const;
