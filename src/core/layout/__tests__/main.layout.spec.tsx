@@ -13,7 +13,7 @@ import { LANGUAGE_STORAGE_KEY } from '@/core/i18n/language-preference';
 import { AppRoutes } from '@/core/router/app-routes';
 import { setThemeMode } from '@/core/theme/use-theme-mode';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
-import { requestKey, stubHttpRoutes } from '@/test/http-stub';
+import { csrfResponse, requestKey, stubHttpRoutes } from '@/test/http-stub';
 import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
 import { SIDEBAR_COLLAPSED_STORAGE_KEY } from '../use-sidebar-collapsed';
@@ -54,6 +54,9 @@ const sectionButton = (name: string) =>
   within(
     screen.getByRole('navigation', { name: i18n.t('layout.navigation') }),
   ).findByRole('menuitem', { name });
+
+const sidebarButtons = async () =>
+  within(await screen.findByRole('complementary')).getAllByRole('button');
 
 const stubSmallScreen = () => {
   vi.spyOn(window, 'matchMedia').mockImplementation(createMatchMedia(375));
@@ -168,6 +171,38 @@ describe('MainLayout', () => {
       }),
     );
     expect(localStorage.getItem('theme-mode')).toBe('light');
+  });
+
+  it('signs out from the bottom of the sidebar', async () => {
+    const requests = stubHttpRoutes(httpClient, {
+      ...signedInRoutes,
+      'GET /auth/csrf': csrfResponse('token'),
+      'POST /auth/logout': envelope(null),
+    });
+
+    renderRoute(AppRoutes.HOME);
+
+    const logoutButton = (await sidebarButtons()).at(-1);
+    expect(logoutButton).toHaveAccessibleName(i18n.t('auth.logout'));
+    expect(logoutButton).toHaveTextContent(i18n.t('auth.logout'));
+
+    fireEvent.click(logoutButton!);
+
+    expect(
+      await screen.findByRole('heading', { name: i18n.t('auth.login.title') }),
+    ).toBeInTheDocument();
+    expect(requests.map(requestKey)).toContain('POST /auth/logout');
+  });
+
+  it('names the sidebar logout button when the sidebar is collapsed', async () => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, 'true');
+    stubHttpRoutes(httpClient, signedInRoutes);
+
+    renderRoute(AppRoutes.HOME);
+
+    const logoutButton = (await sidebarButtons()).at(-1);
+    expect(logoutButton).toHaveAccessibleName(i18n.t('auth.logout'));
+    expect(logoutButton).not.toHaveTextContent(i18n.t('auth.logout'));
   });
 
   it('links the sidebar title to the home page', async () => {

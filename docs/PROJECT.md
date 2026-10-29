@@ -195,9 +195,9 @@ allowed. Role management is described under
 [Roles](#roles).
 
 `MainLayout` (`src/core/layout/`) wraps every signed-in page: a side menu whose title links home
-and whose bottom holds the theme toggle (see [Theme](#theme)), and a header with a sidebar toggle, the language switcher, and a user menu (opened from the user's
+and whose bottom holds the theme toggle (see [Theme](#theme)) and a sign-out button, and a header with a sidebar toggle, the language switcher, and a user menu (opened from the user's
 name) that links to the account page and signs out. `MainLayout` only composes `MainSidebar` (side menu or drawer, rendering
-`SidebarNavigation` and `SidebarThemeToggle`) and `MainHeader` (sidebar toggle, language switcher,
+`SidebarNavigation`, `SidebarThemeToggle`, and `SidebarLogoutButton`) and `MainHeader` (sidebar toggle, language switcher,
 and `UserMenu`), and holds the sidebar state both share. The toggle collapses the side menu into an
 icon-only rail (the title becomes a short mark) and expands it again. The side menu starts expanded,
 and `useSidebarCollapsed` stores the choice in `localStorage` (`sidebar-collapsed`), so it survives
@@ -213,7 +213,8 @@ user has it, and while abilities load, only entries without one are shown; a sec
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
 current page opens whenever that page changes. The collapsed rail shows every entry's icon and
-separates sections with dividers. The menu scrolls vertically between the fixed title and theme toggle when
+separates sections with dividers. In the collapsed rail the bottom buttons show only their icons, with tooltips. The menu scrolls
+vertically between the fixed title and bottom buttons when
 its entries do not fit.
 
 ### Lists and forms
