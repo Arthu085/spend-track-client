@@ -285,6 +285,22 @@ describe('TransactionsPage', () => {
     },
   );
 
+  it('ignores malformed filters in the URL', async () => {
+    const { sent } = renderTransactions(
+      {},
+      `${OCTOBER_2026}&accountUuid=not-a-uuid&categoryUuid=${groceries.uuid}&description=${'a'.repeat(151)}`,
+    );
+
+    await findRow(rent.uuid);
+    expect(sent('GET /transactions')[0].params).toEqual({
+      page: 1,
+      limit: 20,
+      from: '2026-10-01',
+      to: '2026-10-31',
+      categoryUuid: groceries.uuid,
+    });
+  });
+
   it('filters the month by type', async () => {
     const { router, sent } = renderTransactions();
 

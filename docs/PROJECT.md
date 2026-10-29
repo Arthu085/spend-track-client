@@ -338,15 +338,17 @@ comes from the API's decimal strings.
 and sent to `GET /transactions` as the `from` and `to` dates of that month. Without a month in the
 URL it opens on the dashboard's default month from the preferences (current or next, shown after a
 loader while the preferences load). It is a `PaginatedTable` filtered by type, state, account
-(source or destination), category, and description, all kept in the URL; changing the month returns
-to the first page. Rows show the date (with an overdue tag for planned items dated before today),
+(source or destination), category, and description, all kept in the URL; a malformed account or
+category UUID, or a description longer than 150 characters, in the URL is ignored. Changing the month
+returns to the first page. Rows show the date (with an overdue tag for planned items dated before today),
 description and notes, type, category, accounts (`source → destination` for transfers), state with
 its effective date, and the amount, negative for expenses.
 
 - **Form:** one `FormModal` creates and edits. The type (income, expense, or transfer) is fixed after
   creation and decides the fields: income and expenses need a category of the same kind, transfers
   a destination account other than the source. Account and category selects offer active records
-  only (keeping the transaction's current one when it is inactive), and a new transaction starts
+  only (keeping the transaction's current one when it is inactive), loading the first 50 of each
+  (the API's page cap), and a new transaction starts
   from today's date and the default active account, which stays changeable. A new transaction is
   planned or already completed; the effective date of a completed one defaults to its date on the
   API when left empty.

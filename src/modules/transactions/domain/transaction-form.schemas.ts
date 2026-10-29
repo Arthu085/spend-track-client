@@ -60,9 +60,9 @@ export const completeTransactionFormSchema = z.object({
 export const transactionFiltersShape = {
   type: transactionTypeSchema,
   state: transactionStateSchema,
-  accountUuid: z.string(),
-  categoryUuid: z.string(),
-  description: z.string(),
+  accountUuid: z.uuid(),
+  categoryUuid: z.uuid(),
+  description: z.string().max(TRANSACTION_DESCRIPTION_MAX_LENGTH),
 };
 
 export type TransactionForm = z.infer<typeof transactionFormSchema>;
