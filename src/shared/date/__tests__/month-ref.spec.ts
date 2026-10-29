@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatMonthLabel,
+  monthDateRange,
   monthRefOfDate,
   parseMonthRef,
   shiftMonth,
@@ -42,5 +43,18 @@ describe('formatMonthLabel', () => {
 describe('monthRefOfDate', () => {
   it('reads the month of a calendar date', () => {
     expect(monthRefOfDate('2026-10-29')).toEqual({ year: 2026, month: 10 });
+  });
+});
+
+describe('monthDateRange', () => {
+  it('spans the first to the last day of the month', () => {
+    expect(monthDateRange({ year: 2026, month: 10 })).toEqual({
+      from: '2026-10-01',
+      to: '2026-10-31',
+    });
+    expect(monthDateRange({ year: 2028, month: 2 })).toEqual({
+      from: '2028-02-01',
+      to: '2028-02-29',
+    });
   });
 });

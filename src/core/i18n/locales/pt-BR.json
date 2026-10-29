@@ -4,13 +4,15 @@
     "reload": "Recarregar página",
     "save": "Salvar",
     "cancel": "Cancelar",
-    "delete": "Excluir"
+    "delete": "Excluir",
+    "close": "Fechar"
   },
   "home": {
     "greeting": "Olá, {{name}}",
     "description": "Escolha para onde ir.",
     "shortcuts": {
       "dashboard": "Acompanhe os saldos do mês e navegue entre os meses.",
+      "transactions": "Registre receitas, despesas e transferências e confirme pagamentos.",
       "accounts": "Cadastre e organize suas contas e saldos iniciais.",
       "financialSettings": "Ajuste suas preferências e categorias.",
       "users": "Cadastre, edite e desative usuários.",
@@ -91,6 +93,80 @@
       "description": "Excluir {{name}}? Prefira inativar contas que já foram usadas. A exclusão não pode ser desfeita."
     },
     "empty": "Nenhuma conta encontrada."
+  },
+  "transactions": {
+    "title": "Transações",
+    "create": {
+      "title": "Nova transação"
+    },
+    "edit": {
+      "title": "Editar transação"
+    },
+    "view": {
+      "title": "Detalhes da transação"
+    },
+    "fields": {
+      "type": "Tipo",
+      "description": "Descrição",
+      "amount": "Valor",
+      "date": "Data",
+      "state": "Situação",
+      "completedOn": "Data do pagamento ou recebimento",
+      "account": "Conta",
+      "destinationAccount": "Conta de destino",
+      "category": "Categoria",
+      "notes": "Observações",
+      "actions": "Ações"
+    },
+    "accountLabels": {
+      "INCOME": "Conta de recebimento",
+      "EXPENSE": "Conta de pagamento",
+      "TRANSFER": "Conta de origem"
+    },
+    "types": {
+      "INCOME": "Receita",
+      "EXPENSE": "Despesa",
+      "TRANSFER": "Transferência"
+    },
+    "states": {
+      "PLANNED": "Prevista",
+      "COMPLETED": "Realizada",
+      "CANCELED": "Cancelada"
+    },
+    "hints": {
+      "date": "Vencimento ou data prevista quando planejada; data da operação quando realizada.",
+      "completedOn": "Deixe em branco para usar a data da transação.",
+      "completedLocked": "Transações realizadas mantêm valor, datas e contas. Para corrigir, cancele esta transação e registre uma nova.",
+      "canceledLocked": "Transações canceladas ficam no histórico e não podem ser alteradas."
+    },
+    "validation": {
+      "sameAccount": "Escolha uma conta diferente da conta de origem."
+    },
+    "overdue": "Atrasada",
+    "completedOnDate": "Em {{date}}",
+    "transferRoute": "{{from}} → {{to}}",
+    "actions": {
+      "edit": "Editar {{description}}",
+      "view": "Ver {{description}}",
+      "complete": "Marcar {{description}} como realizada",
+      "cancel": "Cancelar {{description}}",
+      "delete": "Excluir {{description}}"
+    },
+    "complete": {
+      "title": "Marcar como realizada",
+      "description": "Informe a data em que {{description}} foi efetivamente pago ou recebido. Os saldos só mudam depois desta etapa."
+    },
+    "cancel": {
+      "title": "Cancelar transação",
+      "plannedDescription": "Cancelar {{description}}? Ela fica no histórico e deixa de contar nas projeções. Esta ação não pode ser desfeita.",
+      "completedDescription": "Cancelar {{description}}? O efeito nos saldos das contas é revertido e ela fica no histórico. Esta ação não pode ser desfeita.",
+      "confirm": "Cancelar transação"
+    },
+    "delete": {
+      "title": "Excluir transação",
+      "description": "Excluir {{description}}? Apenas transações previstas podem ser excluídas. A exclusão não pode ser desfeita."
+    },
+    "empty": "Nenhuma transação neste mês."
   },
   "transactionCategories": {
     "title": "Categorias",
@@ -180,6 +256,7 @@
   "navigation": {
     "home": "Início",
     "dashboard": "Painel",
+    "transactions": "Transações",
     "users": "Usuários",
     "roles": "Perfis",
     "accounts": "Contas",
@@ -394,7 +471,8 @@
     "maxLength": "Use no máximo {{max}} caracteres.",
     "passwordMismatch": "As senhas não coincidem.",
     "strongPassword": "Use pelo menos {{min}} caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um símbolo.",
-    "money": "Informe um valor válido com até duas casas decimais."
+    "money": "Informe um valor válido com até duas casas decimais.",
+    "positiveMoney": "Informe um valor maior que zero."
   },
   "apiErrors": {
     "network": "Não foi possível conectar ao servidor.",

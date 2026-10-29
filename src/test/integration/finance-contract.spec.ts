@@ -19,6 +19,14 @@ import {
 } from '@/modules/transaction-categories/infra/transaction-categories.api';
 import { fetchDashboard } from '@/modules/dashboard/infra/dashboard.api';
 import {
+  createTransaction,
+  deleteTransaction,
+  fetchTransaction,
+  fetchTransactions,
+  updateTransaction,
+  updateTransactionState,
+} from '@/modules/transactions/infra/transactions.api';
+import {
   fetchPreferences,
   updatePreferences,
 } from '@/modules/preferences/infra/preferences.api';
@@ -187,5 +195,106 @@ describe('real backend finance contracts', () => {
         await fetchTransactionCategories({ status: 'INACTIVE', limit: 50 })
       ).data.some(({ uuid }) => uuid === created.data.uuid),
     ).toBe(false);
+  });
+
+  it('records transactions that move balances only when completed', async () => {
+    const checking = await createAccount({
+      name: 'Contract transactions checking',
+      type: 'CHECKING',
+      openingBalance: '1000.00',
+      openingBalanceDate: '2030-01-01',
+      isDefault: false,
+    });
+    const savings = await createAccount({
+      name: 'Contract transactions savings',
+      type: 'SAVINGS',
+      openingBalance: '0.00',
+      openingBalanceDate: '2030-01-01',
+      isDefault: false,
+    });
+    const expenseCategory = (
+      await fetchTransactionCategories({ kind: 'EXPENSE', limit: 1 })
+    ).data[0];
+    const month = { year: 2030, month: 1 };
+    const balanceOf = async (uuid: string) =>
+      (await fetchDashboard(month)).accounts.find(
+        (account) => account.uuid === uuid,
+      );
+
+    const rent = await createTransaction({
+      type: 'EXPENSE',
+      description: 'Contract rent',
+      amount: '250.40',
+      date: '2030-01-10',
+      state: 'PLANNED',
+      accountUuid: checking.data.uuid,
+      categoryUuid: expenseCategory.uuid,
+    });
+
+    expect(rent.data).toMatchObject({ state: 'PLANNED', completedOn: null });
+    expect(await balanceOf(checking.data.uuid)).toMatchObject({
+      actualBalance: '1000.00',
+      projectedBalance: '749.60',
+    });
+
+    const completed = await updateTransactionState({
+      uuid: rent.data.uuid,
+      state: 'COMPLETED',
+      completedOn: '2030-01-11',
+    });
+
+    expect(completed.data.completedOn).toBe('2030-01-11');
+    expect(await balanceOf(checking.data.uuid)).toMatchObject({
+      actualBalance: '749.60',
+    });
+    await expectStatus(
+      updateTransaction({ uuid: rent.data.uuid, amount: '1.00' }),
+      409,
+    );
+    await expectStatus(deleteTransaction(rent.data.uuid), 409);
+
+    await createTransaction({
+      type: 'TRANSFER',
+      description: 'Contract reserve',
+      amount: '100.00',
+      date: '2030-01-12',
+      state: 'COMPLETED',
+      accountUuid: checking.data.uuid,
+      destinationAccountUuid: savings.data.uuid,
+    });
+
+    expect(await balanceOf(savings.data.uuid)).toMatchObject({
+      actualBalance: '100.00',
+    });
+    expect(
+      (
+        await fetchTransactions({
+          from: '2030-01-01',
+          to: '2030-01-31',
+          accountUuid: savings.data.uuid,
+        })
+      ).meta.total,
+    ).toBe(1);
+
+    await login(backend.admin);
+    await expectStatus(fetchTransaction(rent.data.uuid), 404);
+
+    await login(backend.user);
+    await expectStatus(deleteAccount(checking.data.uuid), 409);
+    expect(
+      (
+        await updateTransactionState({
+          uuid: rent.data.uuid,
+          state: 'CANCELED',
+        })
+      ).data.state,
+    ).toBe('CANCELED');
+    expect(await balanceOf(checking.data.uuid)).toMatchObject({
+      actualBalance: '900.00',
+    });
+
+    for (const { uuid } of [checking.data, savings.data]) {
+      await updateAccountStatus({ uuid, status: 'INACTIVE' });
+    }
   });
 });

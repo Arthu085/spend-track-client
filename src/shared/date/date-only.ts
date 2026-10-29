@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { type Language, toLanguage } from '@/core/i18n/language';
 
 export const DATE_ONLY_FORMAT = 'YYYY-MM-DD';
@@ -14,3 +15,5 @@ export const formatDateOnly = (date: string, language: string): string =>
   new Intl.DateTimeFormat(language, { timeZone: 'UTC' }).format(
     new Date(`${date}T00:00:00Z`),
   );
+
+export const todayDateOnly = (): string => dayjs().format(DATE_ONLY_FORMAT);

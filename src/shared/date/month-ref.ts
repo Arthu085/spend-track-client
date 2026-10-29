@@ -44,3 +44,12 @@ export const monthRefOfDate = (date: string): MonthRef => {
 
   return { year, month };
 };
+
+const twoDigits = (value: number) => String(value).padStart(2, '0');
+
+export const monthDateRange = ({ year, month }: MonthRef) => {
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const prefix = `${year}-${twoDigits(month)}`;
+
+  return { from: `${prefix}-01`, to: `${prefix}-${twoDigits(lastDay)}` };
+};

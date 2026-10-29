@@ -82,4 +82,34 @@ describe('FormModal', () => {
     expect(await screen.findByText('Name is required')).toBeInTheDocument();
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it('shows disabled fields and only a close button when read-only', () => {
+    const onCancel = vi.fn();
+
+    render(
+      <FormModal<NameForm>
+        open
+        readOnly
+        title="Item details"
+        initialValues={{ name: 'Ada' }}
+        submitting={false}
+        onSubmit={() => undefined}
+        onCancel={onCancel}
+      >
+        <Form.Item name="name" label="Name">
+          <Input />
+        </Form.Item>
+      </FormModal>,
+    );
+
+    expect(screen.getByLabelText('Name')).toBeDisabled();
+    expect(
+      screen.queryByRole('button', { name: i18n.t('common.save') }),
+    ).not.toBeInTheDocument();
+    const [closeButton] = screen
+      .getAllByRole('button', { name: i18n.t('common.close') })
+      .filter((button) => button.textContent === i18n.t('common.close'));
+    fireEvent.click(closeButton);
+    expect(onCancel).toHaveBeenCalled();
+  });
 });

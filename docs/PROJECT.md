@@ -32,8 +32,9 @@ and lets an admin approve or reject changes another admin requested at `/account
 The `authorization` module shows each role's permissions at `/roles` and lets a user with the
 ability change them. The `home` module's page at `/home` links to every page the user can reach. The
 financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
-balances with month navigation and the spending perspective), the `accounts` module at `/accounts`,
-and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
+balances with month navigation and the spending perspective), the `transactions` module at
+`/transactions` (planned and completed income, expenses, and transfers), the `accounts` module at
+`/accounts`, and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
 
@@ -211,8 +212,8 @@ user menu also links to the change requests page, and a dot on the user's name a
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
-shortcuts. General holds Home; Finances lists the dashboard, accounts, and financial settings for
-every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
+shortcuts. General holds Home; Finances lists the dashboard, transactions, accounts, and financial
+settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
@@ -251,7 +252,8 @@ Shared building blocks for feature pages:
 - **Form modals:** `FormModal` (`src/shared/forms/`) renders a vertical Ant Design form in a modal
   with a submit button, disables it while submitting, and destroys its fields when hidden, so each
   opening starts from `initialValues`. A failed submit reports its error through the feedback
-  modal, so the form stays open with the typed values.
+  modal, so the form stays open with the typed values. `readOnly` disables every field and leaves
+  only a close button, for records that can be viewed but not changed.
 - **Inputs:** `RecordStatusSelect` offers the shared `ACTIVE`/`INACTIVE` record status
   (`src/shared/domain/`) with localized labels.
 - **Success messages:** a mutation opts in by calling `useApiSuccessMessage()`
@@ -279,8 +281,9 @@ Shared building blocks for feature pages:
 Every signed-in user, including an admin, sees only their own accounts, personal categories,
 preferences, and dashboard; the API enforces this and answers `404` for another user's records, so
 financial pages need no ability guard. Amounts travel as decimal strings in BRL (`"1020.80"`, up to
-two decimals) and stay strings in the client: `moneySchema` validates them, `MoneyText` formats them
-with `Intl.NumberFormat` and marks negative values, and `MoneyInput` edits them in string mode so
+two decimals) and stay strings in the client: `moneySchema` validates them (`positiveMoneyInputSchema`
+for amounts that must be greater than zero), `MoneyText` formats them with `Intl.NumberFormat` and
+marks negative values, and `MoneyInput` edits them in string mode so
 they are never rounded through a JavaScript number. Calendar dates without a time travel as
 `YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, and `dateInputFormat` gives the
 date picker the day order of the current language (`shared/date/date-only.ts`). Monthly pages share
@@ -291,7 +294,7 @@ keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list 
 ### Home
 
 `/home` greets the user by name and shows a card linking to each page they can reach, declared in
-`home-shortcuts.ts`: the dashboard, accounts, and financial settings for everyone, Users and Roles
+`home-shortcuts.ts`: the dashboard, transactions, accounts, and financial settings for everyone, Users and Roles
 with the same abilities as their menu entries, My account for everyone, and Change requests only for
 a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
 abilities query settles, so late permission-based entries do not move existing shortcuts. The
@@ -309,6 +312,35 @@ saves the preference with `PATCH /preferences` and reloads the dashboard. Accoun
 mutations invalidate the dashboard query. Until transactions exist, the projected balance equals
 the actual balance.
 
+### Transactions
+
+`/transactions` lists the transactions of one month, with the month in the URL like the dashboard
+(the current month by default, by the browser's clock) and sent to `GET /transactions` as the
+`from` and `to` dates of that month. It is a `PaginatedTable` filtered by type, state, account
+(source or destination), category, and description, all kept in the URL; changing the month returns
+to the first page. Rows show the date (with an overdue tag for planned items dated before today),
+description and notes, type, category, accounts (`source → destination` for transfers), state with
+its effective date, and the amount, negative for expenses.
+
+- **Form:** one `FormModal` creates and edits. The type (income, expense, or transfer) is fixed after
+  creation and decides the fields: income and expenses need a category of the same kind, transfers
+  a destination account other than the source. Account and category selects offer active records
+  only (keeping the transaction's current one when it is inactive), and a new transaction starts
+  from today's date and the default active account, which stays changeable. A new transaction is
+  planned or already completed; the effective date of a completed one defaults to its date on the
+  API when left empty.
+- **States:** planned transactions edit every field but the type. Completed ones edit only the
+  description, category, and notes, as the API enforces; the form says to cancel and record a new
+  transaction to correct the rest. Canceled ones open read-only. The edit body sends account and
+  category references only when they changed, so a transaction keeps an inactive account it already
+  had.
+- **Actions:** mark as completed (planned only) asks for the effective date, today by default, and
+  sends `PUT /transactions/:uuid/state`. Cancel (planned or completed) asks for confirmation in a
+  warning dialog; canceled transactions stay as history. Delete is offered only for planned ones,
+  after confirmation.
+- **Freshness:** every transaction mutation shows the API message and invalidates the transactions,
+  dashboard, and accounts queries, because balances change.
+
 ### Accounts
 
 `/accounts` lists the user's accounts with their type, current balance, opening balance and date,
@@ -317,7 +349,8 @@ filtered by status through `ListFiltersForm` with `RecordStatusSelect` (active b
 the last row of a page returns to the previous page. A form modal creates and edits
 accounts; marking one as default clears the previous default on the API. The status switch
 deactivates or reactivates an account (deactivating also clears its default flag), and delete asks
-for confirmation.
+for confirmation. The API refuses to delete an account that any transaction uses (`409`, with a
+message suggesting deactivation instead), which opens the error dialog with that message.
 
 ### Financial settings
 

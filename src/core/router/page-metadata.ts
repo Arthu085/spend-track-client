@@ -3,6 +3,7 @@ import {
   SafetyCertificateOutlined,
   SettingOutlined,
   TeamOutlined,
+  TransactionOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
 import type { ParseKeys } from 'i18next';
@@ -21,6 +22,12 @@ export const dashboardPage = {
   path: AppRoutes.DASHBOARD,
   labelKey: 'navigation.dashboard',
   icon: DashboardOutlined,
+} satisfies PageMetadata;
+
+export const transactionsPage = {
+  path: AppRoutes.TRANSACTIONS,
+  labelKey: 'navigation.transactions',
+  icon: TransactionOutlined,
 } satisfies PageMetadata;
 
 export const accountsPage = {

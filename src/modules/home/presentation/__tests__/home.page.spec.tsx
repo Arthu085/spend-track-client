@@ -135,6 +135,10 @@ describe('HomePage', () => {
       'href',
       AppRoutes.DASHBOARD,
     );
+    expect(await findShortcut('navigation.transactions')).toHaveAttribute(
+      'href',
+      AppRoutes.TRANSACTIONS,
+    );
     expect(await findShortcut('navigation.accounts')).toHaveAttribute(
       'href',
       AppRoutes.ACCOUNTS,

@@ -11,6 +11,14 @@ export const moneyInputSchema = z
   .string({ error: () => i18n.t('validation.required') })
   .regex(MONEY_DECIMAL_PATTERN, { error: () => i18n.t('validation.money') });
 
+export const isPositiveMoney = (amount: string): boolean =>
+  !amount.startsWith('-') && /[1-9]/.test(amount);
+
+export const positiveMoneyInputSchema = moneyInputSchema.refine(
+  isPositiveMoney,
+  { error: () => i18n.t('validation.positiveMoney') },
+);
+
 export const isNegativeMoney = (amount: string): boolean =>
   amount.startsWith('-') && /[1-9]/.test(amount);
 
