@@ -201,7 +201,8 @@ and whose bottom holds the theme toggle (see [Theme](#theme)) and a sign-out but
 name) that links to the account page and signs out. `MainLayout` only composes `MainSidebar` (side menu or drawer, rendering
 `SidebarNavigation`, `SidebarThemeToggle`, and `SidebarLogoutButton`) and `MainHeader` (sidebar toggle, language switcher,
 and `UserMenu`), and holds the sidebar state both share. The toggle collapses the side menu into an
-icon-only rail (the title becomes a short mark) and expands it again. The side menu starts expanded,
+icon-only rail (the title becomes a short mark) and expands it again. Hovering an entry shows its
+full name: a tooltip in the rail and the link `title` in the expanded menu, where long names are cut. The side menu starts expanded,
 and `useSidebarCollapsed` stores the choice in `localStorage` (`sidebar-collapsed`), so it survives
 reloads and sign-ins. Below the `lg` breakpoint there is no side menu: the toggle opens the same
 title and menu in a drawer from the left, which closes when a link is followed, on a click outside

@@ -128,6 +128,20 @@ describe('MainLayout', () => {
     );
   });
 
+  it('shows the full page name when hovering an expanded sidebar link', async () => {
+    stubHttpRoutes(httpClient, signedInRoutes);
+
+    renderRoute(AppRoutes.DASHBOARD);
+
+    const toggle = await sidebarToggle();
+    const label = i18n.t('navigation.financialSettings');
+    expect(await navigationLink(label)).toHaveAttribute('title', label);
+
+    fireEvent.click(toggle);
+
+    expect(await navigationLink(label)).not.toHaveAttribute('title');
+  });
+
   it('switches the language, remembers the choice, and refetches localized data', async () => {
     const requests = stubHttpRoutes(httpClient, signedInRoutes);
 
