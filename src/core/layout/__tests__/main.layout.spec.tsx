@@ -13,6 +13,7 @@ import { LANGUAGE_STORAGE_KEY } from '@/core/i18n/language-preference';
 import { AppRoutes } from '@/core/router/app-routes';
 import { setThemeMode } from '@/core/theme/use-theme-mode';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import { csrfResponse, requestKey, stubHttpRoutes } from '@/test/http-stub';
 import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
@@ -35,6 +36,7 @@ const user: UserDetail = {
 const envelope = (data: unknown) => ({ status: 200, data: { data, meta: {} } });
 
 const signedInRoutes = {
+  ...dashboardRoute,
   'GET /users/me': envelope(user),
   'GET /users/me/abilities': envelope([{ action: 'READ', subject: 'USER' }]),
   'GET /users/me/change-requests': envelope([]),
@@ -79,7 +81,7 @@ describe('MainLayout', () => {
     });
     expect(
       within(navigation).getByRole('link', {
-        name: i18n.t('navigation.home'),
+        name: i18n.t('navigation.dashboard'),
       }),
     ).toHaveAttribute('href', AppRoutes.HOME);
     const administration = await sectionButton(
@@ -101,7 +103,9 @@ describe('MainLayout', () => {
       }),
     ).toHaveAttribute('href', AppRoutes.USERS);
     expect(
-      await screen.findByText(i18n.t('home.greeting', { name: user.name })),
+      await screen.findByText(
+        i18n.t('dashboard.greeting', { name: user.name }),
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(user.name)).toBeInTheDocument();
     await waitFor(() => {
@@ -230,7 +234,7 @@ describe('MainLayout', () => {
     expect(titleLink()).toHaveAttribute('href', AppRoutes.HOME);
     expect(titleLink()).toHaveTextContent(env.appMark);
     expect(
-      screen.queryByText(i18n.t('navigationSections.general')),
+      screen.queryByText(i18n.t('navigationSections.finances')),
     ).not.toBeInTheDocument();
 
     fireEvent.click(toggle);

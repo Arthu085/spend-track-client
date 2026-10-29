@@ -30,9 +30,10 @@ which manages users at `/users`, lets every signed-in user edit their own profil
 own password at `/account`,
 and lets an admin approve or reject changes another admin requested at `/account/change-requests`.
 The `authorization` module shows each role's permissions at `/roles` and lets a user with the
-ability change them. The `home` module's page at `/` links to every page the user can reach. Its shortcut grid shows a
-skeleton until the initial abilities query settles, so late permission-based entries do not move
-existing shortcuts. The production build is an installable progressive web app (see
+ability change them. The financial foundation covers the `dashboard` module at `/` (monthly
+balances with month navigation and the spending perspective), the `accounts` module at `/accounts`,
+and financial settings at `/settings` (the `preferences` module with the personal categories of the
+`categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
 
 ## Architecture
@@ -207,8 +208,9 @@ it, or with Escape, and the header and page use narrower padding. For a user hol
 user menu also links to the change requests page, and a dot on the user's name and a count on that entry show pending
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
-and role page metadata in `core/router/page-metadata.ts` also used by home shortcuts. Each surface
-keeps its own entries, ordering, and overrides. An entry with an `ability` is shown only when the
+and role page metadata in `core/router/page-metadata.ts`. The Finances section lists the dashboard,
+accounts, and financial settings for every signed-in user; Administration lists the
+ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
@@ -270,13 +272,43 @@ Shared building blocks for feature pages:
   returns to it. Inline alerts remain for form field validation, failed page or table loads, and
   informational notices.
 
-### Home
+### Financial data
+
+Every signed-in user, including an admin, sees only their own accounts, personal categories,
+preferences, and dashboard; the API enforces this and answers `404` for another user's records, so
+financial pages need no ability guard. Amounts travel as decimal strings in BRL (`"1020.80"`, up to
+two decimals) and stay strings in the client: `moneySchema` validates them, `MoneyText` formats them
+with `Intl.NumberFormat` and marks negative values, and `MoneyInput` edits them in string mode so
+they are never rounded through a JavaScript number. Calendar dates without a time travel as
+`YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, and `dateInputFormat` gives the
+date picker the day order of the current language (`shared/date/date-only.ts`).
+
+### Dashboard
 
 `/` is where sign-in lands unless the guards remembered another page (see
-[Authentication](#authentication)). It greets the user by name and shows a card linking to each
-page they can reach, declared in `home-shortcuts.ts`: Users and Roles with the same abilities as
-their menu entries, My account for everyone, and Change requests only for a user holding `ADMIN`,
-with the pending count. While abilities load, only cards without an ability are shown.
+[Authentication](#authentication)). It greets the user and reads `GET /dashboard` for one month:
+the period (with its timing and remaining days), the spending perspective, the actual and projected
+balances, and the balance of each active account, with an invitation to add an account when there is
+none. Previous and next buttons move through past and future months and keep the month in the URL
+(`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
+saves the preference with `PATCH /preferences` and reloads the dashboard. Account and preference
+mutations invalidate the dashboard query. Until transactions exist, the projected balance equals
+the actual balance.
+
+### Accounts
+
+`/accounts` lists the user's active or archived accounts with their type, current balance, opening
+balance and date, and the default flag. A form modal creates and edits accounts; marking one as
+default clears the previous default on the API. The status switch archives or reactivates an
+account (archiving also clears its default flag), and delete asks for confirmation.
+
+### Financial settings
+
+`/settings` saves the spending perspective (purchase date or invoice month) and the dashboard's
+default month (current or next) as soon as they change. Its categories panel lists expense or income
+categories, active or archived. Global categories are seeded by the API, translated, and read-only;
+personal categories can be created with a name, kind, and optional color, renamed or recolored (the
+kind is fixed), and archived.
 
 ### Users
 

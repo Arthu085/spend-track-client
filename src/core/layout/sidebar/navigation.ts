@@ -1,4 +1,8 @@
-import { HomeOutlined } from '@ant-design/icons';
+import {
+  DashboardOutlined,
+  SettingOutlined,
+  WalletOutlined,
+} from '@ant-design/icons';
 import type { ComponentType } from 'react';
 import { AppRoutes } from '@/core/router/app-routes';
 import { rolesPage, usersPage } from '@/core/router/page-metadata';
@@ -22,9 +26,23 @@ export interface NavigationSection {
 
 export const navigationSections: NavigationSection[] = [
   {
-    labelKey: 'navigationSections.general',
+    labelKey: 'navigationSections.finances',
     items: [
-      { path: AppRoutes.HOME, labelKey: 'navigation.home', icon: HomeOutlined },
+      {
+        path: AppRoutes.HOME,
+        labelKey: 'navigation.dashboard',
+        icon: DashboardOutlined,
+      },
+      {
+        path: AppRoutes.ACCOUNTS,
+        labelKey: 'navigation.accounts',
+        icon: WalletOutlined,
+      },
+      {
+        path: AppRoutes.FINANCIAL_SETTINGS,
+        labelKey: 'navigation.financialSettings',
+        icon: SettingOutlined,
+      },
     ],
   },
   {

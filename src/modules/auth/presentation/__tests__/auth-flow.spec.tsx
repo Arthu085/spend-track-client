@@ -5,6 +5,7 @@ import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import { findDialog } from '@/test/find-dialog';
 import {
   csrfResponse,
@@ -39,6 +40,7 @@ const user: UserDetail = {
 const envelope = (data: unknown) => ({ status: 200, data: { data, meta: {} } });
 
 const layoutRoutes = {
+  ...dashboardRoute,
   'GET /users/me/abilities': envelope([]),
   'GET /users/me/change-requests': envelope([]),
 };
@@ -120,7 +122,9 @@ describe('authentication guards', () => {
     const { router } = renderRoute(AppRoutes.LOGIN);
 
     expect(
-      await screen.findByText(i18n.t('home.greeting', { name: user.name })),
+      await screen.findByText(
+        i18n.t('dashboard.greeting', { name: user.name }),
+      ),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(AppRoutes.HOME);
   });
@@ -135,7 +139,7 @@ describe('authentication guards', () => {
     });
 
     const { router, queryClient } = renderRoute(AppRoutes.HOME);
-    await screen.findByText(i18n.t('home.greeting', { name: user.name }));
+    await screen.findByText(i18n.t('dashboard.greeting', { name: user.name }));
     await queryClient
       .fetchQuery({
         queryKey: ['users'],
@@ -178,7 +182,9 @@ describe('LoginPage', () => {
     submit(i18n.t('auth.login.submit'));
 
     expect(
-      await screen.findByText(i18n.t('home.greeting', { name: user.name })),
+      await screen.findByText(
+        i18n.t('dashboard.greeting', { name: user.name }),
+      ),
     ).toBeInTheDocument();
     expect(router.state.location).toMatchObject({
       pathname: AppRoutes.HOME,
@@ -241,7 +247,7 @@ describe('logout', () => {
     fillField(i18n.t('auth.fields.password'), 'secret');
     submit(i18n.t('auth.login.submit'));
 
-    await screen.findByText(i18n.t('home.greeting', { name: user.name }));
+    await screen.findByText(i18n.t('dashboard.greeting', { name: user.name }));
     expect(
       requests.map(requestKey).filter((key) => !(key in layoutRoutes)),
     ).toEqual([

@@ -6,15 +6,134 @@
     "cancel": "Cancel",
     "delete": "Delete"
   },
-  "home": {
+  "dashboard": {
     "greeting": "Hello, {{name}}",
-    "description": "Choose where to go.",
-    "shortcuts": {
-      "users": "Create, edit, and deactivate users.",
-      "roles": "Review and adjust each role's permissions.",
-      "account": "Change your name and email and review your access.",
-      "changeRequests": "Approve or reject changes another administrator requested for your profile."
+    "description": "Track your balances for the month.",
+    "actions": {
+      "accounts": "Manage accounts",
+      "settings": "Financial settings"
+    },
+    "period": {
+      "previous": "Previous month",
+      "next": "Next month",
+      "current": "Go to current month",
+      "timing": {
+        "PAST": "Closed month",
+        "CURRENT": "Current month",
+        "FUTURE": "Future month"
+      },
+      "remainingDays_one": "{{count}} day left",
+      "remainingDays_other": "{{count}} days left"
+    },
+    "balances": {
+      "actual": "Current balance",
+      "actualHint": "Sum of the balances of active accounts.",
+      "projected": "Projected balance",
+      "projectedHint": "Expected balance at the end of the month, including what is planned."
+    },
+    "accounts": {
+      "title": "Balances by account",
+      "empty": "You have not added any account yet.",
+      "add": "Add account"
     }
+  },
+  "accounts": {
+    "title": "Accounts",
+    "create": {
+      "title": "New account"
+    },
+    "edit": {
+      "title": "Edit account"
+    },
+    "fields": {
+      "name": "Name",
+      "type": "Type",
+      "openingBalance": "Opening balance",
+      "openingBalanceDate": "Opening balance date",
+      "isDefault": "Default account",
+      "currentBalance": "Current balance",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "hints": {
+      "openingBalance": "Account balance on the given date. Use a negative amount for an overdrawn balance."
+    },
+    "types": {
+      "CHECKING": "Checking",
+      "SAVINGS": "Savings",
+      "CASH": "Cash",
+      "OTHER": "Other"
+    },
+    "default": "Default",
+    "openingBalanceOn": "On {{date}}",
+    "actions": {
+      "toggleStatus": "Activate or archive {{name}}",
+      "edit": "Edit {{name}}",
+      "delete": "Delete {{name}}"
+    },
+    "delete": {
+      "title": "Delete account",
+      "description": "Delete {{name}}? Prefer archiving accounts that were already used. Deleting cannot be undone."
+    },
+    "empty": "No accounts found.",
+    "filters": {
+      "active": "Active",
+      "archived": "Archived"
+    }
+  },
+  "categories": {
+    "title": "Categories",
+    "create": {
+      "title": "New category"
+    },
+    "edit": {
+      "title": "Edit category"
+    },
+    "fields": {
+      "name": "Name",
+      "kind": "Type",
+      "color": "Color",
+      "scope": "Source",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "hints": {
+      "kindFixed": "The type cannot be changed after creation."
+    },
+    "kinds": {
+      "EXPENSE": "Expense",
+      "INCOME": "Income"
+    },
+    "actions": {
+      "toggleStatus": "Activate or archive {{name}}",
+      "edit": "Edit {{name}}"
+    },
+    "filters": {
+      "active": "Active",
+      "archived": "Archived"
+    }
+  },
+  "preferences": {
+    "title": "Preferences",
+    "fields": {
+      "spendingPerspective": "Spending perspective",
+      "defaultMonth": "Dashboard starting month"
+    },
+    "hints": {
+      "spendingPerspective": "Whether card spending counts by purchase date or by invoice month.",
+      "defaultMonth": "Month shown when the dashboard opens."
+    },
+    "spendingPerspectives": {
+      "PURCHASE_DATE": "Purchase date",
+      "INVOICE_MONTH": "Invoice month"
+    },
+    "defaultMonths": {
+      "CURRENT": "Current month",
+      "NEXT": "Next month"
+    }
+  },
+  "financialSettings": {
+    "title": "Financial settings"
   },
   "notFound": {
     "title": "Page not found",
@@ -46,12 +165,14 @@
     "toggleSidebar": "Expand or collapse the sidebar"
   },
   "navigation": {
-    "home": "Home",
+    "dashboard": "Dashboard",
     "users": "Users",
-    "roles": "Roles"
+    "roles": "Roles",
+    "accounts": "Accounts",
+    "financialSettings": "Financial settings"
   },
   "navigationSections": {
-    "general": "General",
+    "finances": "Finances",
     "administration": "Administration"
   },
   "feedback": {
@@ -257,7 +378,8 @@
     "email": "Enter a valid email.",
     "maxLength": "Use at most {{max}} characters.",
     "passwordMismatch": "The passwords do not match.",
-    "strongPassword": "Use at least {{min}} characters, including an uppercase letter, a lowercase letter, a number, and a symbol."
+    "strongPassword": "Use at least {{min}} characters, including an uppercase letter, a lowercase letter, a number, and a symbol.",
+    "money": "Enter a valid amount with up to two decimal places."
   },
   "apiErrors": {
     "network": "Could not connect to the server.",

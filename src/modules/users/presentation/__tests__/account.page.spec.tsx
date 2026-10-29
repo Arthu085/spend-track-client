@@ -5,6 +5,7 @@ import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import { sessionQuery } from '@/modules/auth/infra/auth.queries';
 import type { UserDetail } from '../../domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import {
   csrfResponse,
   requestBody,
@@ -35,6 +36,7 @@ const envelope = (data: unknown): StubResponse => ({
 });
 
 const signedInRoutes = {
+  ...dashboardRoute,
   'GET /users/me': envelope(user),
   'GET /users/me/abilities': envelope([]),
   'GET /users/me/change-requests': envelope([]),

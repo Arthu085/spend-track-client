@@ -8,6 +8,7 @@ import { sessionQuery } from '@/modules/auth/infra/auth.queries';
 import type { Role } from '@/modules/authorization/domain/role.schema';
 import type { UserChangeRequest } from '../../domain/user-change-request.schema';
 import type { UserDetail } from '../../domain/user.schema';
+import { dashboardRoute } from '@/test/dashboard-fixture';
 import {
   csrfResponse,
   requestKey,
@@ -82,6 +83,7 @@ const renderChangeRequests = (
     'GET /users/me': envelope(user),
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([changeRequest]),
+    ...dashboardRoute,
     ...routes,
   });
   const rendered = renderRoute(path);
