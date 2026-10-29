@@ -71,6 +71,7 @@ export const SidebarNavigation = ({
         </Link>
       </Flex>
       <nav
+        className="sidebar-navigation"
         aria-label={t('layout.navigation')}
         style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}
       >
