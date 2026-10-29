@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { type Language, toLanguage } from '@/core/i18n/language';
 
 export const DATE_ONLY_FORMAT = 'YYYY-MM-DD';
@@ -16,4 +15,19 @@ export const formatDateOnly = (date: string, language: string): string =>
     new Date(`${date}T00:00:00Z`),
   );
 
-export const todayDateOnly = (): string => dayjs().format(DATE_ONLY_FORMAT);
+export const CALENDAR_TIME_ZONE = 'America/Sao_Paulo';
+
+const calendarDateFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: CALENDAR_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+export const todayDateOnly = (now: Date = new Date()): string => {
+  const parts = calendarDateFormat.formatToParts(now);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((candidate) => candidate.type === type)?.value ?? '';
+
+  return `${part('year')}-${part('month')}-${part('day')}`;
+};

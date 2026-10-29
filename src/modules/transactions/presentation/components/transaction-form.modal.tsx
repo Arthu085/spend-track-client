@@ -1,6 +1,7 @@
 import { Alert } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
+import { todayDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
 import {
@@ -51,7 +52,7 @@ const initialValuesOf = (
         categoryUuid: transaction.category?.uuid,
         notes: transaction.notes ?? undefined,
       }
-    : { type: 'EXPENSE', state: 'PLANNED', date: dayjs() };
+    : { type: 'EXPENSE', state: 'PLANNED', date: dayjs(todayDateOnly()) };
 
 const editFormSchema = transactionFormSchema.omit({ state: true });
 

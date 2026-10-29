@@ -285,8 +285,9 @@ two decimals) and stay strings in the client: `moneySchema` validates them (`pos
 for amounts that must be greater than zero), `MoneyText` formats them with `Intl.NumberFormat` and
 marks negative values, and `MoneyInput` edits them in string mode so
 they are never rounded through a JavaScript number. Calendar dates without a time travel as
-`YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, and `dateInputFormat` gives the
-date picker the day order of the current language (`shared/date/date-only.ts`). Monthly pages share
+`YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, `dateInputFormat` gives the
+date picker the day order of the current language, and `todayDateOnly` gives today's date in
+`America/Sao_Paulo`, the calendar the API uses (`shared/date/date-only.ts`). Monthly pages share
 `MonthNavigator` (previous, next, and a link back to the current month) and `useMonthParam`, which
 keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list to its first page
 (`shared/date/`).
@@ -331,8 +332,9 @@ comes from the API's decimal strings.
 ### Transactions
 
 `/transactions` lists the transactions of one month, with the month in the URL like the dashboard
-(the current month by default, by the browser's clock) and sent to `GET /transactions` as the
-`from` and `to` dates of that month. It is a `PaginatedTable` filtered by type, state, account
+and sent to `GET /transactions` as the `from` and `to` dates of that month. Without a month in the
+URL it opens on the dashboard's default month from the preferences (current or next, shown after a
+loader while the preferences load). It is a `PaginatedTable` filtered by type, state, account
 (source or destination), category, and description, all kept in the URL; changing the month returns
 to the first page. Rows show the date (with an overdue tag for planned items dated before today),
 description and notes, type, category, accounts (`source → destination` for transfers), state with

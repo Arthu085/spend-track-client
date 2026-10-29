@@ -252,7 +252,7 @@ describe('DashboardPage', () => {
   describe('transaction indicators', () => {
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ['Date'] });
-      vi.setSystemTime(new Date(2026, 9, 29, 12));
+      vi.setSystemTime(new Date('2026-10-29T15:00:00Z'));
     });
 
     afterEach(() => {

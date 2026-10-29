@@ -2,9 +2,16 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Button, Card, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { usePreferences } from '@/modules/preferences/infra/preferences.queries';
+import { PageLoader } from '@/shared/components/page-loader';
 import { todayDateOnly } from '@/shared/date/date-only';
 import { MonthNavigator } from '@/shared/date/month-navigator';
-import { monthDateRange, monthRefOfDate } from '@/shared/date/month-ref';
+import {
+  monthDateRange,
+  type MonthRef,
+  monthRefOfDate,
+  shiftMonth,
+} from '@/shared/date/month-ref';
 import { useMonthParam } from '@/shared/date/use-month-param';
 import { useListParams } from '@/shared/list/use-list-params';
 import { transactionFiltersShape } from '../../domain/transaction-form.schemas';
@@ -18,11 +25,18 @@ import { TransactionsTable } from '../components/transactions-table';
 type EditorState =
   { mode: 'create' } | { mode: 'edit'; transaction: Transaction };
 
-export const TransactionsPage = () => {
+interface TransactionsOfMonthProps {
+  month: MonthRef;
+  currentMonth: MonthRef;
+  onMonthChange: (month: MonthRef) => void;
+}
+
+const TransactionsOfMonth = ({
+  month,
+  currentMonth,
+  onMonthChange,
+}: TransactionsOfMonthProps) => {
   const { t } = useTranslation();
-  const currentMonth = monthRefOfDate(todayDateOnly());
-  const [selectedMonth, setMonth] = useMonthParam();
-  const month = selectedMonth ?? currentMonth;
   const listParams = useListParams(transactionFiltersShape);
   const { page, limit, filters } = listParams;
   const transactionsQuery = useTransactions({
@@ -52,7 +66,7 @@ export const TransactionsPage = () => {
         <MonthNavigator
           value={month}
           current={currentMonth}
-          onChange={setMonth}
+          onChange={onMonthChange}
         />
       </Card>
       <TransactionsFilters listParams={listParams} />
@@ -72,5 +86,28 @@ export const TransactionsPage = () => {
         onClose={() => setCompleting(null)}
       />
     </Flex>
+  );
+};
+
+export const TransactionsPage = () => {
+  const [selectedMonth, setMonth] = useMonthParam();
+  const { data: preferences, isPending } = usePreferences();
+  const currentMonth = monthRefOfDate(todayDateOnly());
+
+  if (!selectedMonth && isPending) {
+    return <PageLoader />;
+  }
+
+  const defaultMonth =
+    preferences?.defaultMonth === 'NEXT'
+      ? shiftMonth(currentMonth, 1)
+      : currentMonth;
+
+  return (
+    <TransactionsOfMonth
+      month={selectedMonth ?? defaultMonth}
+      currentMonth={currentMonth}
+      onMonthChange={setMonth}
+    />
   );
 };

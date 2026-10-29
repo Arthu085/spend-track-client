@@ -5,6 +5,7 @@ import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import type { Account } from '@/modules/accounts/domain/account.schema';
+import type { Preferences } from '@/modules/preferences/domain/preferences.schema';
 import type { TransactionCategory } from '@/modules/transaction-categories/domain/transaction-category.schema';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
 import { findDialog } from '@/test/find-dialog';
@@ -125,6 +126,14 @@ const paycheck: Transaction = {
   },
 };
 
+const preferences: Preferences = {
+  spendingPerspective: 'PURCHASE_DATE',
+  spendingPerspectiveLabel: 'Data da compra',
+  defaultMonth: 'CURRENT',
+  defaultMonthLabel: 'Mês atual',
+  updatedAt: null,
+};
+
 const envelope = (data: unknown, message?: string): StubResponse => ({
   status: 200,
   data: { data, meta: message ? { message } : {} },
@@ -157,6 +166,7 @@ const renderTransactions = (
     'GET /users/me': envelope(sessionUser),
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
+    'GET /preferences': envelope(preferences),
     'GET /accounts': listPage([nubank, wallet]),
     'GET /transaction-categories': categoriesOf,
     'GET /transactions': listPage([rent, paycheck]),
@@ -211,7 +221,7 @@ const save = (dialog: HTMLElement) => {
 describe('TransactionsPage', () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date(2026, 9, 29, 12));
+    vi.setSystemTime(new Date('2026-10-29T15:00:00Z'));
   });
 
   afterEach(() => {
@@ -252,6 +262,28 @@ describe('TransactionsPage', () => {
       });
     });
   });
+
+  it.each([
+    ['CURRENT', '2026-10-01', '2026-10-31'],
+    ['NEXT', '2026-11-01', '2026-11-30'],
+  ] as const)(
+    'opens on the %s month of the preferences without a month in the URL',
+    async (defaultMonth, from, to) => {
+      const { sent } = renderTransactions(
+        { 'GET /preferences': envelope({ ...preferences, defaultMonth }) },
+        AppRoutes.TRANSACTIONS,
+      );
+
+      await findRow(rent.uuid);
+      expect(sent('GET /transactions')).toHaveLength(1);
+      expect(sent('GET /transactions')[0].params).toEqual({
+        page: 1,
+        limit: 20,
+        from,
+        to,
+      });
+    },
+  );
 
   it('filters the month by type', async () => {
     const { router, sent } = renderTransactions();

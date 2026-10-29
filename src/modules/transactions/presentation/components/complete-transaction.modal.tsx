@@ -1,7 +1,11 @@
 import { DatePicker, Form, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { DATE_ONLY_FORMAT, dateInputFormat } from '@/shared/date/date-only';
+import {
+  DATE_ONLY_FORMAT,
+  dateInputFormat,
+  todayDateOnly,
+} from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
 import { zodRule } from '@/shared/forms/zod-rule';
@@ -48,7 +52,7 @@ export const CompleteTransactionModal = ({
     <FormModal<CompleteTransactionForm>
       open={transaction !== null}
       title={t('transactions.complete.title')}
-      initialValues={{ completedOn: dayjs() }}
+      initialValues={{ completedOn: dayjs(todayDateOnly()) }}
       submitting={mutation.isPending}
       onSubmit={submit}
       onCancel={onClose}
