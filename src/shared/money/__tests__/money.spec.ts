@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   formatMoney,
   isNegativeMoney,
+  isPositiveMoney,
   moneyInputSchema,
   moneySchema,
+  positiveMoneyInputSchema,
 } from '../money';
 
 describe('money', () => {
@@ -32,5 +34,16 @@ describe('money', () => {
     ['10.00', false],
   ])('tells whether %s is negative', (amount, negative) => {
     expect(isNegativeMoney(amount)).toBe(negative);
+  });
+
+  it.each([
+    ['0.01', true],
+    ['250.40', true],
+    ['0.00', false],
+    ['0', false],
+    ['-5.00', false],
+  ])('tells whether %s is positive', (amount, positive) => {
+    expect(isPositiveMoney(amount)).toBe(positive);
+    expect(positiveMoneyInputSchema.safeParse(amount).success).toBe(positive);
   });
 });

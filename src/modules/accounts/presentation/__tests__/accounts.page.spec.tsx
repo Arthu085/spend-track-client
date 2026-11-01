@@ -249,6 +249,32 @@ describe('AccountsPage', () => {
     });
   });
 
+  it('explains why an account with transactions cannot be deleted', async () => {
+    renderAccounts({
+      [`DELETE /accounts/${checking.uuid}`]: {
+        status: 409,
+        data: {
+          statusCode: 409,
+          message: 'A conta tem transações. Inative-a em vez de excluir.',
+        },
+      },
+    });
+
+    const row = await findRow(checking.uuid);
+    fireEvent.click(
+      within(row).getByRole('button', {
+        name: i18n.t('accounts.actions.delete', { name: checking.name }),
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole('button', { name: i18n.t('common.delete') }),
+    );
+
+    expect(await findDialog(i18n.t('feedback.error'))).toHaveTextContent(
+      'A conta tem transações. Inative-a em vez de excluir.',
+    );
+  });
+
   it('shows the API error when an account cannot be found', async () => {
     renderAccounts({
       [`PUT /accounts/${checking.uuid}/status`]: {

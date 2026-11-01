@@ -4,13 +4,15 @@
     "reload": "Reload page",
     "save": "Save",
     "cancel": "Cancel",
-    "delete": "Delete"
+    "delete": "Delete",
+    "close": "Close"
   },
   "home": {
     "greeting": "Hello, {{name}}",
     "description": "Choose where to go.",
     "shortcuts": {
       "dashboard": "Track the month balances and move between months.",
+      "transactions": "Record income, expenses, and transfers and confirm payments.",
       "accounts": "Create and organize your accounts and opening balances.",
       "financialSettings": "Adjust your preferences and categories.",
       "users": "Create, edit, and deactivate users.",
@@ -21,15 +23,14 @@
   },
   "dashboard": {
     "greeting": "Hello, {{name}}",
-    "description": "Track your balances for the month.",
+    "description": "Track the month's balances, income, and expenses.",
     "actions": {
+      "addTransaction": "Add transaction",
+      "transactions": "Transactions",
       "accounts": "Manage accounts",
       "settings": "Financial settings"
     },
     "period": {
-      "previous": "Previous month",
-      "next": "Next month",
-      "current": "Go to current month",
       "timing": {
         "PAST": "Closed month",
         "CURRENT": "Current month",
@@ -48,7 +49,38 @@
       "title": "Balances by account",
       "empty": "You have not added any account yet.",
       "add": "Add account"
+    },
+    "income": {
+      "title": "Income",
+      "completed": "Received",
+      "pending": "Expected",
+      "completedShare": "Share of income received",
+      "empty": "No income recorded for this month."
+    },
+    "expenses": {
+      "title": "Expenses",
+      "completed": "Paid",
+      "pending": "To pay",
+      "completedShare": "Share of expenses paid",
+      "empty": "No expenses recorded for this month."
+    },
+    "expensesByCategory": {
+      "title": "Expenses by category",
+      "breakdown": "Paid {{completed}} · To pay {{pending}}",
+      "empty": "No spending to break down by category."
+    },
+    "upcoming": {
+      "title": "Upcoming",
+      "hint": "Planned transactions up to the end of the month, overdue ones included.",
+      "viewAll": "View month",
+      "partial": "Showing {{shown}} of {{count}}.",
+      "empty": "Nothing planned up to the end of this month."
     }
+  },
+  "month": {
+    "previous": "Previous month",
+    "next": "Next month",
+    "current": "Go to current month"
   },
   "accounts": {
     "title": "Accounts",
@@ -89,6 +121,80 @@
       "description": "Delete {{name}}? Prefer deactivating accounts that were already used. Deleting cannot be undone."
     },
     "empty": "No accounts found."
+  },
+  "transactions": {
+    "title": "Transactions",
+    "create": {
+      "title": "New transaction"
+    },
+    "edit": {
+      "title": "Edit transaction"
+    },
+    "view": {
+      "title": "Transaction details"
+    },
+    "fields": {
+      "type": "Type",
+      "description": "Description",
+      "amount": "Amount",
+      "date": "Date",
+      "state": "Status",
+      "completedOn": "Payment or receipt date",
+      "account": "Account",
+      "destinationAccount": "Destination account",
+      "category": "Category",
+      "notes": "Notes",
+      "actions": "Actions"
+    },
+    "accountLabels": {
+      "INCOME": "Receiving account",
+      "EXPENSE": "Paying account",
+      "TRANSFER": "Source account"
+    },
+    "types": {
+      "INCOME": "Income",
+      "EXPENSE": "Expense",
+      "TRANSFER": "Transfer"
+    },
+    "states": {
+      "PLANNED": "Planned",
+      "COMPLETED": "Completed",
+      "CANCELED": "Canceled"
+    },
+    "hints": {
+      "date": "Due or expected date when planned; date of the operation when completed.",
+      "completedOn": "Leave empty to use the transaction date.",
+      "completedLocked": "Completed transactions keep their amount, dates, and accounts. To correct them, cancel this transaction and record a new one.",
+      "canceledLocked": "Canceled transactions are kept as history and cannot be changed."
+    },
+    "validation": {
+      "sameAccount": "Choose an account other than the source account."
+    },
+    "overdue": "Overdue",
+    "completedOnDate": "On {{date}}",
+    "transferRoute": "{{from}} → {{to}}",
+    "actions": {
+      "edit": "Edit {{description}}",
+      "view": "View {{description}}",
+      "complete": "Mark {{description}} as completed",
+      "cancel": "Cancel {{description}}",
+      "delete": "Delete {{description}}"
+    },
+    "complete": {
+      "title": "Mark as completed",
+      "description": "Enter the date {{description}} was actually paid or received. Balances change only after this step."
+    },
+    "cancel": {
+      "title": "Cancel transaction",
+      "plannedDescription": "Cancel {{description}}? It stays in the history and no longer counts in projections. This cannot be undone.",
+      "completedDescription": "Cancel {{description}}? Its effect on the account balances is reversed and it stays in the history. This cannot be undone.",
+      "confirm": "Cancel transaction"
+    },
+    "delete": {
+      "title": "Delete transaction",
+      "description": "Delete {{description}}? Only planned transactions can be deleted. This cannot be undone."
+    },
+    "empty": "No transactions in this month."
   },
   "transactionCategories": {
     "title": "Categories",
@@ -178,6 +284,7 @@
   "navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
+    "transactions": "Transactions",
     "users": "Users",
     "roles": "Roles",
     "accounts": "Accounts",
@@ -392,7 +499,8 @@
     "maxLength": "Use at most {{max}} characters.",
     "passwordMismatch": "The passwords do not match.",
     "strongPassword": "Use at least {{min}} characters, including an uppercase letter, a lowercase letter, a number, and a symbol.",
-    "money": "Enter a valid amount with up to two decimal places."
+    "money": "Enter a valid amount with up to two decimal places.",
+    "positiveMoney": "Enter an amount greater than zero."
   },
   "apiErrors": {
     "network": "Could not connect to the server.",

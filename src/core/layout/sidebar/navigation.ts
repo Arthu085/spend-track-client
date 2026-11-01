@@ -6,6 +6,7 @@ import {
   dashboardPage,
   financialSettingsPage,
   rolesPage,
+  transactionsPage,
   usersPage,
 } from '@/core/router/page-metadata';
 import type ptBR from '@/core/i18n/locales/pt-BR.json';
@@ -37,6 +38,7 @@ export const navigationSections: NavigationSection[] = [
     labelKey: 'navigationSections.finances',
     items: [
       { ...dashboardPage },
+      { ...transactionsPage },
       { ...accountsPage },
       { ...financialSettingsPage },
     ],

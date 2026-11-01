@@ -7,6 +7,7 @@ import {
   dashboardPage,
   financialSettingsPage,
   rolesPage,
+  transactionsPage,
   usersPage,
 } from '@/core/router/page-metadata';
 import {
@@ -27,6 +28,10 @@ export const homeShortcuts: HomeShortcut[] = [
   {
     ...dashboardPage,
     descriptionKey: 'home.shortcuts.dashboard',
+  },
+  {
+    ...transactionsPage,
+    descriptionKey: 'home.shortcuts.transactions',
   },
   {
     ...accountsPage,
