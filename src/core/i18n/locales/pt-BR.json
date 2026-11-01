@@ -18,7 +18,9 @@
       "users": "Cadastre, edite e desative usuários.",
       "roles": "Veja e ajuste as permissões de cada perfil.",
       "account": "Altere seu nome e e-mail e veja o seu acesso.",
-      "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil."
+      "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil.",
+      "creditCards": "Gerencie seus cartões, dias de fechamento e faturas.",
+      "creditCardPurchases": "Registre compras parceladas no cartão e estornos."
     }
   },
   "dashboard": {
@@ -43,7 +45,9 @@
       "actual": "Saldo atual",
       "actualHint": "Soma dos saldos das contas ativas.",
       "projected": "Saldo previsto",
-      "projectedHint": "Saldo esperado no fim do mês, considerando o que está planejado."
+      "projectedHint": "Saldo esperado no fim do mês, considerando o que está planejado.",
+      "available": "Saldo disponível",
+      "availableHint": "Saldo previsto menos o que ainda falta pagar nas faturas."
     },
     "accounts": {
       "title": "Saldos por conta",
@@ -75,6 +79,13 @@
       "viewAll": "Ver mês",
       "partial": "Exibindo {{shown}} de {{count}}.",
       "empty": "Nada previsto até o fim deste mês."
+    },
+    "creditCards": {
+      "title": "Faturas de cartão",
+      "manage": "Gerenciar cartões",
+      "spending": "Gastos no cartão no mês:",
+      "outstanding": "Em aberto nas faturas:",
+      "empty": "Nenhuma fatura neste mês."
     }
   },
   "month": {
@@ -121,6 +132,129 @@
       "description": "Excluir {{name}}? Prefira inativar contas que já foram usadas. A exclusão não pode ser desfeita."
     },
     "empty": "Nenhuma conta encontrada."
+  },
+  "creditCards": {
+    "title": "Cartões de crédito",
+    "default": "Padrão",
+    "empty": "Nenhum cartão encontrado.",
+    "billingDays": "Fecha no dia {{closingDay}} · vence no dia {{dueDay}}",
+    "creditBalance": "Crédito",
+    "installmentOf": "({{number}}/{{count}})",
+    "installmentsSummary": "{{count}}x de",
+    "refunded": "Estornado",
+    "paymentCanceled": "Cancelado",
+    "create": {
+      "title": "Novo cartão"
+    },
+    "edit": {
+      "title": "Editar cartão"
+    },
+    "fields": {
+      "name": "Nome",
+      "creditLimit": "Limite",
+      "closingDay": "Dia de fechamento",
+      "dueDay": "Dia de vencimento",
+      "isDefault": "Cartão padrão",
+      "billingDays": "Ciclo da fatura",
+      "outstanding": "Valor em aberto",
+      "availableLimit": "Limite disponível",
+      "status": "Status",
+      "actions": "Ações",
+      "account": "Pagar com a conta",
+      "amount": "Valor",
+      "paidOn": "Data do pagamento",
+      "date": "Data",
+      "description": "Descrição",
+      "closingDate": "Fechamento",
+      "dueDate": "Vencimento",
+      "charges": "Lançamentos",
+      "refunds": "Estornos",
+      "previousCredit": "Crédito da fatura anterior",
+      "total": "Total da fatura",
+      "paid": "Pago",
+      "referenceMonth": "Fatura",
+      "card": "Cartão",
+      "purchaseDate": "Data da compra",
+      "installmentCount": "Parcelas",
+      "category": "Categoria",
+      "notes": "Observações",
+      "refundDate": "Data do estorno",
+      "installment": "Parcela",
+      "invoice": "Fatura"
+    },
+    "hints": {
+      "billingDays": "Compras feitas no dia do fechamento ou depois entram na fatura seguinte. Alterar os dias só afeta faturas futuras.",
+      "installments": "Cada parcela entra em uma fatura consecutiva. A primeira absorve os centavos que sobrarem.",
+      "purchaseLocked": "Só a descrição, a categoria e as observações podem mudar. Para corrigir valor, data, cartão ou parcelas, exclua a compra e registre de novo."
+    },
+    "validation": {
+      "billingDay": "Informe um dia entre 1 e 31.",
+      "installments": "Informe entre 1 e 48 parcelas."
+    },
+    "actions": {
+      "toggleStatus": "Ativar ou arquivar {{name}}",
+      "invoices": "Faturas de {{name}}",
+      "edit": "Editar {{name}}",
+      "delete": "Excluir {{name}}",
+      "cancelPayment": "Cancelar pagamento de {{amount}}",
+      "viewInvoice": "Ver fatura de {{month}}",
+      "viewInvoiceOf": "Ver fatura de {{month}} do {{card}}",
+      "editPurchase": "Editar {{description}}",
+      "refund": "Estornar {{description}}",
+      "deletePurchase": "Excluir {{description}}",
+      "deleteRefund": "Excluir estorno de {{date}}"
+    },
+    "delete": {
+      "title": "Excluir cartão",
+      "description": "Excluir {{name}}? Cartões com compras não podem ser excluídos; arquive-os. A exclusão não pode ser desfeita."
+    },
+    "invoices": {
+      "title": "Faturas",
+      "titleOf": "Faturas de {{name}}",
+      "empty": "Este cartão ainda não tem faturas."
+    },
+    "invoice": {
+      "title": "Fatura {{card}} · {{month}}",
+      "creditCarried": "Um crédito de {{amount}} passa para a próxima fatura.",
+      "charges": "Lançamentos",
+      "refunds": "Estornos",
+      "payments": "Pagamentos",
+      "noCharges": "Nenhum lançamento nesta fatura.",
+      "noPayments": "Nenhum pagamento ainda."
+    },
+    "pay": {
+      "title": "Pagar fatura",
+      "outstanding": "Valor em aberto:",
+      "hint": "O pagamento sai da conta escolhida. Ele não conta como nova despesa: as compras já contam."
+    },
+    "cancelPayment": {
+      "title": "Cancelar pagamento",
+      "description": "Cancelar este pagamento? O valor volta para a conta e para o saldo da fatura. O pagamento fica no histórico.",
+      "confirm": "Cancelar pagamento"
+    },
+    "purchases": {
+      "title": "Compras no cartão",
+      "empty": "Nenhuma compra no cartão encontrada.",
+      "create": {
+        "title": "Nova compra"
+      },
+      "edit": {
+        "title": "Editar compra"
+      },
+      "delete": {
+        "title": "Excluir compra",
+        "description": "Excluir {{description}}? Todas as parcelas serão removidas. A exclusão não pode ser desfeita."
+      }
+    },
+    "refund": {
+      "title": "Estornar compra",
+      "description": "Valor estornável de {{description}}:",
+      "hint": "O estorno entra na fatura da data do estorno, mesmo que uma fatura anterior já tenha sido paga.",
+      "delete": {
+        "title": "Excluir estorno",
+        "description": "Excluir este estorno? Só estornos em faturas abertas podem ser excluídos."
+      }
+    }
   },
   "transactions": {
     "title": "Transações",
@@ -288,7 +422,9 @@
     "users": "Usuários",
     "roles": "Perfis",
     "accounts": "Contas",
-    "financialSettings": "Configurações financeiras"
+    "financialSettings": "Configurações financeiras",
+    "creditCards": "Cartões de crédito",
+    "creditCardPurchases": "Compras no cartão"
   },
   "navigationSections": {
     "general": "Geral",
@@ -500,7 +636,8 @@
     "passwordMismatch": "As senhas não coincidem.",
     "strongPassword": "Use pelo menos {{min}} caracteres, incluindo uma letra maiúscula, uma letra minúscula, um número e um símbolo.",
     "money": "Informe um valor válido com até duas casas decimais.",
-    "positiveMoney": "Informe um valor maior que zero."
+    "positiveMoney": "Informe um valor maior que zero.",
+    "nonNegativeMoney": "Informe um valor igual ou maior que zero."
   },
   "apiErrors": {
     "network": "Não foi possível conectar ao servidor.",

@@ -1,7 +1,9 @@
 import {
+  CreditCardOutlined,
   DashboardOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
+  ShoppingOutlined,
   TeamOutlined,
   TransactionOutlined,
   WalletOutlined,
@@ -34,6 +36,18 @@ export const accountsPage = {
   path: AppRoutes.ACCOUNTS,
   labelKey: 'navigation.accounts',
   icon: WalletOutlined,
+} satisfies PageMetadata;
+
+export const creditCardsPage = {
+  path: AppRoutes.CREDIT_CARDS,
+  labelKey: 'navigation.creditCards',
+  icon: CreditCardOutlined,
+} satisfies PageMetadata;
+
+export const creditCardPurchasesPage = {
+  path: AppRoutes.CREDIT_CARD_PURCHASES,
+  labelKey: 'navigation.creditCardPurchases',
+  icon: ShoppingOutlined,
 } satisfies PageMetadata;
 
 export const financialSettingsPage = {

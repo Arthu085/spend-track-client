@@ -18,7 +18,9 @@
       "users": "Create, edit, and deactivate users.",
       "roles": "Review and adjust each role's permissions.",
       "account": "Change your name and email and review your access.",
-      "changeRequests": "Approve or reject changes another administrator requested for your profile."
+      "changeRequests": "Approve or reject changes another administrator requested for your profile.",
+      "creditCards": "Manage your cards, their billing days, and invoices.",
+      "creditCardPurchases": "Record card purchases in installments and refunds."
     }
   },
   "dashboard": {
@@ -43,7 +45,9 @@
       "actual": "Current balance",
       "actualHint": "Sum of the balances of active accounts.",
       "projected": "Projected balance",
-      "projectedHint": "Expected balance at the end of the month, including what is planned."
+      "projectedHint": "Expected balance at the end of the month, including what is planned.",
+      "available": "Available balance",
+      "availableHint": "Projected balance minus what is still due on card invoices."
     },
     "accounts": {
       "title": "Balances by account",
@@ -75,6 +79,13 @@
       "viewAll": "View month",
       "partial": "Showing {{shown}} of {{count}}.",
       "empty": "Nothing planned up to the end of this month."
+    },
+    "creditCards": {
+      "title": "Credit card invoices",
+      "manage": "Manage cards",
+      "spending": "Card spending this month:",
+      "outstanding": "Due on invoices:",
+      "empty": "No invoices for this month."
     }
   },
   "month": {
@@ -121,6 +132,129 @@
       "description": "Delete {{name}}? Prefer deactivating accounts that were already used. Deleting cannot be undone."
     },
     "empty": "No accounts found."
+  },
+  "creditCards": {
+    "title": "Credit cards",
+    "default": "Default",
+    "empty": "No credit cards found.",
+    "billingDays": "Closes on day {{closingDay}} · due on day {{dueDay}}",
+    "creditBalance": "Credit",
+    "installmentOf": "({{number}}/{{count}})",
+    "installmentsSummary": "{{count}}x of",
+    "refunded": "Refunded",
+    "paymentCanceled": "Canceled",
+    "create": {
+      "title": "New credit card"
+    },
+    "edit": {
+      "title": "Edit credit card"
+    },
+    "fields": {
+      "name": "Name",
+      "creditLimit": "Credit limit",
+      "closingDay": "Closing day",
+      "dueDay": "Due day",
+      "isDefault": "Default card",
+      "billingDays": "Billing cycle",
+      "outstanding": "Amount due",
+      "availableLimit": "Available limit",
+      "status": "Status",
+      "actions": "Actions",
+      "account": "Pay from account",
+      "amount": "Amount",
+      "paidOn": "Payment date",
+      "date": "Date",
+      "description": "Description",
+      "closingDate": "Closing date",
+      "dueDate": "Due date",
+      "charges": "Charges",
+      "refunds": "Refunds",
+      "previousCredit": "Credit from previous invoice",
+      "total": "Invoice total",
+      "paid": "Paid",
+      "referenceMonth": "Invoice",
+      "card": "Card",
+      "purchaseDate": "Purchase date",
+      "installmentCount": "Installments",
+      "category": "Category",
+      "notes": "Notes",
+      "refundDate": "Refund date",
+      "installment": "Installment",
+      "invoice": "Invoice"
+    },
+    "hints": {
+      "billingDays": "Purchases made on or after the closing day go to the next invoice. Changing the days only affects future invoices.",
+      "installments": "Each installment goes to a consecutive invoice. The first one absorbs any cents left over.",
+      "purchaseLocked": "Only the description, category, and notes can change. To correct the amount, date, card, or installments, delete the purchase and record it again."
+    },
+    "validation": {
+      "billingDay": "Enter a day between 1 and 31.",
+      "installments": "Enter between 1 and 48 installments."
+    },
+    "actions": {
+      "toggleStatus": "Activate or archive {{name}}",
+      "invoices": "Invoices of {{name}}",
+      "edit": "Edit {{name}}",
+      "delete": "Delete {{name}}",
+      "cancelPayment": "Cancel payment of {{amount}}",
+      "viewInvoice": "View invoice of {{month}}",
+      "viewInvoiceOf": "View {{card}} invoice of {{month}}",
+      "editPurchase": "Edit {{description}}",
+      "refund": "Refund {{description}}",
+      "deletePurchase": "Delete {{description}}",
+      "deleteRefund": "Delete refund of {{date}}"
+    },
+    "delete": {
+      "title": "Delete credit card",
+      "description": "Delete {{name}}? Cards with purchases cannot be deleted; archive them instead. Deleting cannot be undone."
+    },
+    "invoices": {
+      "title": "Invoices",
+      "titleOf": "Invoices of {{name}}",
+      "empty": "This card has no invoices yet."
+    },
+    "invoice": {
+      "title": "{{card}} invoice · {{month}}",
+      "creditCarried": "A credit of {{amount}} carries over to the next invoice.",
+      "charges": "Charges",
+      "refunds": "Refunds",
+      "payments": "Payments",
+      "noCharges": "No charges on this invoice.",
+      "noPayments": "No payments yet."
+    },
+    "pay": {
+      "title": "Pay invoice",
+      "outstanding": "Amount due:",
+      "hint": "The payment leaves the selected account. It is not counted as a new expense: the purchases already are."
+    },
+    "cancelPayment": {
+      "title": "Cancel payment",
+      "description": "Cancel this payment? The amount returns to the account and to the invoice balance. The payment stays as history.",
+      "confirm": "Cancel payment"
+    },
+    "purchases": {
+      "title": "Card purchases",
+      "empty": "No card purchases found.",
+      "create": {
+        "title": "New purchase"
+      },
+      "edit": {
+        "title": "Edit purchase"
+      },
+      "delete": {
+        "title": "Delete purchase",
+        "description": "Delete {{description}}? This removes every installment. Deleting cannot be undone."
+      }
+    },
+    "refund": {
+      "title": "Refund purchase",
+      "description": "Refundable amount of {{description}}:",
+      "hint": "The refund is credited to the invoice of the refund date, even if an earlier invoice was already paid.",
+      "delete": {
+        "title": "Delete refund",
+        "description": "Delete this refund? Only refunds on open invoices can be deleted."
+      }
+    }
   },
   "transactions": {
     "title": "Transactions",
@@ -288,7 +422,9 @@
     "users": "Users",
     "roles": "Roles",
     "accounts": "Accounts",
-    "financialSettings": "Financial settings"
+    "financialSettings": "Financial settings",
+    "creditCards": "Credit cards",
+    "creditCardPurchases": "Card purchases"
   },
   "navigationSections": {
     "general": "General",
@@ -500,7 +636,8 @@
     "passwordMismatch": "The passwords do not match.",
     "strongPassword": "Use at least {{min}} characters, including an uppercase letter, a lowercase letter, a number, and a symbol.",
     "money": "Enter a valid amount with up to two decimal places.",
-    "positiveMoney": "Enter an amount greater than zero."
+    "positiveMoney": "Enter an amount greater than zero.",
+    "nonNegativeMoney": "Enter an amount of zero or more."
   },
   "apiErrors": {
     "network": "Could not connect to the server.",

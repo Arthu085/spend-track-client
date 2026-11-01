@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { accountTypeSchema } from '@/modules/accounts/domain/account.schema';
+import { creditCardInvoiceSchema } from '@/modules/credit-cards/domain/credit-card.schema';
 import { spendingPerspectiveSchema } from '@/modules/preferences/domain/preferences.schema';
 import {
   transactionAccountSchema,
@@ -59,17 +60,28 @@ export const dashboardUpcomingSchema = z.object({
   category: dashboardCategorySchema.nullable(),
 });
 
+export const dashboardCreditCardsSchema = z.object({
+  spending: moneySchema,
+  outstanding: moneySchema,
+  invoices: z.array(creditCardInvoiceSchema),
+});
+
 export const dashboardSchema = z.object({
   period: dashboardPeriodSchema,
   perspective: spendingPerspectiveSchema,
   perspectiveLabel: z.string(),
-  balances: z.object({ actual: moneySchema, projected: moneySchema }),
+  balances: z.object({
+    actual: moneySchema,
+    projected: moneySchema,
+    available: moneySchema,
+  }),
   accounts: z.array(dashboardAccountSchema),
   income: dashboardAmountsSchema,
   expenses: dashboardAmountsSchema,
   expensesByCategory: z.array(dashboardCategoryExpensesSchema),
   upcoming: z.array(dashboardUpcomingSchema),
   upcomingCount: z.number().int().nonnegative(),
+  creditCards: dashboardCreditCardsSchema,
 });
 
 export type PeriodTiming = z.infer<typeof periodTimingSchema>;
@@ -80,4 +92,5 @@ export type DashboardCategoryExpenses = z.infer<
   typeof dashboardCategoryExpensesSchema
 >;
 export type DashboardUpcoming = z.infer<typeof dashboardUpcomingSchema>;
+export type DashboardCreditCards = z.infer<typeof dashboardCreditCardsSchema>;
 export type Dashboard = z.infer<typeof dashboardSchema>;

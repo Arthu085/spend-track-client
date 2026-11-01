@@ -53,6 +53,30 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: AppRoutes.CREDIT_CARDS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/credit-cards/presentation/pages/credit-cards.page')
+                  ).CreditCardsPage,
+                }),
+              },
+              {
+                path: AppRoutes.CREDIT_CARD_INVOICES,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/credit-cards/presentation/pages/credit-card-invoices.page')
+                  ).CreditCardInvoicesPage,
+                }),
+              },
+              {
+                path: AppRoutes.CREDIT_CARD_PURCHASES,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/credit-cards/presentation/pages/credit-card-purchases.page')
+                  ).CreditCardPurchasesPage,
+                }),
+              },
+              {
                 path: AppRoutes.FINANCIAL_SETTINGS,
                 lazy: async () => ({
                   Component: (
