@@ -54,6 +54,8 @@ const initialValuesOf = (
       }
     : { type: 'EXPENSE', state: 'PLANNED', date: dayjs(todayDateOnly()) };
 
+const MODAL_WIDTH = 720;
+
 const editFormSchema = transactionFormSchema.omit({ state: true });
 
 export const TransactionFormModal = ({
@@ -95,6 +97,7 @@ export const TransactionFormModal = ({
       initialValues={initialValuesOf(transaction)}
       submitting={createMutation.isPending || updateMutation.isPending}
       readOnly={transaction?.state === 'CANCELED'}
+      width={MODAL_WIDTH}
       onSubmit={submit}
       onCancel={onClose}
     >

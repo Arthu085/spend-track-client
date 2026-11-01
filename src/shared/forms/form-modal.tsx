@@ -8,6 +8,7 @@ interface FormModalProps<T> {
   initialValues?: Partial<T>;
   submitting: boolean;
   readOnly?: boolean;
+  width?: number;
   onSubmit: (values: T) => void;
   onCancel: () => void;
   children: ReactNode;
@@ -19,6 +20,7 @@ export const FormModal = <T extends object>({
   initialValues,
   submitting,
   readOnly = false,
+  width,
   onSubmit,
   onCancel,
   children,
@@ -29,6 +31,7 @@ export const FormModal = <T extends object>({
     <Modal
       open={open}
       title={title}
+      width={width}
       okText={t('common.save')}
       okButtonProps={{ htmlType: 'submit' }}
       cancelText={readOnly ? t('common.close') : undefined}
