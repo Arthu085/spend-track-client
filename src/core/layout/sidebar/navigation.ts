@@ -7,6 +7,7 @@ import {
   creditCardsPage,
   dashboardPage,
   financialSettingsPage,
+  recurrencesPage,
   rolesPage,
   transactionsPage,
   usersPage,
@@ -41,6 +42,7 @@ export const navigationSections: NavigationSection[] = [
     items: [
       { ...dashboardPage },
       { ...transactionsPage },
+      { ...recurrencesPage },
       { ...accountsPage },
       { ...creditCardsPage },
       { ...creditCardPurchasesPage },

@@ -7,6 +7,7 @@ import {
 import type { ApiResponse } from '@/core/http/api-envelope';
 import { creditCardsKey } from '@/modules/credit-cards/infra/credit-cards.keys';
 import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
+import { recurrencesKey } from '@/modules/recurrences/infra/recurrences.keys';
 import { transactionsKey } from '@/modules/transactions/infra/transactions.keys';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
 import {
@@ -38,9 +39,13 @@ const useAccountMutation = <TVariables, TData>(
     onSuccess: async (response) => {
       showSuccessMessage(response);
       await Promise.all(
-        [accountsKey, dashboardKey, transactionsKey, creditCardsKey].map(
-          (queryKey) => queryClient.invalidateQueries({ queryKey }),
-        ),
+        [
+          accountsKey,
+          dashboardKey,
+          transactionsKey,
+          creditCardsKey,
+          recurrencesKey,
+        ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       );
     },
   });

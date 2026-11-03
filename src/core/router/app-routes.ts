@@ -2,6 +2,7 @@ export const AppRoutes = {
   DASHBOARD: '/',
   HOME: '/home',
   TRANSACTIONS: '/transactions',
+  RECURRENCES: '/recurrences',
   ACCOUNTS: '/accounts',
   CREDIT_CARDS: '/credit-cards',
   CREDIT_CARD_INVOICES: '/credit-cards/:uuid/invoices',

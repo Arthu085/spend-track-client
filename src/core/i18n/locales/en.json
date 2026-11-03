@@ -20,7 +20,8 @@
       "account": "Change your name and email and review your access.",
       "changeRequests": "Approve or reject changes another administrator requested for your profile.",
       "creditCards": "Manage your cards, their billing days, and invoices.",
-      "creditCardPurchases": "Record card purchases in installments and refunds."
+      "creditCardPurchases": "Record card purchases in installments and refunds.",
+      "recurrences": "Plan recurring income, expenses, and card charges and confirm each occurrence."
     }
   },
   "dashboard": {
@@ -85,7 +86,8 @@
       "manage": "Manage cards",
       "spending": "Card spending this month:",
       "outstanding": "Due on invoices:",
-      "empty": "No invoices for this month."
+      "empty": "No invoices for this month.",
+      "planned": "Planned recurring charges:"
     }
   },
   "month": {
@@ -328,7 +330,121 @@
       "title": "Delete transaction",
       "description": "Delete {{description}}? Only planned transactions can be deleted. This cannot be undone."
     },
-    "empty": "No transactions in this month."
+    "empty": "No transactions in this month.",
+    "recurring": "Recurring"
+  },
+  "recurrences": {
+    "title": "Recurrences",
+    "empty": "No recurrences found.",
+    "create": {
+      "title": "New recurrence"
+    },
+    "edit": {
+      "title": "Edit recurrence"
+    },
+    "fields": {
+      "type": "Type",
+      "description": "Description",
+      "amount": "Amount",
+      "frequency": "Frequency",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "target": "Charge to",
+      "creditCard": "Card",
+      "category": "Category",
+      "notes": "Notes",
+      "state": "Status",
+      "schedule": "Schedule",
+      "nextOccurrence": "Next occurrence",
+      "actions": "Actions",
+      "scope": "Apply to",
+      "from": "Starting on",
+      "endMode": "How to end",
+      "endFrom": "No occurrence from",
+      "endFromInvoiceMonth": "No charge from the invoice of",
+      "date": "Date"
+    },
+    "targets": {
+      "ACCOUNT": "Account",
+      "CREDIT_CARD": "Credit card"
+    },
+    "frequencies": {
+      "WEEKLY": "Weekly",
+      "MONTHLY": "Monthly",
+      "YEARLY": "Yearly"
+    },
+    "states": {
+      "ACTIVE": "Active",
+      "PAUSED": "Paused",
+      "ENDED": "Ended"
+    },
+    "scopes": {
+      "FUTURE": "Planned occurrences from a date",
+      "ALL": "Every planned occurrence"
+    },
+    "endModes": {
+      "FROM_DATE": "From a date",
+      "FROM_INVOICE_MONTH": "From an invoice",
+      "ENTIRE": "End the entire recurrence"
+    },
+    "schedule": {
+      "from": "From {{start}}",
+      "between": "{{start}} to {{end}}"
+    },
+    "hints": {
+      "planned": "Occurrences are created as planned up to 12 months ahead and never paid or received on their own. Confirm each one when it actually happens.",
+      "startDate": "Monthly and yearly occurrences keep this day, or the last day of shorter months.",
+      "endDate": "Leave empty to repeat until you end it.",
+      "cardOnlyExpense": "Only expenses can be charged to a credit card.",
+      "cardCharges": "Each charge joins an invoice only when you confirm it.",
+      "editLocked": "Changes apply to planned occurrences only; completed and canceled ones are never changed. The type, frequency, dates, and card are fixed: to change them, end this recurrence and create a new one.",
+      "endFrom": "Planned occurrences on or after this date are removed.",
+      "endFromInvoiceMonth": "Planned charges on this invoice and later ones are removed. Earlier invoices stay as they are."
+    },
+    "validation": {
+      "endBeforeStart": "Choose an end date on or after the start date."
+    },
+    "actions": {
+      "occurrences": "Occurrences of {{description}}",
+      "edit": "Edit {{description}}",
+      "pause": "Pause {{description}}",
+      "resume": "Resume {{description}}",
+      "end": "End {{description}}",
+      "confirmOccurrence": "Confirm occurrence of {{date}}",
+      "editOccurrence": "Edit occurrence of {{date}}",
+      "skipOccurrence": "Skip occurrence of {{date}}"
+    },
+    "pause": {
+      "title": "Pause recurrence",
+      "description": "Pause {{description}}? Planned occurrences from today on are removed and none are created while it is paused. Resuming creates occurrences from that day on. Completed history is kept.",
+      "confirm": "Pause"
+    },
+    "end": {
+      "title": "End recurrence",
+      "description": "Choose when {{description}} stops.",
+      "history": "Completed occurrences always stay in the history, and planned ones before the cut are kept. Ending cannot be undone."
+    },
+    "occurrences": {
+      "title": "Occurrences · {{description}}",
+      "empty": "No occurrences yet.",
+      "scheduledFor": "Scheduled for {{date}}",
+      "accountHint": "Each occurrence is a planned transaction until you confirm it.",
+      "cardHint": "Planned charges show the invoice they are expected on and join it only once confirmed."
+    },
+    "confirm": {
+      "title": "Confirm occurrence",
+      "accountDescription": "Enter the amount and the date {{description}} was actually paid or received. Balances change only after this step.",
+      "cardDescription": "Enter the amount and the purchase date of {{description}}. Confirming adds the charge to the matching invoice."
+    },
+    "editOccurrence": {
+      "title": "Edit occurrence",
+      "description": "Only this occurrence of {{description}} changes."
+    },
+    "skip": {
+      "title": "Skip occurrence",
+      "description": "Skip the occurrence of {{date}}? It stays listed as canceled and the rest of the recurrence is unchanged. This cannot be undone.",
+      "confirm": "Skip occurrence"
+    }
   },
   "transactionCategories": {
     "title": "Categories",
@@ -424,7 +540,8 @@
     "accounts": "Accounts",
     "financialSettings": "Financial settings",
     "creditCards": "Credit cards",
-    "creditCardPurchases": "Card purchases"
+    "creditCardPurchases": "Card purchases",
+    "recurrences": "Recurrences"
   },
   "navigationSections": {
     "general": "General",

@@ -4,6 +4,7 @@ import {
   EditOutlined,
   EyeOutlined,
   StopOutlined,
+  SyncOutlined,
 } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
@@ -23,22 +24,13 @@ import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import type { ListParams } from '@/shared/list/use-list-params';
 import type { transactionFiltersShape } from '../../domain/transaction-form.schemas';
-import {
-  isOverdue,
-  type Transaction,
-  type TransactionState,
-} from '../../domain/transaction.schema';
+import { isOverdue, type Transaction } from '../../domain/transaction.schema';
 import {
   useDeleteTransaction,
   useUpdateTransactionState,
 } from '../../infra/transactions.queries';
 import { TransactionAmount } from './transaction-amount';
-
-const stateColors: Record<TransactionState, string | undefined> = {
-  PLANNED: 'warning',
-  COMPLETED: 'success',
-  CANCELED: undefined,
-};
+import { TransactionStateTag } from './transaction-state-tag';
 
 interface TransactionsTableProps {
   query: UseQueryResult<PaginatedResponse<Transaction>>;
@@ -109,9 +101,14 @@ export const TransactionsTable = ({
     {
       title: t('transactions.fields.description'),
       dataIndex: 'description',
-      render: (_, { description, notes }) => (
+      render: (_, { description, notes, recurrence }) => (
         <Flex vertical>
-          {description}
+          <Space size="small" wrap>
+            {description}
+            {recurrence && (
+              <Tag icon={<SyncOutlined />}>{t('transactions.recurring')}</Tag>
+            )}
+          </Space>
           {notes && (
             <Typography.Text
               type="secondary"
@@ -152,7 +149,7 @@ export const TransactionsTable = ({
       dataIndex: 'state',
       render: (_, { state, stateLabel, completedOn }) => (
         <Flex vertical align="start">
-          <Tag color={stateColors[state]}>{stateLabel}</Tag>
+          <TransactionStateTag state={state} stateLabel={stateLabel} />
           {completedOn && (
             <Typography.Text type="secondary">
               {t('transactions.completedOnDate', {

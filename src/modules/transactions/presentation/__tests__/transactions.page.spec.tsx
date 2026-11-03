@@ -92,6 +92,7 @@ const rent: Transaction = {
   stateLabel: 'Prevista',
   completedOn: null,
   canceledAt: null,
+  recurrence: null,
   account: { uuid: nubank.uuid, name: nubank.name, status: 'ACTIVE' },
   destinationAccount: null,
   category: {
@@ -117,6 +118,10 @@ const paycheck: Transaction = {
   state: 'COMPLETED',
   stateLabel: 'Realizada',
   completedOn: '2026-10-01',
+  recurrence: {
+    uuid: '8e7a6b5c-8888-4c3e-9f1a-1a2b3c4d5e6f',
+    occurrenceDate: '2026-10-01',
+  },
   category: {
     uuid: salary.uuid,
     name: salary.name,
@@ -237,10 +242,15 @@ describe('TransactionsPage', () => {
       within(rentRow).getByText(i18n.t('transactions.overdue')),
     ).toBeInTheDocument();
     expect(
-      within(await findRow(paycheck.uuid)).queryByText(
-        i18n.t('transactions.overdue'),
-      ),
+      within(rentRow).queryByText(i18n.t('transactions.recurring')),
     ).not.toBeInTheDocument();
+    const paycheckRow = await findRow(paycheck.uuid);
+    expect(
+      within(paycheckRow).queryByText(i18n.t('transactions.overdue')),
+    ).not.toBeInTheDocument();
+    expect(
+      within(paycheckRow).getByText(i18n.t('transactions.recurring')),
+    ).toBeInTheDocument();
     expect(sent('GET /transactions')[0].params).toEqual({
       page: 1,
       limit: 20,

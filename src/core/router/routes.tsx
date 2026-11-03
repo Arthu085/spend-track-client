@@ -45,6 +45,14 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: AppRoutes.RECURRENCES,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/recurrences/presentation/pages/recurrences.page')
+                  ).RecurrencesPage,
+                }),
+              },
+              {
                 path: AppRoutes.ACCOUNTS,
                 lazy: async () => ({
                   Component: (

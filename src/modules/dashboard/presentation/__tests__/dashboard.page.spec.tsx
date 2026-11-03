@@ -154,7 +154,7 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows card invoices, what is still due, and the available balance', async () => {
+  it('shows card invoices, what is still due, planned charges, and the available balance', async () => {
     const invoice = buildCreditCardInvoice();
     renderDashboard(AppRoutes.DASHBOARD, {
       'GET /dashboard': envelope({
@@ -162,6 +162,7 @@ describe('DashboardPage', () => {
         creditCards: {
           spending: '300.00',
           outstanding: '300.00',
+          planned: '55.90',
           invoices: [invoice],
         },
       }),
@@ -179,6 +180,9 @@ describe('DashboardPage', () => {
     expect(
       within(page).getByLabelText(i18n.t('dashboard.creditCards.outstanding')),
     ).toHaveTextContent(money('300.00'));
+    expect(
+      within(page).getByLabelText(i18n.t('dashboard.creditCards.planned')),
+    ).toHaveTextContent(money('55.90'));
 
     const row = page.querySelector<HTMLElement>(
       `tr[data-row-key="${invoice.uuid}"]`,
@@ -387,6 +391,7 @@ describe('DashboardPage', () => {
       stateLabel: 'Realizada',
       completedOn: '2026-10-29',
       canceledAt: null,
+      recurrence: null,
       account,
       destinationAccount: null,
       category: {

@@ -22,6 +22,7 @@ export interface TransactionListParams extends TransactionFilters {
   limit?: number;
   from?: string;
   to?: string;
+  recurrenceUuid?: string;
 }
 
 export interface UpdateTransactionVariables extends UpdateTransactionPayload {

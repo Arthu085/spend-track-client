@@ -4,6 +4,7 @@ import {
   SafetyCertificateOutlined,
   SettingOutlined,
   ShoppingOutlined,
+  SyncOutlined,
   TeamOutlined,
   TransactionOutlined,
   WalletOutlined,
@@ -30,6 +31,12 @@ export const transactionsPage = {
   path: AppRoutes.TRANSACTIONS,
   labelKey: 'navigation.transactions',
   icon: TransactionOutlined,
+} satisfies PageMetadata;
+
+export const recurrencesPage = {
+  path: AppRoutes.RECURRENCES,
+  labelKey: 'navigation.recurrences',
+  icon: SyncOutlined,
 } satisfies PageMetadata;
 
 export const accountsPage = {

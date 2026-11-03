@@ -31,6 +31,7 @@ const transaction: Transaction = {
   stateLabel: 'Realizada',
   completedOn: '2026-10-30',
   canceledAt: null,
+  recurrence: null,
   account: { uuid: 'account-1', name: 'Nubank', status: 'INACTIVE' },
   destinationAccount: null,
   category: {
