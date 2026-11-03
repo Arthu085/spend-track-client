@@ -17,6 +17,7 @@ import { formatInvoiceMonth } from '@/modules/credit-cards/presentation/componen
 import { InvoiceStatusTag } from '@/modules/credit-cards/presentation/components/invoice-status-tag';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
+import { isPositiveMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type { DashboardCreditCards } from '../../domain/dashboard.schema';
 
@@ -103,6 +104,16 @@ export const CreditCardInvoicesCard = ({
               aria-label={t('dashboard.creditCards.outstanding')}
             />
           </Typography.Text>
+          {isPositiveMoney(creditCards.planned) && (
+            <Typography.Text>
+              {t('dashboard.creditCards.planned')}{' '}
+              <MoneyText
+                amount={creditCards.planned}
+                strong
+                aria-label={t('dashboard.creditCards.planned')}
+              />
+            </Typography.Text>
+          )}
         </Flex>
         {creditCards.invoices.length === 0 ? (
           <Empty

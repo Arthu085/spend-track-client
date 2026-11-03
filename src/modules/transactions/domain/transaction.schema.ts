@@ -25,6 +25,11 @@ export const transactionCategoryRefSchema = z.object({
   status: recordStatusSchema,
 });
 
+export const transactionRecurrenceRefSchema = z.object({
+  uuid: z.string(),
+  occurrenceDate: z.iso.date(),
+});
+
 export const transactionSchema = z.object({
   uuid: z.string(),
   type: transactionTypeSchema,
@@ -39,6 +44,7 @@ export const transactionSchema = z.object({
   account: transactionAccountSchema,
   destinationAccount: transactionAccountSchema.nullable(),
   category: transactionCategoryRefSchema.nullable(),
+  recurrence: transactionRecurrenceRefSchema.nullable(),
   notes: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),

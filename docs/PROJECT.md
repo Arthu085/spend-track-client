@@ -33,8 +33,9 @@ The `authorization` module shows each role's permissions at `/roles` and lets a 
 ability change them. The `home` module's page at `/home` links to every page the user can reach. The
 financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
 balances with month navigation and the spending perspective), the `transactions` module at
-`/transactions` (planned and completed income, expenses, and transfers), the `accounts` module at
-`/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
+`/transactions` (planned and completed income, expenses, and transfers), the `recurrences` module
+at `/recurrences` (recurring income, expenses, and card charges with their occurrences), the
+`accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
 invoices, installment purchases, refunds, and invoice payments), and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
@@ -213,8 +214,8 @@ user menu also links to the change requests page, and a dot on the user's name a
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
-shortcuts. General holds Home; Finances lists the dashboard, transactions, accounts, and financial
-settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
+shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, accounts, credit
+cards, card purchases, and financial settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
@@ -299,7 +300,7 @@ keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list 
 ### Home
 
 `/home` greets the user by name and shows a card linking to each page they can reach, declared in
-`home-shortcuts.ts`: the dashboard, transactions, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
+`home-shortcuts.ts`: the dashboard, transactions, recurrences, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
 with the same abilities as their menu entries, My account for everyone, and Change requests only for
 a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
 abilities query settles, so late permission-based entries do not move existing shortcuts. The
@@ -314,11 +315,12 @@ and available balances, and the balance of each active account, with an invitati
 none. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
 saves the preference with `PATCH /preferences` and reloads the dashboard. Account, category,
-preference, transaction, and credit card mutations invalidate the dashboard query; account and
-category mutations also invalidate the transactions and credit card queries, which show their names
-and colors. The projected balance adds every planned
+preference, transaction, credit card, and recurrence mutations invalidate the dashboard query;
+account and category mutations also invalidate the transactions, credit card, and recurrence
+queries, which show their names and colors. The projected balance adds every planned
 transaction dated up to the end of the month, overdue ones included, to the actual balance; the
-available balance subtracts what is still due on card invoices from the projected one.
+available balance subtracts what is still due on card invoices and the planned recurring card
+charges of the month from the projected one.
 
 Transaction indicators, each with its own empty state:
 
@@ -333,9 +335,11 @@ Transaction indicators, each with its own empty state:
   (in the category color) and its paid and pending amounts.
 - **Credit card invoices:** the month's card spending, what is still due on every invoice, and the
   invoices of the month plus older ones still due, with their card, due date, status, and amount
-  due. Each opens the invoice detail (see [Credit cards](#credit-cards)). The API counts card
-  spending in `expenses` and `expensesByCategory` by purchase date or by invoice month, following
-  the perspective; invoice payments are never expenses.
+  due. Each opens the invoice detail (see [Credit cards](#credit-cards)). When the month has
+  planned recurring card charges (`creditCards.planned`), the card also shows their total. The API
+  counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
+  following the perspective, and counts planned recurring card charges as pending expenses; invoice
+  payments are never expenses.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -350,8 +354,10 @@ loader while the preferences load). It is a `PaginatedTable` filtered by type, s
 (source or destination), category, and description, all kept in the URL; a malformed account or
 category UUID, or a description longer than 150 characters, in the URL is ignored. Changing the month
 returns to the first page. Rows show the date (with an overdue tag for planned items dated before today),
-description and notes, type, category, accounts (`source → destination` for transfers), state with
-its effective date, and the amount, negative for expenses.
+description and notes (with a recurring tag for occurrences of a recurrence), type, category,
+accounts (`source → destination` for transfers), state with its effective date, and the amount,
+negative for expenses. `GET /transactions` also accepts a `recurrenceUuid` filter, which the
+client types but does not expose as a page filter.
 
 - **Form:** one `FormModal` creates and edits. The type (income, expense, or transfer) is fixed after
   creation and decides the fields: income and expenses need a category of the same kind, transfers
@@ -370,8 +376,11 @@ its effective date, and the amount, negative for expenses.
   sends `PUT /transactions/:uuid/state`. Cancel (planned or completed) asks for confirmation in a
   warning dialog; canceled transactions stay as history. Delete is offered only for planned ones,
   after confirmation.
+- **Recurring occurrences:** a planned transaction generated by a recurrence carries
+  `recurrence: { uuid, occurrenceDate }`; it is completed, edited, or canceled here with the same
+  rules as any planned transaction (see [Recurrences](#recurrences)).
 - **Freshness:** every transaction mutation shows the API message and invalidates the transactions,
-  dashboard, and accounts queries, because balances change.
+  dashboard, accounts, and recurrence queries, because balances and occurrences change.
 
 ### Accounts
 
@@ -413,7 +422,44 @@ purchases are not transactions: they never change an account balance until an in
   refundable and defaults to the refundable amount and today's date. A refund on an already paid
   invoice becomes credit on the next invoice.
 - **Freshness:** every credit card mutation shows the API message and invalidates the credit card,
-  dashboard, and accounts queries, because payments change account balances.
+  dashboard, accounts, and recurrence queries, because payments change account balances and
+  recurrences show card names.
+
+### Recurrences
+
+The `recurrences` module mirrors the API's recurrence templates and the planned occurrences they
+generate up to 12 months ahead. Occurrences are never paid or received on their own: each one is
+confirmed when it happens, and completed or canceled occurrences are history that no recurrence
+operation changes.
+
+- **List:** `/recurrences` is a `PaginatedTable` filtered by state (active, paused, ended), type,
+  and description, all kept in the URL, with the type, frequency and start and end dates, next
+  occurrence, target (account or card), category, state, and amount, negative for expenses.
+- **Create:** the form takes the type (income or expense), the target (an account, or a card for
+  expenses only), description, amount, frequency (weekly, monthly, yearly), start date, optional
+  end date (on or after the start date), a category of the same kind, and notes. Selects offer
+  active records only, and the default active account and card are preselected, like the
+  transaction and purchase forms. Only the chosen target is sent.
+- **Edit:** the type, frequency, dates, and card are fixed (end the recurrence and create a new
+  one to change them), so the edit form exposes only the description, amount, category, account
+  (account recurrences), and notes. It asks for the scope: planned occurrences from a date (today
+  by default) or every planned occurrence. References are sent only when they changed.
+- **Pause and resume:** pausing asks for confirmation first, because the API removes planned
+  occurrences from today on and generates none while paused; resuming generates again from today.
+- **End:** an account recurrence ends from a date (today by default) and a card recurrence from an
+  invoice month (`fromInvoiceMonth`, the first day of the chosen month, the current one by
+  default), or either ends entirely. The modal says that completed history and earlier planned
+  occurrences are kept. Ended recurrences only show their occurrences.
+- **Occurrences:** a modal lists one recurrence's occurrences, oldest first, with locally kept
+  pagination, the current and scheduled dates, an overdue tag, the invoice month of card charges,
+  the state with its completion date, and the amount. Planned ones can be confirmed (amount and
+  date prefilled and editable: today as the payment or receipt date for account occurrences, the
+  occurrence date as the purchase date for card charges, which confirming turns into a
+  single-installment card purchase on the matching invoice), edited (amount and date of that
+  occurrence only), or skipped after a warning, which keeps them listed as canceled.
+- **Freshness:** every recurrence mutation shows the API message and invalidates the recurrence,
+  transactions, credit card, dashboard, and accounts queries, because occurrences are planned
+  transactions or card charges, and confirming changes balances and invoices.
 
 ### Financial settings
 

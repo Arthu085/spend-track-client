@@ -20,7 +20,8 @@
       "account": "Altere seu nome e e-mail e veja o seu acesso.",
       "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil.",
       "creditCards": "Gerencie seus cartões, dias de fechamento e faturas.",
-      "creditCardPurchases": "Registre compras parceladas no cartão e estornos."
+      "creditCardPurchases": "Registre compras parceladas no cartão e estornos.",
+      "recurrences": "Planeje receitas, despesas e cobranças no cartão recorrentes e confirme cada ocorrência."
     }
   },
   "dashboard": {
@@ -85,7 +86,8 @@
       "manage": "Gerenciar cartões",
       "spending": "Gastos no cartão no mês:",
       "outstanding": "Em aberto nas faturas:",
-      "empty": "Nenhuma fatura neste mês."
+      "empty": "Nenhuma fatura neste mês.",
+      "planned": "Cobranças recorrentes previstas:"
     }
   },
   "month": {
@@ -328,7 +330,121 @@
       "title": "Excluir transação",
       "description": "Excluir {{description}}? Apenas transações previstas podem ser excluídas. A exclusão não pode ser desfeita."
     },
-    "empty": "Nenhuma transação neste mês."
+    "empty": "Nenhuma transação neste mês.",
+    "recurring": "Recorrente"
+  },
+  "recurrences": {
+    "title": "Recorrências",
+    "empty": "Nenhuma recorrência encontrada.",
+    "create": {
+      "title": "Nova recorrência"
+    },
+    "edit": {
+      "title": "Editar recorrência"
+    },
+    "fields": {
+      "type": "Tipo",
+      "description": "Descrição",
+      "amount": "Valor",
+      "frequency": "Frequência",
+      "startDate": "Data de início",
+      "endDate": "Data de término",
+      "target": "Lançar em",
+      "creditCard": "Cartão",
+      "category": "Categoria",
+      "notes": "Observações",
+      "state": "Situação",
+      "schedule": "Agenda",
+      "nextOccurrence": "Próxima ocorrência",
+      "actions": "Ações",
+      "scope": "Aplicar a",
+      "from": "A partir de",
+      "endMode": "Como encerrar",
+      "endFrom": "Nenhuma ocorrência a partir de",
+      "endFromInvoiceMonth": "Nenhuma cobrança a partir da fatura de",
+      "date": "Data"
+    },
+    "targets": {
+      "ACCOUNT": "Conta",
+      "CREDIT_CARD": "Cartão de crédito"
+    },
+    "frequencies": {
+      "WEEKLY": "Semanal",
+      "MONTHLY": "Mensal",
+      "YEARLY": "Anual"
+    },
+    "states": {
+      "ACTIVE": "Ativa",
+      "PAUSED": "Pausada",
+      "ENDED": "Encerrada"
+    },
+    "scopes": {
+      "FUTURE": "Ocorrências previstas a partir de uma data",
+      "ALL": "Todas as ocorrências previstas"
+    },
+    "endModes": {
+      "FROM_DATE": "A partir de uma data",
+      "FROM_INVOICE_MONTH": "A partir de uma fatura",
+      "ENTIRE": "Encerrar toda a recorrência"
+    },
+    "schedule": {
+      "from": "Desde {{start}}",
+      "between": "{{start}} a {{end}}"
+    },
+    "hints": {
+      "planned": "As ocorrências são criadas como previstas até 12 meses à frente e nunca são pagas ou recebidas sozinhas. Confirme cada uma quando ela acontecer.",
+      "startDate": "Ocorrências mensais e anuais mantêm este dia, ou o último dia dos meses mais curtos.",
+      "endDate": "Deixe em branco para repetir até você encerrar.",
+      "cardOnlyExpense": "Só despesas podem ser lançadas no cartão de crédito.",
+      "cardCharges": "Cada cobrança só entra em uma fatura quando você a confirma.",
+      "editLocked": "As alterações valem só para ocorrências previstas; as realizadas e canceladas nunca mudam. Tipo, frequência, datas e cartão são fixos: para mudá-los, encerre esta recorrência e crie uma nova.",
+      "endFrom": "Ocorrências previstas nesta data ou depois são removidas.",
+      "endFromInvoiceMonth": "Cobranças previstas nesta fatura e nas seguintes são removidas. As faturas anteriores continuam como estão."
+    },
+    "validation": {
+      "endBeforeStart": "Escolha uma data de término igual ou posterior à data de início."
+    },
+    "actions": {
+      "occurrences": "Ocorrências de {{description}}",
+      "edit": "Editar {{description}}",
+      "pause": "Pausar {{description}}",
+      "resume": "Retomar {{description}}",
+      "end": "Encerrar {{description}}",
+      "confirmOccurrence": "Confirmar ocorrência de {{date}}",
+      "editOccurrence": "Editar ocorrência de {{date}}",
+      "skipOccurrence": "Pular ocorrência de {{date}}"
+    },
+    "pause": {
+      "title": "Pausar recorrência",
+      "description": "Pausar {{description}}? As ocorrências previstas a partir de hoje são removidas e nenhuma é criada enquanto estiver pausada. Ao retomar, as ocorrências voltam a ser criadas a partir daquele dia. O histórico realizado é mantido.",
+      "confirm": "Pausar"
+    },
+    "end": {
+      "title": "Encerrar recorrência",
+      "description": "Escolha quando {{description}} termina.",
+      "history": "As ocorrências realizadas sempre ficam no histórico, e as previstas antes do corte são mantidas. O encerramento não pode ser desfeito."
+    },
+    "occurrences": {
+      "title": "Ocorrências · {{description}}",
+      "empty": "Nenhuma ocorrência ainda.",
+      "scheduledFor": "Agendada para {{date}}",
+      "accountHint": "Cada ocorrência é uma transação prevista até você confirmá-la.",
+      "cardHint": "As cobranças previstas mostram a fatura em que devem entrar e só entram nela depois de confirmadas."
+    },
+    "confirm": {
+      "title": "Confirmar ocorrência",
+      "accountDescription": "Informe o valor e a data em que {{description}} foi efetivamente pago ou recebido. Os saldos só mudam depois desta etapa.",
+      "cardDescription": "Informe o valor e a data da compra de {{description}}. Ao confirmar, a cobrança entra na fatura correspondente."
+    },
+    "editOccurrence": {
+      "title": "Editar ocorrência",
+      "description": "Só esta ocorrência de {{description}} muda."
+    },
+    "skip": {
+      "title": "Pular ocorrência",
+      "description": "Pular a ocorrência de {{date}}? Ela fica listada como cancelada e o restante da recorrência não muda. Esta ação não pode ser desfeita.",
+      "confirm": "Pular ocorrência"
+    }
   },
   "transactionCategories": {
     "title": "Categorias",
@@ -424,7 +540,8 @@
     "accounts": "Contas",
     "financialSettings": "Configurações financeiras",
     "creditCards": "Cartões de crédito",
-    "creditCardPurchases": "Compras no cartão"
+    "creditCardPurchases": "Compras no cartão",
+    "recurrences": "Recorrências"
   },
   "navigationSections": {
     "general": "Geral",

@@ -63,6 +63,7 @@ export const dashboardUpcomingSchema = z.object({
 export const dashboardCreditCardsSchema = z.object({
   spending: moneySchema,
   outstanding: moneySchema,
+  planned: moneySchema,
   invoices: z.array(creditCardInvoiceSchema),
 });
 

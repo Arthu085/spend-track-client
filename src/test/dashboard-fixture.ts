@@ -22,7 +22,12 @@ export const buildDashboard = (
   expensesByCategory: [],
   upcoming: [],
   upcomingCount: 0,
-  creditCards: { spending: '0.00', outstanding: '0.00', invoices: [] },
+  creditCards: {
+    spending: '0.00',
+    outstanding: '0.00',
+    planned: '0.00',
+    invoices: [],
+  },
   ...overrides,
 });
 

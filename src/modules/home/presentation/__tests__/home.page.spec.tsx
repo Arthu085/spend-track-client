@@ -139,6 +139,10 @@ describe('HomePage', () => {
       'href',
       AppRoutes.TRANSACTIONS,
     );
+    expect(await findShortcut('navigation.recurrences')).toHaveAttribute(
+      'href',
+      AppRoutes.RECURRENCES,
+    );
     expect(await findShortcut('navigation.accounts')).toHaveAttribute(
       'href',
       AppRoutes.ACCOUNTS,
