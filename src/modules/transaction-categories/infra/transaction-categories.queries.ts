@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import type { ApiResponse } from '@/core/http/api-envelope';
+import { budgetsKey } from '@/modules/budgets/infra/budgets.keys';
 import { creditCardsKey } from '@/modules/credit-cards/infra/credit-cards.keys';
 import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
 import { recurrencesKey } from '@/modules/recurrences/infra/recurrences.keys';
@@ -47,6 +48,7 @@ const useTransactionCategoryMutation = <TVariables, TData>(
           transactionsKey,
           creditCardsKey,
           recurrencesKey,
+          budgetsKey,
         ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       );
     },

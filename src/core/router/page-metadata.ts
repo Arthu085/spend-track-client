@@ -1,6 +1,7 @@
 import {
   CreditCardOutlined,
   DashboardOutlined,
+  FundOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   ShoppingOutlined,
@@ -37,6 +38,12 @@ export const recurrencesPage = {
   path: AppRoutes.RECURRENCES,
   labelKey: 'navigation.recurrences',
   icon: SyncOutlined,
+} satisfies PageMetadata;
+
+export const budgetsPage = {
+  path: AppRoutes.BUDGETS,
+  labelKey: 'navigation.budgets',
+  icon: FundOutlined,
 } satisfies PageMetadata;
 
 export const accountsPage = {

@@ -3,6 +3,7 @@ export const AppRoutes = {
   HOME: '/home',
   TRANSACTIONS: '/transactions',
   RECURRENCES: '/recurrences',
+  BUDGETS: '/budgets',
   ACCOUNTS: '/accounts',
   CREDIT_CARDS: '/credit-cards',
   CREDIT_CARD_INVOICES: '/credit-cards/:uuid/invoices',

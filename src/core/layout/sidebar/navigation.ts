@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { AppRoutes } from '@/core/router/app-routes';
 import {
   accountsPage,
+  budgetsPage,
   creditCardPurchasesPage,
   creditCardsPage,
   dashboardPage,
@@ -43,6 +44,7 @@ export const navigationSections: NavigationSection[] = [
       { ...dashboardPage },
       { ...transactionsPage },
       { ...recurrencesPage },
+      { ...budgetsPage },
       { ...accountsPage },
       { ...creditCardsPage },
       { ...creditCardPurchasesPage },

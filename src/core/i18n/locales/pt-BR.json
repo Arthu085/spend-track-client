@@ -21,7 +21,8 @@
       "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil.",
       "creditCards": "Gerencie seus cartões, dias de fechamento e faturas.",
       "creditCardPurchases": "Registre compras parceladas no cartão e estornos.",
-      "recurrences": "Planeje receitas, despesas e cobranças no cartão recorrentes e confirme cada ocorrência."
+      "recurrences": "Planeje receitas, despesas e cobranças no cartão recorrentes e confirme cada ocorrência.",
+      "budgets": "Defina limites mensais de gastos e acompanhe quanto pode gastar por dia."
     }
   },
   "dashboard": {
@@ -88,6 +89,25 @@
       "outstanding": "Em aberto nas faturas:",
       "empty": "Nenhuma fatura neste mês.",
       "planned": "Cobranças recorrentes previstas:"
+    },
+    "budget": {
+      "title": "Orçamento e orientação de gastos",
+      "manage": "Gerenciar orçamento",
+      "overall": "Limite geral",
+      "spentOf": "{{spent}} de {{limit}}",
+      "remaining": "Restam {{amount}}",
+      "overspent": "Excedido em {{amount}}",
+      "empty": "Nenhum orçamento para este mês.",
+      "neverBlocks": "Orçamentos são apenas orientação: transações acima do limite continuam sendo salvas.",
+      "guidance": {
+        "BUDGET": "Restante do orçamento",
+        "BUDGETHint": "Limite geral menos as despesas pagas e planejadas do mês.",
+        "BALANCE": "Livre para gastar",
+        "BALANCEHint": "Saldo disponível, pois o mês não tem limite geral.",
+        "daily": "Valor diário",
+        "dailyHint": "Informativo: o restante dividido pelos dias que faltam.",
+        "noDaysLeft": "Não restam dias neste mês."
+      }
     }
   },
   "month": {
@@ -446,6 +466,40 @@
       "confirm": "Pular ocorrência"
     }
   },
+  "budgets": {
+    "title": "Orçamentos",
+    "description": "Defina um limite geral e limites opcionais por categoria para cada mês.",
+    "form": {
+      "title": "Orçamento de {{month}}"
+    },
+    "fields": {
+      "totalLimit": "Limite geral",
+      "categoryLimits": "Limites por categoria",
+      "category": "Categoria",
+      "limit": "Limite"
+    },
+    "hints": {
+      "totalLimit": "Opcional quando houver limites por categoria."
+    },
+    "validation": {
+      "empty": "Defina um limite geral ou pelo menos um limite por categoria."
+    },
+    "actions": {
+      "create": "Criar orçamento",
+      "edit": "Editar orçamento",
+      "delete": "Excluir orçamento",
+      "copyPrevious": "Copiar mês anterior",
+      "addCategoryLimit": "Adicionar limite por categoria",
+      "removeCategoryLimit": "Remover limite por categoria"
+    },
+    "copy": {
+      "empty": "{{month}} não tem orçamento para copiar."
+    },
+    "delete": {
+      "title": "Excluir o orçamento de {{month}}?",
+      "content": "Os limites deste mês serão removidos. As transações não são alteradas."
+    }
+  },
   "transactionCategories": {
     "title": "Categorias",
     "create": {
@@ -541,7 +595,8 @@
     "financialSettings": "Configurações financeiras",
     "creditCards": "Cartões de crédito",
     "creditCardPurchases": "Compras no cartão",
-    "recurrences": "Recorrências"
+    "recurrences": "Recorrências",
+    "budgets": "Orçamentos"
   },
   "navigationSections": {
     "general": "Geral",

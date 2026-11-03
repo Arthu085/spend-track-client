@@ -28,6 +28,12 @@ export const buildDashboard = (
     planned: '0.00',
     invoices: [],
   },
+  budget: null,
+  spendingGuidance: {
+    basis: 'BALANCE',
+    remaining: '0.00',
+    dailyAllowance: '0.00',
+  },
   ...overrides,
 });
 
