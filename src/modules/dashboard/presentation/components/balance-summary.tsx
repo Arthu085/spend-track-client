@@ -23,12 +23,18 @@ export const BalanceSummary = ({ balances }: BalanceSummaryProps) => {
       hint: t('dashboard.balances.projectedHint'),
       amount: balances.projected,
     },
+    {
+      key: 'available',
+      label: t('dashboard.balances.available'),
+      hint: t('dashboard.balances.availableHint'),
+      amount: balances.available,
+    },
   ];
 
   return (
     <Row gutter={[16, 16]}>
       {items.map(({ key, label, hint, amount }) => (
-        <Col key={key} xs={24} md={12}>
+        <Col key={key} xs={24} md={8}>
           <Card>
             <Typography.Text type="secondary">{label}</Typography.Text>
             <Typography.Title level={3} style={{ margin: '4px 0' }}>

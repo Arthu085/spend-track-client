@@ -15,13 +15,14 @@ export const buildDashboard = (
   },
   perspective: 'PURCHASE_DATE',
   perspectiveLabel: 'Data da compra',
-  balances: { actual: '0.00', projected: '0.00' },
+  balances: { actual: '0.00', projected: '0.00', available: '0.00' },
   accounts: [],
   income: { total: '0.00', completed: '0.00', pending: '0.00' },
   expenses: { total: '0.00', completed: '0.00', pending: '0.00' },
   expensesByCategory: [],
   upcoming: [],
   upcomingCount: 0,
+  creditCards: { spending: '0.00', outstanding: '0.00', invoices: [] },
   ...overrides,
 });
 

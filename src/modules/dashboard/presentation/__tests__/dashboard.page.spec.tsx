@@ -7,6 +7,10 @@ import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import type { Preferences } from '@/modules/preferences/domain/preferences.schema';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
+import {
+  buildCreditCardInvoice,
+  buildCreditCardInvoiceDetail,
+} from '@/test/credit-card-fixture';
 import { buildDashboard } from '@/test/dashboard-fixture';
 import { findDialog } from '@/test/find-dialog';
 import {
@@ -37,7 +41,7 @@ const sessionUser: UserDetail = {
 };
 
 const withAccounts = buildDashboard({
-  balances: { actual: '1000.30', projected: '1000.30' },
+  balances: { actual: '1000.30', projected: '1000.30', available: '700.30' },
   accounts: [
     {
       uuid: '1b0f7d6e-1111-4c3e-9f1a-1a2b3c4d5e6f',
@@ -148,6 +152,51 @@ describe('DashboardPage', () => {
     expect(
       within(page).getByText(i18n.t('accounts.default')),
     ).toBeInTheDocument();
+  });
+
+  it('shows card invoices, what is still due, and the available balance', async () => {
+    const invoice = buildCreditCardInvoice();
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        creditCards: {
+          spending: '300.00',
+          outstanding: '300.00',
+          invoices: [invoice],
+        },
+      }),
+      [`GET /credit-card-invoices/${invoice.uuid}`]: envelope(
+        buildCreditCardInvoiceDetail(),
+      ),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByLabelText(
+        i18n.t('dashboard.balances.available'),
+      ),
+    ).toHaveTextContent(money('700.30'));
+    expect(
+      within(page).getByLabelText(i18n.t('dashboard.creditCards.outstanding')),
+    ).toHaveTextContent(money('300.00'));
+
+    const row = page.querySelector<HTMLElement>(
+      `tr[data-row-key="${invoice.uuid}"]`,
+    );
+    expect(row).not.toBeNull();
+    expect(within(row!).getByText('Aberta')).toBeInTheDocument();
+
+    fireEvent.click(
+      within(row!).getByRole('button', {
+        name: i18n.t('creditCards.actions.viewInvoiceOf', {
+          card: 'Visa',
+          month: formatMonthLabel({ year: 2026, month: 11 }, i18n.language),
+        }),
+      }),
+    );
+
+    const dialog = await findDialog(i18n.t('creditCards.invoice.charges'));
+    expect(within(dialog).getByText(/Tênis/)).toBeInTheDocument();
   });
 
   it('moves between months through the URL, including future months', async () => {

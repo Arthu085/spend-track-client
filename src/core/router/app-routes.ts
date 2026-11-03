@@ -3,6 +3,9 @@ export const AppRoutes = {
   HOME: '/home',
   TRANSACTIONS: '/transactions',
   ACCOUNTS: '/accounts',
+  CREDIT_CARDS: '/credit-cards',
+  CREDIT_CARD_INVOICES: '/credit-cards/:uuid/invoices',
+  CREDIT_CARD_PURCHASES: '/credit-card-purchases',
   FINANCIAL_SETTINGS: '/settings',
   USERS: '/users',
   ROLES: '/roles',
@@ -15,3 +18,6 @@ export const AppRoutes = {
   RESEND_CONFIRMATION: '/resend-confirmation',
   NOT_FOUND: '*',
 } as const;
+
+export const creditCardInvoicesPath = (cardUuid: string) =>
+  AppRoutes.CREDIT_CARD_INVOICES.replace(':uuid', encodeURIComponent(cardUuid));

@@ -26,6 +26,7 @@ import { useDashboard } from '../../infra/dashboard.queries';
 import { AccountBalancesCard } from '../components/account-balances.card';
 import { BalanceSummary } from '../components/balance-summary';
 import { CashFlowSummary } from '../components/cash-flow-summary';
+import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
 import { ExpensesByCategoryCard } from '../components/expenses-by-category.card';
 import { PeriodNavigator } from '../components/period-navigator';
 import { PerspectiveSwitch } from '../components/perspective-switch';
@@ -103,6 +104,7 @@ export const DashboardPage = () => {
               />
             </Col>
           </Row>
+          <CreditCardInvoicesCard creditCards={dashboard.creditCards} />
           <AccountBalancesCard accounts={dashboard.accounts} />
         </>
       )}

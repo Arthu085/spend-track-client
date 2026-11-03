@@ -34,7 +34,8 @@ ability change them. The `home` module's page at `/home` links to every page the
 financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
 balances with month navigation and the spending perspective), the `transactions` module at
 `/transactions` (planned and completed income, expenses, and transfers), the `accounts` module at
-`/accounts`, and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
+`/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
+invoices, installment purchases, refunds, and invoice payments), and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
 
@@ -298,7 +299,7 @@ keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list 
 ### Home
 
 `/home` greets the user by name and shows a card linking to each page they can reach, declared in
-`home-shortcuts.ts`: the dashboard, transactions, accounts, and financial settings for everyone, Users and Roles
+`home-shortcuts.ts`: the dashboard, transactions, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
 with the same abilities as their menu entries, My account for everyone, and Change requests only for
 a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
 abilities query settles, so late permission-based entries do not move existing shortcuts. The
@@ -308,14 +309,16 @@ not-found and forbidden pages link back to it.
 
 `/` is where sign-in lands unless the guards remembered another page (see
 [Authentication](#authentication)). It greets the user and reads `GET /dashboard` for one month:
-the period (with its timing and remaining days), the spending perspective, the actual and projected
-balances, and the balance of each active account, with an invitation to add an account when there is
+the period (with its timing and remaining days), the spending perspective, the actual, projected,
+and available balances, and the balance of each active account, with an invitation to add an account when there is
 none. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
 saves the preference with `PATCH /preferences` and reloads the dashboard. Account, category,
-preference, and transaction mutations invalidate the dashboard query; account and category mutations
-also invalidate the transactions queries, which show their names and colors. The projected balance adds every planned
-transaction dated up to the end of the month, overdue ones included, to the actual balance.
+preference, transaction, and credit card mutations invalidate the dashboard query; account and
+category mutations also invalidate the transactions and credit card queries, which show their names
+and colors. The projected balance adds every planned
+transaction dated up to the end of the month, overdue ones included, to the actual balance; the
+available balance subtracts what is still due on card invoices from the projected one.
 
 Transaction indicators, each with its own empty state:
 
@@ -328,6 +331,11 @@ Transaction indicators, each with its own empty state:
   links to the month on the transactions page.
 - **Expenses by category:** each category's total with a bar for its share of the month's expenses
   (in the category color) and its paid and pending amounts.
+- **Credit card invoices:** the month's card spending, what is still due on every invoice, and the
+  invoices of the month plus older ones still due, with their card, due date, status, and amount
+  due. Each opens the invoice detail (see [Credit cards](#credit-cards)). The API counts card
+  spending in `expenses` and `expensesByCategory` by purchase date or by invoice month, following
+  the perspective; invoice payments are never expenses.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -373,8 +381,39 @@ filtered by status through `ListFiltersForm` with `RecordStatusSelect` (active b
 the last row of a page returns to the previous page. A form modal creates and edits
 accounts; marking one as default clears the previous default on the API. The status switch
 deactivates or reactivates an account (deactivating also clears its default flag), and delete asks
-for confirmation. The API refuses to delete an account that any transaction uses (`409`, with a
-message suggesting deactivation instead), which opens the error dialog with that message.
+for confirmation. The API refuses to delete an account that any transaction or card invoice payment
+uses (`409`, with a message suggesting deactivation instead), which opens the error dialog with that
+message.
+
+### Credit cards
+
+The `credit-cards` module mirrors the API's cards, invoices, purchases, refunds, and payments. Card
+purchases are not transactions: they never change an account balance until an invoice is paid.
+
+- **Cards:** `/credit-cards` is a `PaginatedTable` filtered by status (active by default) with the
+  billing cycle (closing and due days), limit, amount due, available limit, and any credit carried
+  over. A form modal creates and edits cards; marking one as default clears the previous default on
+  the API. The status switch archives or reactivates a card (archived cards keep their history and
+  can still be paid but take no new purchases), and delete asks for confirmation; the API refuses
+  to delete a card with purchases (`409`).
+- **Invoices:** `/credit-cards/:uuid/invoices` lists a card's invoices, newest first, with the
+  reference month, closing and due dates, total, paid and due amounts, and status (open, closed,
+  overdue, or paid). The invoice detail modal shows the totals (including credit from the previous
+  invoice and credit carried to the next), the charges with their installment number, refunds, and
+  payments. **Pay invoice** asks for an active account (the default one first), the amount (the
+  amount due by default; partial payments are allowed, and the API rejects more than the amount
+  due), and the date. A payment can be canceled after confirmation; it stays listed as canceled.
+- **Purchases:** `/credit-card-purchases` lists the purchases of one month by purchase date, with
+  the month in the URL like the transactions page, filtered by card, category, and description.
+  Each row expands to its installments (date, invoice month, amount) and refunds. The form creates
+  a purchase on an active card (the default one first) with an expense category, amount, date, and
+  1–48 installments; the API splits the amount and puts each installment on a consecutive invoice.
+  Editing changes only the description, category, and notes, as the API enforces. Delete is offered
+  only while the API marks the purchase `deletable`; refund is offered while something is still
+  refundable and defaults to the refundable amount and today's date. A refund on an already paid
+  invoice becomes credit on the next invoice.
+- **Freshness:** every credit card mutation shows the API message and invalidates the credit card,
+  dashboard, and accounts queries, because payments change account balances.
 
 ### Financial settings
 

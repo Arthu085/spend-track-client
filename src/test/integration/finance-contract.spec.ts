@@ -17,6 +17,16 @@ import {
   updateTransactionCategory,
   updateTransactionCategoryStatus,
 } from '@/modules/transaction-categories/infra/transaction-categories.api';
+import {
+  cancelCreditCardPayment,
+  createCreditCard,
+  createCreditCardPurchase,
+  createCreditCardRefund,
+  fetchCreditCardInvoice,
+  fetchCreditCardInvoices,
+  fetchCreditCardPurchases,
+  payCreditCardInvoice,
+} from '@/modules/credit-cards/infra/credit-cards.api';
 import { fetchDashboard } from '@/modules/dashboard/infra/dashboard.api';
 import {
   createTransaction,
@@ -309,5 +319,115 @@ describe('real backend finance contracts', () => {
     for (const { uuid } of [checking.data, savings.data]) {
       await updateAccountStatus({ uuid, status: 'INACTIVE' });
     }
+  });
+  it('records card purchases on invoices and pays them from an account', async () => {
+    const checking = await createAccount({
+      name: 'Contract card payer',
+      type: 'CHECKING',
+      openingBalance: '1000.00',
+      openingBalanceDate: '2031-01-01',
+      isDefault: false,
+    });
+    const expenseCategory = (
+      await fetchTransactionCategories({ kind: 'EXPENSE', limit: 1 })
+    ).data[0];
+    const card = await createCreditCard({
+      name: 'Contract card',
+      creditLimit: '5000.00',
+      closingDay: 5,
+      dueDay: 12,
+      isDefault: false,
+    });
+
+    const purchase = await createCreditCardPurchase({
+      cardUuid: card.data.uuid,
+      categoryUuid: expenseCategory.uuid,
+      description: 'Contract shoes',
+      amount: '100.00',
+      purchaseDate: '2031-10-29',
+      installmentCount: 3,
+    });
+
+    expect(
+      purchase.data.installments.map(({ amount, invoice }) => [
+        amount,
+        invoice.referenceMonth,
+      ]),
+    ).toEqual([
+      ['33.34', '2031-11-01'],
+      ['33.33', '2031-12-01'],
+      ['33.33', '2032-01-01'],
+    ]);
+    expect(
+      (
+        await fetchCreditCardPurchases({
+          cardUuid: card.data.uuid,
+          from: '2031-10-01',
+          to: '2031-10-31',
+        })
+      ).meta.total,
+    ).toBe(1);
+    expect(
+      (await fetchCreditCardInvoices(card.data.uuid)).data.map(
+        ({ total }) => total,
+      ),
+    ).toEqual(['33.33', '33.33', '33.34']);
+
+    const november = purchase.data.installments[0].invoice;
+
+    expect(
+      (await fetchDashboard({ year: 2031, month: 10 })).expenses.total,
+    ).toBe('33.34');
+    await updatePreferences({ spendingPerspective: 'INVOICE_MONTH' });
+    expect(
+      (await fetchDashboard({ year: 2031, month: 11 })).creditCards,
+    ).toMatchObject({ spending: '33.34' });
+    await updatePreferences({ spendingPerspective: 'PURCHASE_DATE' });
+
+    await expectStatus(
+      payCreditCardInvoice({
+        invoiceUuid: november.uuid,
+        accountUuid: checking.data.uuid,
+        amount: '33.35',
+        paidOn: '2031-11-12',
+      }),
+      422,
+    );
+
+    const payment = await payCreditCardInvoice({
+      invoiceUuid: november.uuid,
+      accountUuid: checking.data.uuid,
+      amount: '33.34',
+      paidOn: '2031-11-12',
+    });
+    const paid = await fetchCreditCardInvoice(november.uuid);
+
+    expect(paid).toMatchObject({ outstanding: '0.00', status: 'OPEN' });
+    expect(paid.chargeEntries[0]).toMatchObject({
+      installmentNumber: 1,
+      installmentCount: 3,
+    });
+
+    const refund = await createCreditCardRefund({
+      purchaseUuid: purchase.data.uuid,
+      amount: '10.00',
+      date: '2031-11-20',
+    });
+
+    expect(refund.data.invoice.referenceMonth).toBe('2031-12-01');
+    expect(
+      (
+        await cancelCreditCardPayment({
+          invoiceUuid: november.uuid,
+          paymentUuid: payment.data.uuid,
+        })
+      ).data.canceledAt,
+    ).not.toBeNull();
+
+    await login(backend.admin);
+    await expectStatus(fetchCreditCardInvoice(november.uuid), 404);
+
+    await login(backend.user);
+    await updateAccountStatus({ uuid: checking.data.uuid, status: 'INACTIVE' });
   });
 });
