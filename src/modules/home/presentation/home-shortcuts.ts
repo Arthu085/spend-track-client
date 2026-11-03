@@ -4,6 +4,7 @@ import type { ComponentType } from 'react';
 import { AppRoutes } from '@/core/router/app-routes';
 import {
   accountsPage,
+  budgetsPage,
   creditCardPurchasesPage,
   creditCardsPage,
   dashboardPage,
@@ -39,6 +40,10 @@ export const homeShortcuts: HomeShortcut[] = [
   {
     ...recurrencesPage,
     descriptionKey: 'home.shortcuts.recurrences',
+  },
+  {
+    ...budgetsPage,
+    descriptionKey: 'home.shortcuts.budgets',
   },
   {
     ...accountsPage,

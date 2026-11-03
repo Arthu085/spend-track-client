@@ -53,6 +53,14 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: AppRoutes.BUDGETS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/budgets/presentation/pages/budgets.page')
+                  ).BudgetsPage,
+                }),
+              },
+              {
                 path: AppRoutes.ACCOUNTS,
                 lazy: async () => ({
                   Component: (

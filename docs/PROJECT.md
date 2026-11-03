@@ -35,7 +35,7 @@ financial foundation covers the `dashboard` module at `/`, the default page afte
 balances with month navigation and the spending perspective), the `transactions` module at
 `/transactions` (planned and completed income, expenses, and transfers), the `recurrences` module
 at `/recurrences` (recurring income, expenses, and card charges with their occurrences), the
-`accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
+`budgets` module at `/budgets` (monthly overall and category limits), the `accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
 invoices, installment purchases, refunds, and invoice payments), and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
@@ -214,7 +214,7 @@ user menu also links to the change requests page, and a dot on the user's name a
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
-shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, accounts, credit
+shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, budgets, accounts, credit
 cards, card purchases, and financial settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
@@ -300,7 +300,7 @@ keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list 
 ### Home
 
 `/home` greets the user by name and shows a card linking to each page they can reach, declared in
-`home-shortcuts.ts`: the dashboard, transactions, recurrences, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
+`home-shortcuts.ts`: the dashboard, transactions, recurrences, budgets, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
 with the same abilities as their menu entries, My account for everyone, and Change requests only for
 a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
 abilities query settles, so late permission-based entries do not move existing shortcuts. The
@@ -315,9 +315,9 @@ and available balances, and the balance of each active account, with an invitati
 none. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
 saves the preference with `PATCH /preferences` and reloads the dashboard. Account, category,
-preference, transaction, credit card, and recurrence mutations invalidate the dashboard query;
+preference, transaction, credit card, recurrence, and budget mutations invalidate the dashboard query;
 account and category mutations also invalidate the transactions, credit card, and recurrence
-queries, which show their names and colors. The projected balance adds every planned
+queries (category mutations also the budget queries), which show their names and colors. The projected balance adds every planned
 transaction dated up to the end of the month, overdue ones included, to the actual balance; the
 available balance subtracts what is still due on card invoices and the planned recurring card
 charges of the month from the projected one.
@@ -340,6 +340,10 @@ Transaction indicators, each with its own empty state:
   counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
   following the perspective, and counts planned recurring card charges as pending expenses; invoice
   payments are never expenses.
+- **Budget and spending guidance:** the amount left to spend and the informational daily
+  allowance, then the month's overall limit and each category limit with its paid and pending
+  spending, what is left, and how much it is exceeded by (see [Budgets](#budgets)). It links to the
+  month on the budgets page.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -460,6 +464,29 @@ operation changes.
 - **Freshness:** every recurrence mutation shows the API message and invalidates the recurrence,
   transactions, credit card, dashboard, and accounts queries, because occurrences are planned
   transactions or card charges, and confirming changes balances and invoices.
+
+### Budgets
+
+The `budgets` module mirrors the API's monthly budgets (`GET`, `PUT`, and `DELETE
+/budgets/:year/:month`): an optional overall limit and optional limits for expense categories. Budgets
+are guidance only; the API never blocks a transaction above a limit.
+
+- **Month:** `/budgets` uses the same month navigation as the purchases page, kept in the URL
+  (`?year=2026&month=11`) and defaulting to the user's default month. Each month is independent.
+- **Progress:** the page reuses the dashboard's budget card, read from `GET /dashboard` for the month,
+  so its figures always match the dashboard: spending against each limit follows the spending
+  perspective and counts planned expenses once. `spendingGuidance.remaining` is the overall limit
+  minus the month's expenses (or the available balance when there is no overall limit), and the daily
+  allowance divides it by the remaining days; a past month shows none.
+- **Edit:** a form modal sets the overall limit (optional when category limits exist) and a list of
+  category limits, each category at most once. Only active expense categories can be added; a
+  category already in the month's budget stays selectable after being archived. Saving replaces
+  the whole month with `PUT`.
+- **Copy previous month:** for a month without a budget, prefills the form with the previous
+  month's limits, or says that month has none.
+- **Delete:** removes the month's limits after a warning; transactions never change.
+- **Freshness:** budget mutations show the API message and invalidate the budget and dashboard
+  queries.
 
 ### Financial settings
 

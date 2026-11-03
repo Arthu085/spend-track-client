@@ -21,7 +21,8 @@
       "changeRequests": "Approve or reject changes another administrator requested for your profile.",
       "creditCards": "Manage your cards, their billing days, and invoices.",
       "creditCardPurchases": "Record card purchases in installments and refunds.",
-      "recurrences": "Plan recurring income, expenses, and card charges and confirm each occurrence."
+      "recurrences": "Plan recurring income, expenses, and card charges and confirm each occurrence.",
+      "budgets": "Set monthly spending limits and follow your daily allowance."
     }
   },
   "dashboard": {
@@ -88,6 +89,25 @@
       "outstanding": "Due on invoices:",
       "empty": "No invoices for this month.",
       "planned": "Planned recurring charges:"
+    },
+    "budget": {
+      "title": "Budget and spending guidance",
+      "manage": "Manage budget",
+      "overall": "Overall limit",
+      "spentOf": "{{spent}} of {{limit}}",
+      "remaining": "{{amount}} left",
+      "overspent": "Over by {{amount}}",
+      "empty": "No budget for this month.",
+      "neverBlocks": "Budgets are guidance only: transactions above a limit are still saved.",
+      "guidance": {
+        "BUDGET": "Left in the budget",
+        "BUDGETHint": "Overall limit minus paid and planned expenses of the month.",
+        "BALANCE": "Free to spend",
+        "BALANCEHint": "Available balance, since the month has no overall limit.",
+        "daily": "Daily allowance",
+        "dailyHint": "Informational: what is left spread over the remaining days.",
+        "noDaysLeft": "No days left in this month."
+      }
     }
   },
   "month": {
@@ -446,6 +466,40 @@
       "confirm": "Skip occurrence"
     }
   },
+  "budgets": {
+    "title": "Budgets",
+    "description": "Set an overall limit and optional category limits for each month.",
+    "form": {
+      "title": "Budget for {{month}}"
+    },
+    "fields": {
+      "totalLimit": "Overall limit",
+      "categoryLimits": "Category limits",
+      "category": "Category",
+      "limit": "Limit"
+    },
+    "hints": {
+      "totalLimit": "Optional when you set category limits."
+    },
+    "validation": {
+      "empty": "Set an overall limit or at least one category limit."
+    },
+    "actions": {
+      "create": "Create budget",
+      "edit": "Edit budget",
+      "delete": "Delete budget",
+      "copyPrevious": "Copy previous month",
+      "addCategoryLimit": "Add category limit",
+      "removeCategoryLimit": "Remove category limit"
+    },
+    "copy": {
+      "empty": "{{month}} has no budget to copy."
+    },
+    "delete": {
+      "title": "Delete the budget for {{month}}?",
+      "content": "The limits of this month are removed. Transactions are not changed."
+    }
+  },
   "transactionCategories": {
     "title": "Categories",
     "create": {
@@ -541,7 +595,8 @@
     "financialSettings": "Financial settings",
     "creditCards": "Credit cards",
     "creditCardPurchases": "Card purchases",
-    "recurrences": "Recurrences"
+    "recurrences": "Recurrences",
+    "budgets": "Budgets"
   },
   "navigationSections": {
     "general": "General",

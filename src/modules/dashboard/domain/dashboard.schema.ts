@@ -67,6 +67,29 @@ export const dashboardCreditCardsSchema = z.object({
   invoices: z.array(creditCardInvoiceSchema),
 });
 
+export const dashboardBudgetLimitSchema = dashboardAmountsSchema.extend({
+  limit: moneySchema,
+  remaining: moneySchema,
+  overspent: moneySchema,
+});
+
+export const dashboardBudgetCategorySchema = dashboardBudgetLimitSchema.extend({
+  category: dashboardCategorySchema,
+});
+
+export const dashboardBudgetSchema = z.object({
+  overall: dashboardBudgetLimitSchema.nullable(),
+  categories: z.array(dashboardBudgetCategorySchema),
+});
+
+export const spendingGuidanceBasisSchema = z.enum(['BUDGET', 'BALANCE']);
+
+export const dashboardSpendingGuidanceSchema = z.object({
+  basis: spendingGuidanceBasisSchema,
+  remaining: moneySchema,
+  dailyAllowance: moneySchema.nullable(),
+});
+
 export const dashboardSchema = z.object({
   period: dashboardPeriodSchema,
   perspective: spendingPerspectiveSchema,
@@ -83,6 +106,8 @@ export const dashboardSchema = z.object({
   upcoming: z.array(dashboardUpcomingSchema),
   upcomingCount: z.number().int().nonnegative(),
   creditCards: dashboardCreditCardsSchema,
+  budget: dashboardBudgetSchema.nullable(),
+  spendingGuidance: dashboardSpendingGuidanceSchema,
 });
 
 export type PeriodTiming = z.infer<typeof periodTimingSchema>;
@@ -94,4 +119,9 @@ export type DashboardCategoryExpenses = z.infer<
 >;
 export type DashboardUpcoming = z.infer<typeof dashboardUpcomingSchema>;
 export type DashboardCreditCards = z.infer<typeof dashboardCreditCardsSchema>;
+export type DashboardBudgetLimit = z.infer<typeof dashboardBudgetLimitSchema>;
+export type DashboardBudget = z.infer<typeof dashboardBudgetSchema>;
+export type DashboardSpendingGuidance = z.infer<
+  typeof dashboardSpendingGuidanceSchema
+>;
 export type Dashboard = z.infer<typeof dashboardSchema>;

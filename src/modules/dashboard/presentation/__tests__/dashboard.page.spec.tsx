@@ -302,6 +302,77 @@ describe('DashboardPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows the budget against the limits with the informational daily allowance', async () => {
+    const { router } = renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        budget: {
+          overall: {
+            limit: '1000.00',
+            total: '1200.00',
+            completed: '800.00',
+            pending: '400.00',
+            remaining: '0.00',
+            overspent: '200.00',
+          },
+          categories: [],
+        },
+        spendingGuidance: {
+          basis: 'BUDGET',
+          remaining: '0.00',
+          dailyAllowance: '0.00',
+        },
+      }),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByText(
+        i18n.t('dashboard.budget.overspent', { amount: money('200.00') }),
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByLabelText(i18n.t('dashboard.budget.guidance.BUDGET')),
+    ).toHaveTextContent(money('0.00'));
+    expect(
+      within(page).getByLabelText(i18n.t('dashboard.budget.guidance.daily')),
+    ).toHaveTextContent(money('0.00'));
+
+    fireEvent.click(
+      within(page).getByRole('link', {
+        name: i18n.t('dashboard.budget.manage'),
+      }),
+    );
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(AppRoutes.BUDGETS);
+    });
+    expect(router.state.location.search).toBe('?year=2026&month=10');
+  });
+
+  it('shows no daily allowance once the month is over', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        spendingGuidance: {
+          basis: 'BALANCE',
+          remaining: '700.30',
+          dailyAllowance: null,
+        },
+      }),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByText(
+        i18n.t('dashboard.budget.guidance.noDaysLeft'),
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByText(i18n.t('dashboard.budget.empty')),
+    ).toBeInTheDocument();
+  });
+
   describe('transaction indicators', () => {
     beforeEach(() => {
       vi.useFakeTimers({ toFake: ['Date'] });
