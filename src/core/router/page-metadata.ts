@@ -2,6 +2,7 @@ import {
   CreditCardOutlined,
   DashboardOutlined,
   FundOutlined,
+  RiseOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   ShoppingOutlined,
@@ -44,6 +45,12 @@ export const budgetsPage = {
   path: AppRoutes.BUDGETS,
   labelKey: 'navigation.budgets',
   icon: FundOutlined,
+} satisfies PageMetadata;
+
+export const investmentsPage = {
+  path: AppRoutes.INVESTMENTS,
+  labelKey: 'navigation.investments',
+  icon: RiseOutlined,
 } satisfies PageMetadata;
 
 export const accountsPage = {

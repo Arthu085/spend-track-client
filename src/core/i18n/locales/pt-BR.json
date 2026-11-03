@@ -22,7 +22,8 @@
       "creditCards": "Gerencie seus cartões, dias de fechamento e faturas.",
       "creditCardPurchases": "Registre compras parceladas no cartão e estornos.",
       "recurrences": "Planeje receitas, despesas e cobranças no cartão recorrentes e confirme cada ocorrência.",
-      "budgets": "Defina limites mensais de gastos e acompanhe quanto pode gastar por dia."
+      "budgets": "Defina limites mensais de gastos e acompanhe quanto pode gastar por dia.",
+      "investments": "Acompanhe reservas, metas e investimentos com aportes, resgates e atualizações de valor."
     }
   },
   "dashboard": {
@@ -108,6 +109,15 @@
         "dailyHint": "Informativo: o restante dividido pelos dias que faltam.",
         "noDaysLeft": "Não restam dias neste mês."
       }
+    },
+    "investments": {
+      "title": "Investimentos e metas",
+      "manage": "Gerenciar investimentos",
+      "totalValue": "Valor total:",
+      "contributions": "Aportado no mês:",
+      "withdrawals": "Resgatado no mês:",
+      "pending": "(+{{amount}} previsto)",
+      "empty": "Nenhum investimento, reserva ou meta ativa."
     }
   },
   "month": {
@@ -500,6 +510,93 @@
       "content": "Os limites deste mês serão removidos. As transações não são alteradas."
     }
   },
+  "investments": {
+    "title": "Investimentos",
+    "description": "Gerencie investimentos, reservas e metas. Aportes e resgates movem dinheiro entre uma conta e o investimento sem contar como receita ou despesa.",
+    "create": {
+      "title": "Novo investimento"
+    },
+    "edit": {
+      "title": "Editar investimento"
+    },
+    "fields": {
+      "name": "Nome",
+      "type": "Tipo",
+      "targetAmount": "Valor da meta",
+      "currentValue": "Valor atual",
+      "progress": "Progresso",
+      "amount": "Valor",
+      "date": "Data",
+      "state": "Situação do lançamento",
+      "newValue": "Novo valor",
+      "status": "Situação",
+      "actions": "Ações",
+      "account": "Conta",
+      "movementType": "Movimentação"
+    },
+    "types": {
+      "INVESTMENT": "Investimento",
+      "RESERVE": "Reserva",
+      "GOAL": "Meta"
+    },
+    "hints": {
+      "targetAmount": "Opcional. Deixe vazio quando não houver meta.",
+      "state": "Movimentações previstas só alteram saldos depois de confirmadas."
+    },
+    "noTarget": "Sem meta",
+    "progressOf": "Progresso de {{name}}",
+    "targetReached": "Meta de {{target}} atingida",
+    "targetRemaining": "Faltam {{remaining}} para {{target}}",
+    "movement": {
+      "title": {
+        "CONTRIBUTION": "Aportar em {{name}}",
+        "WITHDRAWAL": "Resgatar de {{name}}"
+      },
+      "hint": {
+        "CONTRIBUTION": "O valor sai da conta e entra no investimento. Não conta como despesa.",
+        "WITHDRAWAL": "O valor sai do investimento e volta para a conta. Não conta como receita."
+      },
+      "account": {
+        "CONTRIBUTION": "Conta de origem",
+        "WITHDRAWAL": "Conta de destino"
+      }
+    },
+    "valuation": {
+      "title": "Atualizar valor de {{name}}",
+      "hint": "Informe o valor de mercado atual. Só o investimento muda; nenhum saldo de conta é afetado."
+    },
+    "actions": {
+      "contribute": "Aportar em {{name}}",
+      "withdraw": "Resgatar de {{name}}",
+      "valuate": "Atualizar valor de {{name}}",
+      "history": "Histórico de {{name}}",
+      "toggleStatus": "Ativar ou inativar {{name}}",
+      "edit": "Editar {{name}}",
+      "delete": "Excluir {{name}}",
+      "confirm": "Confirmar",
+      "confirmMovement": "Confirmar {{type}}",
+      "cancel": "Cancelar movimentação",
+      "cancelMovement": "Cancelar {{type}}"
+    },
+    "delete": {
+      "title": "Excluir investimento",
+      "description": "Excluir {{name}}? Investimentos com movimentações não podem ser excluídos; inative-os."
+    },
+    "confirm": {
+      "title": "Confirmar movimentação",
+      "description": "A movimentação vai alterar os saldos da conta e do investimento."
+    },
+    "cancelMovement": {
+      "title": "Cancelar movimentação",
+      "description": "A movimentação continua no histórico, mas deixa de alterar qualquer saldo."
+    },
+    "movements": {
+      "title": "Histórico do investimento",
+      "description": "Aportes, resgates e atualizações de valor, dos mais recentes aos mais antigos.",
+      "empty": "Nenhuma movimentação registrada."
+    },
+    "empty": "Nenhum investimento encontrado."
+  },
   "transactionCategories": {
     "title": "Categorias",
     "create": {
@@ -596,7 +693,8 @@
     "creditCards": "Cartões de crédito",
     "creditCardPurchases": "Compras no cartão",
     "recurrences": "Recorrências",
-    "budgets": "Orçamentos"
+    "budgets": "Orçamentos",
+    "investments": "Investimentos"
   },
   "navigationSections": {
     "general": "Geral",

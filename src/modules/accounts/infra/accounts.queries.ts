@@ -7,6 +7,7 @@ import {
 import type { ApiResponse } from '@/core/http/api-envelope';
 import { creditCardsKey } from '@/modules/credit-cards/infra/credit-cards.keys';
 import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
+import { investmentsKey } from '@/modules/investments/infra/investments.keys';
 import { recurrencesKey } from '@/modules/recurrences/infra/recurrences.keys';
 import { transactionsKey } from '@/modules/transactions/infra/transactions.keys';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
@@ -45,6 +46,7 @@ const useAccountMutation = <TVariables, TData>(
           transactionsKey,
           creditCardsKey,
           recurrencesKey,
+          investmentsKey,
         ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       );
     },
