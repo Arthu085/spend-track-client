@@ -113,8 +113,26 @@ incompatibility fails CI on either side. The job uses the API branch with the sa
 branch when one exists, and `main` otherwise, so a coordinated contract change uses one branch name in
 both repositories.
 
-To run it locally, with Docker running and both repositories checked out, install each repository's
-dependencies and run the suite from the frontend:
+### CI credentials
+
+The job reads the API repository with its `github.token`, which is enough while that repository is
+public. If it becomes private, create a fine-grained personal access token or a GitHub App
+installation token limited to both repositories with read-only Contents access (read-only Metadata is
+implied), store it in each one as the `CROSS_REPO_TOKEN` Actions secret, and rotate it before it
+expires:
+
+```sh
+gh secret set CROSS_REPO_TOKEN --repo <owner>/<repo>
+```
+
+Missing or insufficient credentials fail the job with an explicit error rather than skip it, so a
+contract break cannot pass silently. The token is only available to the steps that read the other
+repository, never to dependency installation or test code.
+
+### Running locally
+
+With Docker running and both repositories checked out, install each repository's dependencies and run
+the suite from the frontend:
 
 ```sh
 npm ci
