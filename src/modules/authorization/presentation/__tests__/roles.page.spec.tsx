@@ -165,6 +165,9 @@ describe('RolesPage', () => {
     expect(
       screen.queryByRole('link', { name: i18n.t('navigation.roles') }),
     ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: i18n.t('common.backToDashboard') }),
+    ).toHaveAttribute('href', AppRoutes.DASHBOARD);
   });
 
   it('disables opening an inactive role', async () => {
