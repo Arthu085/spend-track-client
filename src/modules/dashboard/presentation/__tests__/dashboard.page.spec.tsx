@@ -779,6 +779,23 @@ describe('DashboardPage', () => {
       }
     });
 
+    it('links to recurrences and card purchases from the quick actions', async () => {
+      renderDashboard();
+
+      const page = await main();
+
+      expect(
+        await within(page).findByRole('link', {
+          name: new RegExp(i18n.t('navigation.recurrences')),
+        }),
+      ).toHaveAttribute('href', AppRoutes.RECURRENCES);
+      expect(
+        within(page).getByRole('link', {
+          name: new RegExp(i18n.t('navigation.creditCardPurchases')),
+        }),
+      ).toHaveAttribute('href', AppRoutes.CREDIT_CARD_PURCHASES);
+    });
+
     it('opens the transaction form from the quick action', async () => {
       renderDashboard(AppRoutes.DASHBOARD, {
         'GET /accounts': {

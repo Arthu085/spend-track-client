@@ -19,6 +19,10 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { getApiErrorMessage } from '@/core/http/api-error';
 import { AppRoutes } from '@/core/router/app-routes';
+import {
+  creditCardPurchasesPage,
+  recurrencesPage,
+} from '@/core/router/page-metadata';
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { TransactionFormModal } from '@/modules/transactions/presentation/components/transaction-form.modal';
 import { useMonthParam } from '@/shared/date/use-month-param';
@@ -34,6 +38,8 @@ import { InvestmentsCard } from '../components/investments.card';
 import { PeriodNavigator } from '../components/period-navigator';
 import { PerspectiveSwitch } from '../components/perspective-switch';
 import { UpcomingTransactionsCard } from '../components/upcoming-transactions.card';
+
+const pageShortcuts = [recurrencesPage, creditCardPurchasesPage];
 
 const budgetOfMonth = ({ year, month }: DashboardPeriod) =>
   `${AppRoutes.BUDGETS}?${new URLSearchParams({
@@ -70,6 +76,11 @@ export const DashboardPage = () => {
           <Link to={AppRoutes.TRANSACTIONS}>
             <TransactionOutlined /> {t('dashboard.actions.transactions')}
           </Link>
+          {pageShortcuts.map(({ path, labelKey, icon: Icon }) => (
+            <Link key={path} to={path}>
+              <Icon /> {t(labelKey)}
+            </Link>
+          ))}
           <Link to={AppRoutes.ACCOUNTS}>
             <WalletOutlined /> {t('dashboard.actions.accounts')}
           </Link>

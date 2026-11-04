@@ -303,13 +303,14 @@ keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list 
 `home-shortcuts.ts`: the dashboard, transactions, recurrences, budgets, investments, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
 with the same abilities as their menu entries, My account for everyone, and Change requests only for
 a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
-abilities query settles, so late permission-based entries do not move existing shortcuts. The
-not-found and forbidden pages link back to it.
+abilities query settles, so late permission-based entries do not move existing shortcuts.
 
 ### Dashboard
 
 `/` is where sign-in lands unless the guards remembered another page (see
-[Authentication](#authentication)). It greets the user and reads `GET /dashboard` for one month:
+[Authentication](#authentication)), and the not-found and forbidden pages link back to it. Its header
+adds a transaction and links to transactions, recurrences, card purchases, accounts, and financial
+settings. It greets the user and reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
 and available balances, and the balance of each active account. A user without accounts sees the
 invitation to add one right below the month, and a negative available balance shows a warning with the amount missing. Previous and next buttons move through past and future months and keep the month in the URL

@@ -1,6 +1,6 @@
 {
   "common": {
-    "backToHome": "Voltar ao início",
+    "backToDashboard": "Voltar ao painel",
     "reload": "Recarregar página",
     "save": "Salvar",
     "cancel": "Cancelar",
