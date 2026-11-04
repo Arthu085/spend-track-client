@@ -100,7 +100,7 @@ describe('real backend API contracts', () => {
   });
 
   it('refreshes an expired access cookie once and rotates refresh cookies sequentially', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 2250));
+    await new Promise((resolve) => setTimeout(resolve, 5250));
     const users = await fetchUsers({ page: 1, limit: 10 });
 
     expect(users.meta.total).toBeGreaterThanOrEqual(2);

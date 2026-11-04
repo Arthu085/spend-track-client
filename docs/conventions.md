@@ -68,8 +68,8 @@ npm run format:check && npm run lint:check && npm run typecheck && npm test && n
 - Never reach the network: stub HTTP with a custom Axios adapter on the client under test.
   `src/test/http-stub.ts` stubs routes by `METHOD /path`, and `src/test/render-route.tsx` renders
   the route tree at a path with a fresh query client.
-- The opt-in `src/test/integration/` suite is the exception: it checks real HTTP against a disposable
-  backend and is excluded from `npm test`. Setup and scope are in the
+- The `src/test/integration/` suite is the exception: it checks real HTTP against a disposable
+  backend, is excluded from `npm test`, and runs in its own CI job. Setup and scope are in the
   [README](../README.md#api-integration-tests).
 - Media queries answer for a 1280px-wide viewport. To test a narrower screen, stub
   `window.matchMedia` with `createMatchMedia(width)` from `src/test/match-media.ts`.
