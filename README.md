@@ -14,8 +14,8 @@ The related API project is [spend-track-api](https://github.com/Arthu085/spend-t
 The repositories have separate setup, configuration, and validation. The HTTP client follows the
 API contract (cookie sessions, session refresh, session-bound CSRF tokens, `Accept-Language`).
 The default tests stub HTTP, so this client builds and validates without the API running.
-The optional [API integration tests](#api-integration-tests) check real requests and response schemas
-against a disposable backend. Sign in with an API
+The [API integration tests](#api-integration-tests), which run in CI, check real requests and response
+schemas against a disposable backend. Sign in with an API
 user, such as the seeded admin from the API's `SEED_ADMIN_*` settings.
 
 ## Prerequisites
@@ -81,12 +81,18 @@ npm run format:check && npm run lint:check && npm run typecheck && npm test && n
 ```
 
 GitHub Actions runs this gate on pull requests targeting `main` and pushes to `main`, after a clean
-`npm ci` using the Node version from `.nvmrc`.
+`npm ci` using the Node version from `.nvmrc`. A separate job runs the
+[API integration tests](#api-integration-tests).
 
 ## API integration tests
 
-With Docker running and both repositories checked out, install each repository's dependencies and
-run this optional suite from the frontend:
+GitHub Actions runs this suite in its own job, here and in the API repository, so a contract
+incompatibility fails CI on either side. The job uses the API branch with the same name as the client
+branch when one exists, and `main` otherwise, so a coordinated contract change uses one branch name in
+both repositories.
+
+To run it locally, with Docker running and both repositories checked out, install each repository's
+dependencies and run the suite from the frontend:
 
 ```sh
 npm ci
