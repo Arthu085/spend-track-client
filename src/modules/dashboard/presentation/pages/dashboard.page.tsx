@@ -30,6 +30,7 @@ import { BudgetCard } from '../components/budget.card';
 import { CashFlowSummary } from '../components/cash-flow-summary';
 import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
 import { ExpensesByCategoryCard } from '../components/expenses-by-category.card';
+import { InvestmentsCard } from '../components/investments.card';
 import { PeriodNavigator } from '../components/period-navigator';
 import { PerspectiveSwitch } from '../components/perspective-switch';
 import { UpcomingTransactionsCard } from '../components/upcoming-transactions.card';
@@ -122,6 +123,7 @@ export const DashboardPage = () => {
             </Col>
           </Row>
           <CreditCardInvoicesCard creditCards={dashboard.creditCards} />
+          <InvestmentsCard investments={dashboard.investments} />
           <AccountBalancesCard accounts={dashboard.accounts} />
         </>
       )}

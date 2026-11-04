@@ -6,7 +6,7 @@ import { recordStatusSchema } from '@/shared/domain/record-status.schema';
 import { DATE_ONLY_FORMAT } from '@/shared/date/date-only';
 import type { ListFilters } from '@/shared/list/use-list-params';
 import {
-  moneyInputSchema,
+  nonNegativeMoneyInputSchema,
   positiveMoneyInputSchema,
 } from '@/shared/money/money';
 import type { CreditCardPurchase } from './credit-card.schema';
@@ -24,11 +24,6 @@ const maxLength = (max: number) => () =>
 const requiredDate = z.custom<Dayjs>((value) => value != null, {
   error: required,
 });
-
-const nonNegativeMoneyInputSchema = moneyInputSchema.refine(
-  (amount) => !amount.startsWith('-'),
-  { error: () => i18n.t('validation.nonNegativeMoney') },
-);
 
 const billingDaySchema = z
   .number({ error: required })

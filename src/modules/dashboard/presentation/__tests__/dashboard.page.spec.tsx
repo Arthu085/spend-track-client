@@ -350,6 +350,70 @@ describe('DashboardPage', () => {
     expect(router.state.location.search).toBe('?year=2026&month=10');
   });
 
+  it('shows investment totals, the month contributions, and goal progress', async () => {
+    const { router } = renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        investments: {
+          totalValue: '1500.00',
+          contributions: {
+            total: '700.00',
+            completed: '500.00',
+            pending: '200.00',
+          },
+          withdrawals: { total: '0.00', completed: '0.00', pending: '0.00' },
+          items: [
+            {
+              uuid: '7a1b2c3d-7777-4c3e-9f1a-1a2b3c4d5e6f',
+              name: 'Viagem',
+              type: 'GOAL',
+              typeLabel: 'Meta',
+              currentValue: '1500.00',
+              targetAmount: '6000.00',
+              progress: { remaining: '4500.00', percent: 25 },
+            },
+          ],
+        },
+      }),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByLabelText(
+        i18n.t('dashboard.investments.totalValue'),
+      ),
+    ).toHaveTextContent(money('1500.00'));
+    expect(
+      within(page).getByLabelText(
+        i18n.t('dashboard.investments.contributions'),
+      ),
+    ).toHaveTextContent(money('500.00'));
+    expect(
+      within(page).getByText(
+        i18n.t('dashboard.investments.pending', { amount: money('200.00') }),
+        { exact: false },
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByText(
+        i18n.t('investments.targetRemaining', {
+          remaining: money('4500.00'),
+          target: money('6000.00'),
+        }),
+      ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      within(page).getByRole('link', {
+        name: i18n.t('dashboard.investments.manage'),
+      }),
+    );
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(AppRoutes.INVESTMENTS);
+    });
+  });
+
   it('shows no daily allowance once the month is over', async () => {
     renderDashboard(AppRoutes.DASHBOARD, {
       'GET /dashboard': envelope({

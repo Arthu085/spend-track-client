@@ -19,6 +19,11 @@ export const positiveMoneyInputSchema = moneyInputSchema.refine(
   { error: () => i18n.t('validation.positiveMoney') },
 );
 
+export const nonNegativeMoneyInputSchema = moneyInputSchema.refine(
+  (amount) => !amount.startsWith('-'),
+  { error: () => i18n.t('validation.nonNegativeMoney') },
+);
+
 export const isNegativeMoney = (amount: string): boolean =>
   amount.startsWith('-') && /[1-9]/.test(amount);
 

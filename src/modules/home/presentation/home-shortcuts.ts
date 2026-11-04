@@ -9,6 +9,7 @@ import {
   creditCardsPage,
   dashboardPage,
   financialSettingsPage,
+  investmentsPage,
   recurrencesPage,
   rolesPage,
   transactionsPage,
@@ -44,6 +45,10 @@ export const homeShortcuts: HomeShortcut[] = [
   {
     ...budgetsPage,
     descriptionKey: 'home.shortcuts.budgets',
+  },
+  {
+    ...investmentsPage,
+    descriptionKey: 'home.shortcuts.investments',
   },
   {
     ...accountsPage,

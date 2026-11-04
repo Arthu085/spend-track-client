@@ -4,6 +4,8 @@ export const AppRoutes = {
   TRANSACTIONS: '/transactions',
   RECURRENCES: '/recurrences',
   BUDGETS: '/budgets',
+  INVESTMENTS: '/investments',
+  INVESTMENT_MOVEMENTS: '/investments/:uuid/movements',
   ACCOUNTS: '/accounts',
   CREDIT_CARDS: '/credit-cards',
   CREDIT_CARD_INVOICES: '/credit-cards/:uuid/invoices',
@@ -23,3 +25,9 @@ export const AppRoutes = {
 
 export const creditCardInvoicesPath = (cardUuid: string) =>
   AppRoutes.CREDIT_CARD_INVOICES.replace(':uuid', encodeURIComponent(cardUuid));
+
+export const investmentMovementsPath = (investmentUuid: string) =>
+  AppRoutes.INVESTMENT_MOVEMENTS.replace(
+    ':uuid',
+    encodeURIComponent(investmentUuid),
+  );

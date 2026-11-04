@@ -22,7 +22,8 @@
       "creditCards": "Manage your cards, their billing days, and invoices.",
       "creditCardPurchases": "Record card purchases in installments and refunds.",
       "recurrences": "Plan recurring income, expenses, and card charges and confirm each occurrence.",
-      "budgets": "Set monthly spending limits and follow your daily allowance."
+      "budgets": "Set monthly spending limits and follow your daily allowance.",
+      "investments": "Track reserves, goals, and investments with contributions, withdrawals, and valuations."
     }
   },
   "dashboard": {
@@ -108,6 +109,15 @@
         "dailyHint": "Informational: what is left spread over the remaining days.",
         "noDaysLeft": "No days left in this month."
       }
+    },
+    "investments": {
+      "title": "Investments and goals",
+      "manage": "Manage investments",
+      "totalValue": "Total value:",
+      "contributions": "Contributed this month:",
+      "withdrawals": "Withdrawn this month:",
+      "pending": "(+{{amount}} planned)",
+      "empty": "No active investments, reserves, or goals."
     }
   },
   "month": {
@@ -500,6 +510,93 @@
       "content": "The limits of this month are removed. Transactions are not changed."
     }
   },
+  "investments": {
+    "title": "Investments",
+    "description": "Manage investments, reserves, and goals. Contributions and withdrawals move money between an account and the investment without counting as income or expenses.",
+    "create": {
+      "title": "New investment"
+    },
+    "edit": {
+      "title": "Edit investment"
+    },
+    "fields": {
+      "name": "Name",
+      "type": "Type",
+      "targetAmount": "Target amount",
+      "currentValue": "Current value",
+      "progress": "Progress",
+      "amount": "Amount",
+      "date": "Date",
+      "state": "State",
+      "newValue": "New value",
+      "status": "Status",
+      "actions": "Actions",
+      "account": "Account",
+      "movementType": "Movement"
+    },
+    "types": {
+      "INVESTMENT": "Investment",
+      "RESERVE": "Reserve",
+      "GOAL": "Goal"
+    },
+    "hints": {
+      "targetAmount": "Optional. Leave empty when there is no target.",
+      "state": "Planned movements only change balances once confirmed."
+    },
+    "noTarget": "No target",
+    "progressOf": "Progress of {{name}}",
+    "targetReached": "Target of {{target}} reached",
+    "targetRemaining": "{{remaining}} left to reach {{target}}",
+    "movement": {
+      "title": {
+        "CONTRIBUTION": "Contribute to {{name}}",
+        "WITHDRAWAL": "Withdraw from {{name}}"
+      },
+      "hint": {
+        "CONTRIBUTION": "The amount leaves the account and is added to the investment. It does not count as an expense.",
+        "WITHDRAWAL": "The amount leaves the investment and returns to the account. It does not count as income."
+      },
+      "account": {
+        "CONTRIBUTION": "From account",
+        "WITHDRAWAL": "To account"
+      }
+    },
+    "valuation": {
+      "title": "Update value of {{name}}",
+      "hint": "Record the current market value. Only the investment changes; no account balance is affected."
+    },
+    "actions": {
+      "contribute": "Contribute to {{name}}",
+      "withdraw": "Withdraw from {{name}}",
+      "valuate": "Update value of {{name}}",
+      "history": "History of {{name}}",
+      "toggleStatus": "Activate or deactivate {{name}}",
+      "edit": "Edit {{name}}",
+      "delete": "Delete {{name}}",
+      "confirm": "Confirm",
+      "confirmMovement": "Confirm {{type}}",
+      "cancel": "Cancel movement",
+      "cancelMovement": "Cancel {{type}}"
+    },
+    "delete": {
+      "title": "Delete investment",
+      "description": "Delete {{name}}? Investments with movements cannot be deleted; deactivate them instead."
+    },
+    "confirm": {
+      "title": "Confirm movement",
+      "description": "The movement will change the account and investment balances."
+    },
+    "cancelMovement": {
+      "title": "Cancel movement",
+      "description": "The movement stays in the history but no longer changes any balance."
+    },
+    "movements": {
+      "title": "Investment history",
+      "description": "Contributions, withdrawals, and valuations, newest first.",
+      "empty": "No movements recorded yet."
+    },
+    "empty": "No investments found."
+  },
   "transactionCategories": {
     "title": "Categories",
     "create": {
@@ -596,7 +693,8 @@
     "creditCards": "Credit cards",
     "creditCardPurchases": "Card purchases",
     "recurrences": "Recurrences",
-    "budgets": "Budgets"
+    "budgets": "Budgets",
+    "investments": "Investments"
   },
   "navigationSections": {
     "general": "General",

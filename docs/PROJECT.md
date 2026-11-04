@@ -35,7 +35,7 @@ financial foundation covers the `dashboard` module at `/`, the default page afte
 balances with month navigation and the spending perspective), the `transactions` module at
 `/transactions` (planned and completed income, expenses, and transfers), the `recurrences` module
 at `/recurrences` (recurring income, expenses, and card charges with their occurrences), the
-`budgets` module at `/budgets` (monthly overall and category limits), the `accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
+`budgets` module at `/budgets` (monthly overall and category limits), the `investments` module at `/investments` (investments, reserves, and goals with contributions, withdrawals, and valuations), the `accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
 invoices, installment purchases, refunds, and invoice payments), and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
 [Progressive web app](#progressive-web-app)).
@@ -214,7 +214,7 @@ user menu also links to the change requests page, and a dot on the user's name a
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
-shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, budgets, accounts, credit
+shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, budgets, investments, accounts, credit
 cards, card purchases, and financial settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
@@ -287,7 +287,7 @@ Every signed-in user, including an admin, sees only their own accounts, personal
 preferences, and dashboard; the API enforces this and answers `404` for another user's records, so
 financial pages need no ability guard. Amounts travel as decimal strings in BRL (`"1020.80"`, up to
 two decimals) and stay strings in the client: `moneySchema` validates them (`positiveMoneyInputSchema`
-for amounts that must be greater than zero), `MoneyText` formats them with `Intl.NumberFormat` and
+for amounts that must be greater than zero, `nonNegativeMoneyInputSchema` for zero or more), `MoneyText` formats them with `Intl.NumberFormat` and
 marks negative values, and `MoneyInput` edits them in string mode so
 they are never rounded through a JavaScript number. Calendar dates without a time travel as
 `YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, `dateInputFormat` gives the
@@ -300,7 +300,7 @@ keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list 
 ### Home
 
 `/home` greets the user by name and shows a card linking to each page they can reach, declared in
-`home-shortcuts.ts`: the dashboard, transactions, recurrences, budgets, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
+`home-shortcuts.ts`: the dashboard, transactions, recurrences, budgets, investments, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
 with the same abilities as their menu entries, My account for everyone, and Change requests only for
 a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
 abilities query settles, so late permission-based entries do not move existing shortcuts. The
@@ -315,10 +315,11 @@ and available balances, and the balance of each active account, with an invitati
 none. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
 saves the preference with `PATCH /preferences` and reloads the dashboard. Account, category,
-preference, transaction, credit card, recurrence, and budget mutations invalidate the dashboard query;
+preference, transaction, credit card, recurrence, budget, and investment mutations invalidate the dashboard query;
 account and category mutations also invalidate the transactions, credit card, and recurrence
-queries (category mutations also the budget queries), which show their names and colors. The projected balance adds every planned
-transaction dated up to the end of the month, overdue ones included, to the actual balance; the
+queries (account mutations also the investment queries) (category mutations also the budget queries), which show their names and colors. The projected balance adds every planned
+transaction and planned investment contribution or withdrawal dated up to the end of the month,
+overdue ones included, to the actual balance; the
 available balance subtracts what is still due on card invoices and the planned recurring card
 charges of the month from the projected one.
 
@@ -344,6 +345,10 @@ Transaction indicators, each with its own empty state:
   allowance, then the month's overall limit and each category limit with its paid and pending
   spending, what is left, and how much it is exceeded by (see [Budgets](#budgets)). It links to the
   month on the budgets page.
+- **Investments and goals:** the total value of active investments, the month's completed
+  contributions and withdrawals (with the planned amount when there is one), and each active
+  investment with its value and target progress (see [Investments](#investments)). It links to the
+  investments page. Contributions and withdrawals never count as income or expenses.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -487,6 +492,32 @@ are guidance only; the API never blocks a transaction above a limit.
 - **Delete:** removes the month's limits after a warning; transactions never change.
 - **Freshness:** budget mutations show the API message and invalidate the budget and dashboard
   queries.
+
+### Investments
+
+The `investments` module mirrors the API's investments (`/investments`), reserves, and goals. Each
+has a name, a type (investment, reserve, or goal), an optional target amount, and a current value the
+API derives from its movements: contributions minus withdrawals plus valuation adjustments.
+
+- **List:** `/investments` is a `PaginatedTable` filtered by type and status (active by default)
+  showing each investment's value and, when it has a target, a progress bar with what is left. The
+  bar stops at 100% while the label shows the real percentage.
+- **Edit:** a form modal creates or edits the name, type, and target; a cleared target is sent as
+  `null`. The status switch archives or restores an investment, and delete works only while it has
+  no movements (the API explains otherwise).
+- **Contribute and withdraw:** a form modal posts `POST /investments/:uuid/movements` with the
+  account (the default account preselected), amount, date (today by default), and state (completed
+  by default, or planned). A contribution moves money from the account into the investment and a
+  withdrawal moves it back; neither is income or an expense, and the API refuses a withdrawal larger
+  than the current value.
+- **Update value:** a form modal posts `POST /investments/:uuid/valuations` with the new market value;
+  only the investment changes, never an account balance.
+- **History:** `/investments/:uuid/movements` lists every movement, newest first, with the signed
+  amount, account, and state. A planned movement can be confirmed and any movement not yet canceled
+  can be canceled; movements are never edited or deleted, so the history stays traceable. An
+  archived investment accepts no new movements but keeps its history.
+- **Freshness:** investment mutations show the API message and invalidate the investment, dashboard,
+  and accounts queries, because contributions and withdrawals change account balances.
 
 ### Financial settings
 

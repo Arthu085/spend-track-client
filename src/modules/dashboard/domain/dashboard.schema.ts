@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { accountTypeSchema } from '@/modules/accounts/domain/account.schema';
 import { creditCardInvoiceSchema } from '@/modules/credit-cards/domain/credit-card.schema';
+import {
+  investmentProgressSchema,
+  investmentTypeSchema,
+} from '@/modules/investments/domain/investment.schema';
 import { spendingPerspectiveSchema } from '@/modules/preferences/domain/preferences.schema';
 import {
   transactionAccountSchema,
@@ -82,6 +86,23 @@ export const dashboardBudgetSchema = z.object({
   categories: z.array(dashboardBudgetCategorySchema),
 });
 
+export const dashboardInvestmentSchema = z.object({
+  uuid: z.string(),
+  name: z.string(),
+  type: investmentTypeSchema,
+  typeLabel: z.string(),
+  currentValue: moneySchema,
+  targetAmount: moneySchema.nullable(),
+  progress: investmentProgressSchema.nullable(),
+});
+
+export const dashboardInvestmentsSchema = z.object({
+  totalValue: moneySchema,
+  contributions: dashboardAmountsSchema,
+  withdrawals: dashboardAmountsSchema,
+  items: z.array(dashboardInvestmentSchema),
+});
+
 export const spendingGuidanceBasisSchema = z.enum(['BUDGET', 'BALANCE']);
 
 export const dashboardSpendingGuidanceSchema = z.object({
@@ -107,6 +128,7 @@ export const dashboardSchema = z.object({
   upcomingCount: z.number().int().nonnegative(),
   creditCards: dashboardCreditCardsSchema,
   budget: dashboardBudgetSchema.nullable(),
+  investments: dashboardInvestmentsSchema,
   spendingGuidance: dashboardSpendingGuidanceSchema,
 });
 
@@ -121,6 +143,7 @@ export type DashboardUpcoming = z.infer<typeof dashboardUpcomingSchema>;
 export type DashboardCreditCards = z.infer<typeof dashboardCreditCardsSchema>;
 export type DashboardBudgetLimit = z.infer<typeof dashboardBudgetLimitSchema>;
 export type DashboardBudget = z.infer<typeof dashboardBudgetSchema>;
+export type DashboardInvestments = z.infer<typeof dashboardInvestmentsSchema>;
 export type DashboardSpendingGuidance = z.infer<
   typeof dashboardSpendingGuidanceSchema
 >;

@@ -29,6 +29,12 @@ export const buildDashboard = (
     invoices: [],
   },
   budget: null,
+  investments: {
+    totalValue: '0.00',
+    contributions: { total: '0.00', completed: '0.00', pending: '0.00' },
+    withdrawals: { total: '0.00', completed: '0.00', pending: '0.00' },
+    items: [],
+  },
   spendingGuidance: {
     basis: 'BALANCE',
     remaining: '0.00',

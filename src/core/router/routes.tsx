@@ -61,6 +61,22 @@ export const routes: RouteObject[] = [
                 }),
               },
               {
+                path: AppRoutes.INVESTMENTS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/investments/presentation/pages/investments.page')
+                  ).InvestmentsPage,
+                }),
+              },
+              {
+                path: AppRoutes.INVESTMENT_MOVEMENTS,
+                lazy: async () => ({
+                  Component: (
+                    await import('@/modules/investments/presentation/pages/investment-movements.page')
+                  ).InvestmentMovementsPage,
+                }),
+              },
+              {
                 path: AppRoutes.ACCOUNTS,
                 lazy: async () => ({
                   Component: (
