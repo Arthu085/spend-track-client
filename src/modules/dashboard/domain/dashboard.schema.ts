@@ -64,11 +64,26 @@ export const dashboardUpcomingSchema = z.object({
   category: dashboardCategorySchema.nullable(),
 });
 
+export const dashboardPlannedCardChargeSchema = z.object({
+  uuid: z.string(),
+  recurrenceUuid: z.string(),
+  description: z.string(),
+  amount: moneySchema,
+  date: z.iso.date(),
+  invoiceMonth: z.iso.date(),
+  overdue: z.boolean(),
+  card: z.object({ uuid: z.string(), name: z.string() }),
+  category: dashboardCategorySchema,
+});
+
 export const dashboardCreditCardsSchema = z.object({
   spending: moneySchema,
   outstanding: moneySchema,
   planned: moneySchema,
+  plannedDue: moneySchema,
   invoices: z.array(creditCardInvoiceSchema),
+  plannedCharges: z.array(dashboardPlannedCardChargeSchema),
+  plannedChargesCount: z.number().int().nonnegative(),
 });
 
 export const dashboardBudgetLimitSchema = dashboardAmountsSchema.extend({
@@ -140,6 +155,9 @@ export type DashboardCategoryExpenses = z.infer<
   typeof dashboardCategoryExpensesSchema
 >;
 export type DashboardUpcoming = z.infer<typeof dashboardUpcomingSchema>;
+export type DashboardPlannedCardCharge = z.infer<
+  typeof dashboardPlannedCardChargeSchema
+>;
 export type DashboardCreditCards = z.infer<typeof dashboardCreditCardsSchema>;
 export type DashboardBudgetLimit = z.infer<typeof dashboardBudgetLimitSchema>;
 export type DashboardBudget = z.infer<typeof dashboardBudgetSchema>;

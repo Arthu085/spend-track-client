@@ -46,11 +46,12 @@
     },
     "balances": {
       "actual": "Current balance",
-      "actualHint": "Sum of the balances of active accounts.",
+      "actualHint": "Sum of the active accounts' balances today, whichever month is selected.",
       "projected": "Projected balance",
       "projectedHint": "Expected balance at the end of the month, including what is planned.",
       "available": "Available balance",
-      "availableHint": "Projected balance minus what is still due on card invoices."
+      "availableHint": "Projected balance minus what is due on card invoices and the planned card charges expected on them.",
+      "shortfall": "Short by {{amount}}: planned items and card obligations through this month exceed the money expected in your accounts."
     },
     "accounts": {
       "title": "Balances by account",
@@ -89,7 +90,10 @@
       "spending": "Card spending this month:",
       "outstanding": "Due on invoices:",
       "empty": "No invoices for this month.",
-      "planned": "Planned recurring charges:"
+      "spendingPlanned": "(+{{amount}} planned)",
+      "plannedDue": "Planned recurring charges:",
+      "plannedHint": "Recurring card charges not confirmed yet, expected on the invoices through this month.",
+      "manageRecurrences": "Manage recurrences"
     },
     "budget": {
       "title": "Budget and spending guidance",
@@ -104,7 +108,7 @@
         "BUDGET": "Left in the budget",
         "BUDGETHint": "Overall limit minus paid and planned expenses of the month.",
         "BALANCE": "Free to spend",
-        "BALANCEHint": "Available balance, since the month has no overall limit.",
+        "BALANCEHint": "Available balance: the month has no overall limit, or less money is available than the limit leaves.",
         "daily": "Daily allowance",
         "dailyHint": "Informational: what is left spread over the remaining days.",
         "noDaysLeft": "No days left in this month."
@@ -118,6 +122,10 @@
       "withdrawals": "Withdrawn this month:",
       "pending": "(+{{amount}} planned)",
       "empty": "No active investments, reserves, or goals."
+    },
+    "perspective": {
+      "PURCHASE_DATE": "Card spending counts in the month of the purchase. Balances and invoices stay the same.",
+      "INVOICE_MONTH": "Card spending counts in the month of its invoice. Balances and invoices stay the same."
     }
   },
   "month": {

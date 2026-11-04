@@ -1,11 +1,14 @@
 import { Card, Col, Flex, Progress, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { isPositiveMoney } from '@/shared/money/money';
+import { isNegativeMoney, isPositiveMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type { DashboardAmounts } from '../../domain/dashboard.schema';
 import { displaySharePercent } from './share-percent';
 
 type CashFlowKind = 'income' | 'expenses';
+
+const hasAmount = (amount: string) =>
+  isPositiveMoney(amount) || isNegativeMoney(amount);
 
 interface CashFlowCardProps {
   kind: CashFlowKind;
@@ -30,7 +33,7 @@ const CashFlowCard = ({ kind, amounts }: CashFlowCardProps) => {
           aria-label={t(`dashboard.${kind}.title`)}
         />
       </Typography.Title>
-      {isPositiveMoney(amounts.total) ? (
+      {lines.some(({ amount }) => hasAmount(amount)) ? (
         <Flex vertical gap="small">
           <Progress
             percent={displaySharePercent(amounts.completed, amounts.total)}

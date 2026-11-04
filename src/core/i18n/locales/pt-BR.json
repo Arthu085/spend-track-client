@@ -46,11 +46,12 @@
     },
     "balances": {
       "actual": "Saldo atual",
-      "actualHint": "Soma dos saldos das contas ativas.",
+      "actualHint": "Soma dos saldos das contas ativas hoje, qualquer que seja o mês selecionado.",
       "projected": "Saldo previsto",
       "projectedHint": "Saldo esperado no fim do mês, considerando o que está planejado.",
       "available": "Saldo disponível",
-      "availableHint": "Saldo previsto menos o que ainda falta pagar nas faturas."
+      "availableHint": "Saldo previsto menos o que falta pagar nas faturas e as cobranças previstas nelas.",
+      "shortfall": "Faltam {{amount}}: o que está planejado e as obrigações de cartão até este mês superam o dinheiro esperado nas contas."
     },
     "accounts": {
       "title": "Saldos por conta",
@@ -89,7 +90,10 @@
       "spending": "Gastos no cartão no mês:",
       "outstanding": "Em aberto nas faturas:",
       "empty": "Nenhuma fatura neste mês.",
-      "planned": "Cobranças recorrentes previstas:"
+      "spendingPlanned": "(+{{amount}} previsto)",
+      "plannedDue": "Cobranças recorrentes previstas:",
+      "plannedHint": "Cobranças recorrentes de cartão ainda não confirmadas, previstas nas faturas até este mês.",
+      "manageRecurrences": "Gerenciar recorrências"
     },
     "budget": {
       "title": "Orçamento e orientação de gastos",
@@ -104,7 +108,7 @@
         "BUDGET": "Restante do orçamento",
         "BUDGETHint": "Limite geral menos as despesas pagas e planejadas do mês.",
         "BALANCE": "Livre para gastar",
-        "BALANCEHint": "Saldo disponível, pois o mês não tem limite geral.",
+        "BALANCEHint": "Saldo disponível: o mês não tem limite geral ou há menos dinheiro disponível do que o limite deixa.",
         "daily": "Valor diário",
         "dailyHint": "Informativo: o restante dividido pelos dias que faltam.",
         "noDaysLeft": "Não restam dias neste mês."
@@ -118,6 +122,10 @@
       "withdrawals": "Resgatado no mês:",
       "pending": "(+{{amount}} previsto)",
       "empty": "Nenhum investimento, reserva ou meta ativa."
+    },
+    "perspective": {
+      "PURCHASE_DATE": "Os gastos no cartão contam no mês da compra. Saldos e faturas não mudam.",
+      "INVOICE_MONTH": "Os gastos no cartão contam no mês da fatura. Saldos e faturas não mudam."
     }
   },
   "month": {
