@@ -406,7 +406,8 @@
       "endMode": "Como encerrar",
       "endFrom": "Nenhuma ocorrência a partir de",
       "endFromInvoiceMonth": "Nenhuma cobrança a partir da fatura de",
-      "date": "Data"
+      "date": "Data",
+      "expectedDate": "Data prevista"
     },
     "targets": {
       "ACCOUNT": "Conta",
@@ -443,10 +444,12 @@
       "cardCharges": "Cada cobrança só entra em uma fatura quando você a confirma.",
       "editLocked": "As alterações valem só para ocorrências previstas; as realizadas e canceladas nunca mudam. Tipo, frequência, datas e cartão são fixos: para mudá-los, encerre esta recorrência e crie uma nova.",
       "endFrom": "Ocorrências previstas nesta data ou depois são removidas.",
-      "endFromInvoiceMonth": "Cobranças previstas nesta fatura e nas seguintes são removidas. As faturas anteriores continuam como estão."
+      "endFromInvoiceMonth": "Cobranças previstas nesta fatura e nas seguintes são removidas. As faturas anteriores continuam como estão.",
+      "endEntire": "A recorrência termina hoje. As ocorrências previstas até hoje são mantidas, e as posteriores são removidas."
     },
     "validation": {
-      "endBeforeStart": "Escolha uma data de término igual ou posterior à data de início."
+      "endBeforeStart": "Escolha uma data de término igual ou posterior à data de início.",
+      "occurrenceAfterEnd": "Escolha uma data até {{date}}, quando esta recorrência termina."
     },
     "actions": {
       "occurrences": "Ocorrências de {{description}}",
@@ -466,7 +469,7 @@
     "end": {
       "title": "Encerrar recorrência",
       "description": "Escolha quando {{description}} termina.",
-      "history": "As ocorrências realizadas sempre ficam no histórico, e as previstas antes do corte são mantidas. O encerramento não pode ser desfeito."
+      "history": "As ocorrências realizadas e canceladas sempre ficam no histórico. As previstas até o fim ainda podem ser confirmadas, editadas ou puladas, e as posteriores são removidas. O encerramento não pode ser desfeito."
     },
     "occurrences": {
       "title": "Ocorrências · {{description}}",
@@ -478,11 +481,13 @@
     "confirm": {
       "title": "Confirmar ocorrência",
       "accountDescription": "Informe o valor e a data em que {{description}} foi efetivamente pago ou recebido. Os saldos só mudam depois desta etapa.",
-      "cardDescription": "Informe o valor e a data da compra de {{description}}. Ao confirmar, a cobrança entra na fatura correspondente."
+      "cardDescription": "Informe o valor e a data da compra de {{description}}. Ao confirmar, a cobrança entra na fatura correspondente.",
+      "dateHint": "Esta é a data em que realmente aconteceu, por isso pode ser depois do fim da recorrência. A data agendada não muda."
     },
     "editOccurrence": {
       "title": "Editar ocorrência",
-      "description": "Só esta ocorrência de {{description}} muda."
+      "description": "Só esta ocorrência de {{description}} muda.",
+      "endDateLimit": "Não pode ser depois de {{date}}, quando esta recorrência termina. A data agendada não muda."
     },
     "skip": {
       "title": "Pular ocorrência",

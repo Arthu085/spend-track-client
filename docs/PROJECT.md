@@ -467,15 +467,19 @@ operation changes.
   occurrences from today on and generates none while paused; resuming generates again from today.
 - **End:** an account recurrence ends from a date (today by default) and a card recurrence from an
   invoice month (`fromInvoiceMonth`, the first day of the chosen month, the current one by
-  default), or either ends entirely. The modal says that completed history and earlier planned
-  occurrences are kept. Ended recurrences only show their occurrences.
+  default), or either ends entirely, which keeps planned occurrences up to today. The modal says
+  that completed and canceled history and planned occurrences up to the end are kept. An ended
+  recurrence can no longer be edited, paused, resumed, or ended, so its row offers only its
+  occurrences; the planned ones it kept can still be confirmed, edited, or skipped.
 - **Occurrences:** a modal lists one recurrence's occurrences, oldest first, with locally kept
   pagination, the current and scheduled dates, an overdue tag, the invoice month of card charges,
   the state with its completion date, and the amount. Planned ones can be confirmed (amount and
   date prefilled and editable: today as the payment or receipt date for account occurrences, the
   occurrence date as the purchase date for card charges, which confirming turns into a
-  single-installment card purchase on the matching invoice), edited (amount and date of that
-  occurrence only), or skipped after a warning, which keeps them listed as canceled.
+  single-installment card purchase on the matching invoice), edited (amount and expected date of
+  that occurrence only), or skipped after a warning, which keeps them listed as canceled. The
+  scheduled date never changes. The expected date cannot move past the recurrence's end date, while
+  the confirmation date records when it actually happened and may be later.
 - **Freshness:** every recurrence mutation shows the API message and invalidates the recurrence,
   transactions, credit card, dashboard, and accounts queries, because occurrences are planned
   transactions or card charges, and confirming changes balances and invoices.
