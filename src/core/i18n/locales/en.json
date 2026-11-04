@@ -7,31 +7,14 @@
     "delete": "Delete",
     "close": "Close"
   },
-  "home": {
-    "greeting": "Hello, {{name}}",
-    "description": "Choose where to go.",
-    "shortcuts": {
-      "dashboard": "Track the month balances and move between months.",
-      "transactions": "Record income, expenses, and transfers and confirm payments.",
-      "accounts": "Create and organize your accounts and opening balances.",
-      "financialSettings": "Adjust your preferences and categories.",
-      "users": "Create, edit, and deactivate users.",
-      "roles": "Review and adjust each role's permissions.",
-      "account": "Change your name and email and review your access.",
-      "changeRequests": "Approve or reject changes another administrator requested for your profile.",
-      "creditCards": "Manage your cards, their billing days, and invoices.",
-      "creditCardPurchases": "Record card purchases in installments and refunds.",
-      "recurrences": "Plan recurring income, expenses, and card charges and confirm each occurrence.",
-      "budgets": "Set monthly spending limits and follow your daily allowance.",
-      "investments": "Track reserves, goals, and investments with contributions, withdrawals, and valuations."
-    }
-  },
   "dashboard": {
     "greeting": "Hello, {{name}}",
     "description": "Track the month's balances, income, and expenses.",
     "actions": {
       "addTransaction": "Add transaction",
       "transactions": "Transactions",
+      "recurrences": "Recurrences",
+      "creditCardPurchases": "Card purchases",
       "accounts": "Manage accounts",
       "settings": "Financial settings"
     },
@@ -691,7 +674,6 @@
     "toggleSidebar": "Expand or collapse the sidebar"
   },
   "navigation": {
-    "home": "Home",
     "dashboard": "Dashboard",
     "transactions": "Transactions",
     "users": "Users",
@@ -705,7 +687,6 @@
     "investments": "Investments"
   },
   "navigationSections": {
-    "general": "General",
     "finances": "Finances",
     "administration": "Administration"
   },

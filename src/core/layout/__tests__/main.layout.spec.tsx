@@ -223,7 +223,7 @@ describe('MainLayout', () => {
     expect(logoutButton).not.toHaveTextContent(i18n.t('auth.logout'));
   });
 
-  it('links the sidebar title to the home page', async () => {
+  it('links the sidebar title to the dashboard', async () => {
     stubHttpRoutes(httpClient, signedInRoutes);
 
     renderRoute(AppRoutes.USERS);

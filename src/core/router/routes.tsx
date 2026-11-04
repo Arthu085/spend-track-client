@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router';
+import { Navigate, type RouteObject } from 'react-router';
 import { NotFoundPage } from '@/core/pages/not-found.page';
 import { RouteErrorPage } from '@/core/pages/route-error.page';
 import { AbilityGuard } from '@/modules/authorization/presentation/guards/ability.guard';
@@ -13,6 +13,10 @@ export const routes: RouteObject[] = [
     ErrorBoundary: RouteErrorPage,
     children: [
       {
+        path: AppRoutes.LEGACY_HOME,
+        element: <Navigate to={AppRoutes.DASHBOARD} replace />,
+      },
+      {
         Component: AuthGuard,
         children: [
           {
@@ -26,14 +30,6 @@ export const routes: RouteObject[] = [
                   Component: (
                     await import('@/modules/dashboard/presentation/pages/dashboard.page')
                   ).DashboardPage,
-                }),
-              },
-              {
-                path: AppRoutes.HOME,
-                lazy: async () => ({
-                  Component: (
-                    await import('@/modules/home/presentation/pages/home.page')
-                  ).HomePage,
                 }),
               },
               {

@@ -1,6 +1,4 @@
-import { HomeOutlined } from '@ant-design/icons';
 import type { ComponentType } from 'react';
-import { AppRoutes } from '@/core/router/app-routes';
 import {
   accountsPage,
   budgetsPage,
@@ -33,12 +31,6 @@ export interface NavigationSection {
 }
 
 export const navigationSections: NavigationSection[] = [
-  {
-    labelKey: 'navigationSections.general',
-    items: [
-      { path: AppRoutes.HOME, labelKey: 'navigation.home', icon: HomeOutlined },
-    ],
-  },
   {
     labelKey: 'navigationSections.finances',
     items: [

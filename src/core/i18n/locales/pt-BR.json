@@ -7,31 +7,14 @@
     "delete": "Excluir",
     "close": "Fechar"
   },
-  "home": {
-    "greeting": "Olá, {{name}}",
-    "description": "Escolha para onde ir.",
-    "shortcuts": {
-      "dashboard": "Acompanhe os saldos do mês e navegue entre os meses.",
-      "transactions": "Registre receitas, despesas e transferências e confirme pagamentos.",
-      "accounts": "Cadastre e organize suas contas e saldos iniciais.",
-      "financialSettings": "Ajuste suas preferências e categorias.",
-      "users": "Cadastre, edite e desative usuários.",
-      "roles": "Veja e ajuste as permissões de cada perfil.",
-      "account": "Altere seu nome e e-mail e veja o seu acesso.",
-      "changeRequests": "Aprove ou rejeite alterações que outro administrador pediu para o seu perfil.",
-      "creditCards": "Gerencie seus cartões, dias de fechamento e faturas.",
-      "creditCardPurchases": "Registre compras parceladas no cartão e estornos.",
-      "recurrences": "Planeje receitas, despesas e cobranças no cartão recorrentes e confirme cada ocorrência.",
-      "budgets": "Defina limites mensais de gastos e acompanhe quanto pode gastar por dia.",
-      "investments": "Acompanhe reservas, metas e investimentos com aportes, resgates e atualizações de valor."
-    }
-  },
   "dashboard": {
     "greeting": "Olá, {{name}}",
     "description": "Acompanhe os saldos, as receitas e as despesas do mês.",
     "actions": {
       "addTransaction": "Adicionar transação",
       "transactions": "Transações",
+      "recurrences": "Recorrências",
+      "creditCardPurchases": "Compras no cartão",
       "accounts": "Gerenciar contas",
       "settings": "Configurações financeiras"
     },
@@ -691,7 +674,6 @@
     "toggleSidebar": "Expandir ou recolher o menu lateral"
   },
   "navigation": {
-    "home": "Início",
     "dashboard": "Painel",
     "transactions": "Transações",
     "users": "Usuários",
@@ -705,7 +687,6 @@
     "investments": "Investimentos"
   },
   "navigationSections": {
-    "general": "Geral",
     "finances": "Finanças",
     "administration": "Administração"
   },

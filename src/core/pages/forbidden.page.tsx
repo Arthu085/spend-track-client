@@ -11,7 +11,7 @@ export const ForbiddenPage = () => {
       status="403"
       title={t('forbidden.title')}
       subTitle={t('forbidden.subtitle')}
-      extra={<Link to={AppRoutes.HOME}>{t('common.backToHome')}</Link>}
+      extra={<Link to={AppRoutes.DASHBOARD}>{t('common.backToHome')}</Link>}
     />
   );
 };

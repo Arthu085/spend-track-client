@@ -30,7 +30,7 @@ which manages users at `/users`, lets every signed-in user edit their own profil
 own password at `/account`,
 and lets an admin approve or reject changes another admin requested at `/account/change-requests`.
 The `authorization` module shows each role's permissions at `/roles` and lets a user with the
-ability change them. The `home` module's page at `/home` links to every page the user can reach. The
+ability change them. The
 financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
 balances with month navigation and the spending perspective), the `transactions` module at
 `/transactions` (planned and completed income, expenses, and transfers), the `recurrences` module
@@ -154,8 +154,8 @@ The `auth` module mirrors the API's cookie session; the browser never sees a tok
   login page; on `signed-in` it removes every other cached query and refetches the session, so a
   tab left on a guest page moves into the app.
 - **Guards:** `AuthGuard` wraps protected routes and redirects to `/login`; `GuestGuard` wraps
-  login, forgot-password, and resend-confirmation and always sends a signed-in user home, so every
-  login lands on the home page. Both show a full-page loader while the session loads; the guest guard resolves before
+  login, forgot-password, and resend-confirmation and always sends a signed-in user to the dashboard, so every
+  login lands there. Both show a full-page loader while the session loads; the guest guard resolves before
   mounting the authentication card, so the card does not resize around that loader.
 - **Pages:** login, forgot-password, and reset-password (`/reset-password?token=...`, the API's
   default `MAIL_RESET_PASSWORD_PATH`) render inside `AuthLayout`. Reset-password works with or
@@ -199,7 +199,7 @@ is limited, and avoids a forbidden catalog request. The API still decides whethe
 allowed. Role management is described under
 [Roles](#roles).
 
-`MainLayout` (`src/core/layout/main.layout.tsx`, with header parts in `header/` and sidebar parts in `sidebar/`) wraps every signed-in page: a side menu whose title links home
+`MainLayout` (`src/core/layout/main.layout.tsx`, with header parts in `header/` and sidebar parts in `sidebar/`) wraps every signed-in page: a side menu whose title links to the dashboard
 and whose bottom holds the theme toggle (see [Theme](#theme)) and a sign-out button, and a header with a sidebar toggle, the language switcher, and a user menu (opened from the user's
 name) that links to the account page and signs out. `MainLayout` only composes `MainSidebar` (side menu or drawer, rendering
 `SidebarNavigation`, `SidebarThemeToggle`, and `SidebarLogoutButton`) and `MainHeader` (sidebar toggle, language switcher,
@@ -213,8 +213,7 @@ it, or with Escape, and the header and page use narrower padding. For a user hol
 user menu also links to the change requests page, and a dot on the user's name and a count on that entry show pending
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
-and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
-shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, budgets, investments, accounts, credit
+and the user, role, and finance page metadata in `core/router/page-metadata.ts`. Finances lists the dashboard, transactions, recurrences, budgets, investments, accounts, credit
 cards, card purchases, and financial settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
@@ -297,19 +296,13 @@ date picker the day order of the current language, and `todayDateOnly` gives tod
 keeps the month in the URL (`?year=2026&month=11`) and returns a paginated list to its first page
 (`shared/date/`).
 
-### Home
-
-`/home` greets the user by name and shows a card linking to each page they can reach, declared in
-`home-shortcuts.ts`: the dashboard, transactions, recurrences, budgets, investments, accounts, credit cards, card purchases, and financial settings for everyone, Users and Roles
-with the same abilities as their menu entries, My account for everyone, and Change requests only for
-a user holding `ADMIN`, with the pending count. Its shortcut grid shows a skeleton until the initial
-abilities query settles, so late permission-based entries do not move existing shortcuts. The
-not-found and forbidden pages link back to it.
-
 ### Dashboard
 
-`/` is where sign-in lands unless the guards remembered another page (see
-[Authentication](#authentication)). It greets the user and reads `GET /dashboard` for one month:
+`/` is the application's main page: sign-in always lands there (see
+[Authentication](#authentication)), the not-found and forbidden pages link back to it, and the former
+`/home` path redirects to it. Quick actions add a transaction and link to transactions, recurrences,
+card purchases, accounts, and financial settings; administration and personal pages stay in the
+ability-filtered menu and the user menu. It greets the user and reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
 and available balances, and the balance of each active account. A user without accounts sees the
 invitation to add one right below the month, and a negative available balance shows a warning with the amount missing. Previous and next buttons move through past and future months and keep the month in the URL

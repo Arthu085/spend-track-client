@@ -168,7 +168,7 @@ describe('LoginPage', () => {
     expect(requests).toHaveLength(requestsBeforeSubmit);
   });
 
-  it('signs in and always lands on home, not the page the user came from', async () => {
+  it('signs in and always lands on the dashboard, not the page the user came from', async () => {
     const requests = stubHttpRoutes(httpClient, {
       ...signedOutRoutes,
       ...layoutRoutes,

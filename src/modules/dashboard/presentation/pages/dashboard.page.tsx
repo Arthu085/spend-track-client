@@ -1,6 +1,8 @@
 import {
   PlusOutlined,
   SettingOutlined,
+  ShoppingOutlined,
+  SyncOutlined,
   TransactionOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
@@ -69,6 +71,12 @@ export const DashboardPage = () => {
           </Button>
           <Link to={AppRoutes.TRANSACTIONS}>
             <TransactionOutlined /> {t('dashboard.actions.transactions')}
+          </Link>
+          <Link to={AppRoutes.RECURRENCES}>
+            <SyncOutlined /> {t('dashboard.actions.recurrences')}
+          </Link>
+          <Link to={AppRoutes.CREDIT_CARD_PURCHASES}>
+            <ShoppingOutlined /> {t('dashboard.actions.creditCardPurchases')}
           </Link>
           <Link to={AppRoutes.ACCOUNTS}>
             <WalletOutlined /> {t('dashboard.actions.accounts')}

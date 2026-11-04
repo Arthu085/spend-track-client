@@ -11,7 +11,7 @@ export const NotFoundPage = () => {
       status="404"
       title={t('notFound.title')}
       subTitle={t('notFound.subtitle')}
-      extra={<Link to={AppRoutes.HOME}>{t('common.backToHome')}</Link>}
+      extra={<Link to={AppRoutes.DASHBOARD}>{t('common.backToHome')}</Link>}
     />
   );
 };
