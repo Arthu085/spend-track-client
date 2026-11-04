@@ -367,6 +367,73 @@ describe('RecurrencesPage', () => {
     ).toHaveLength(1);
   });
 
+  it.each([
+    ['card', netflix, 'recurrences.occurrences.cardHint'] as const,
+    ['account', rent, 'recurrences.occurrences.accountHint'] as const,
+  ])(
+    'locks an ended %s recurrence but keeps its planned occurrences manageable',
+    async (_target, recurrence, hint) => {
+      const { uuid, description } = recurrence;
+      const planned = buildRecurrenceOccurrence({
+        occurrenceDate: '2026-10-20',
+        date: '2026-10-20',
+      });
+
+      renderRecurrences({
+        'GET /recurrences': listPage([
+          {
+            ...recurrence,
+            state: 'ENDED',
+            stateLabel: 'Encerrada',
+            endDate: '2026-10-28',
+            nextOccurrenceDate: null,
+          },
+        ]),
+        [`GET /recurrences/${uuid}/occurrences`]: listPage([
+          confirmedCharge,
+          planned,
+        ]),
+      });
+
+      const row = await findRow(uuid);
+      for (const action of [
+        'recurrences.actions.edit',
+        'recurrences.actions.pause',
+        'recurrences.actions.resume',
+        'recurrences.actions.end',
+      ] as const) {
+        expect(
+          within(row).queryByRole('button', {
+            name: i18n.t(action, { description }),
+          }),
+        ).not.toBeInTheDocument();
+      }
+
+      await clickRowAction(
+        uuid,
+        i18n.t('recurrences.actions.occurrences', { description }),
+      );
+      await findDialog(i18n.t(hint));
+
+      const plannedRow = await findRow(planned.uuid);
+      const plannedDate = date('2026-10-20');
+      for (const action of [
+        'recurrences.actions.confirmOccurrence',
+        'recurrences.actions.editOccurrence',
+        'recurrences.actions.skipOccurrence',
+      ] as const) {
+        expect(
+          within(plannedRow).getByRole('button', {
+            name: i18n.t(action, { date: plannedDate }),
+          }),
+        ).toBeEnabled();
+      }
+      expect(
+        within(await findRow(confirmedCharge.uuid)).queryByRole('button'),
+      ).not.toBeInTheDocument();
+    },
+  );
+
   it('pauses a recurrence after a warning', async () => {
     const { sent } = renderRecurrences({
       [`PUT /recurrences/${netflix.uuid}/state`]: envelope(

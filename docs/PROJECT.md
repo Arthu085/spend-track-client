@@ -468,7 +468,9 @@ operation changes.
 - **End:** an account recurrence ends from a date (today by default) and a card recurrence from an
   invoice month (`fromInvoiceMonth`, the first day of the chosen month, the current one by
   default), or either ends entirely. The modal says that completed history and earlier planned
-  occurrences are kept. Ended recurrences only show their occurrences.
+  occurrences are kept. An ended recurrence can no longer be edited, paused, resumed, or ended, so
+  its row offers only its occurrences; the planned ones it kept can still be confirmed, edited, or
+  skipped.
 - **Occurrences:** a modal lists one recurrence's occurrences, oldest first, with locally kept
   pagination, the current and scheduled dates, an overdue tag, the invoice month of card charges,
   the state with its completion date, and the amount. Planned ones can be confirmed (amount and
