@@ -394,6 +394,16 @@ describe('real backend finance contracts', () => {
       422,
     );
 
+    await expectStatus(
+      payCreditCardInvoice({
+        invoiceUuid: november.uuid,
+        accountUuid: checking.data.uuid,
+        amount: '1.00',
+        paidOn: '2030-12-31',
+      }),
+      422,
+    );
+
     const payment = await payCreditCardInvoice({
       invoiceUuid: november.uuid,
       accountUuid: checking.data.uuid,

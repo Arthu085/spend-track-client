@@ -405,7 +405,9 @@ accounts; marking one as default clears the previous default on the API. The sta
 deactivates or reactivates an account (deactivating also clears its default flag), and delete asks
 for confirmation. The API refuses to delete an account that any transaction or card invoice payment
 uses (`409`, with a message suggesting deactivation instead), which opens the error dialog with that
-message.
+message. The form hints explain the opening balance rules the API enforces: no operation can be
+dated before the opening date, which moves later only up to the earliest operation (`422`, shown in
+the same dialog), while changing the amount shifts the balance by the difference.
 
 ### Credit cards
 

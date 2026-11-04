@@ -95,6 +95,7 @@ export const AccountFormModal = ({
       <Form.Item
         name="openingBalanceDate"
         label={t('accounts.fields.openingBalanceDate')}
+        extra={t('accounts.hints.openingBalanceDate')}
         rules={[zodRule(shape.openingBalanceDate)]}
       >
         <DatePicker
