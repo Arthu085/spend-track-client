@@ -8,6 +8,7 @@ import { positiveMoneyInputSchema } from '@/shared/money/money';
 import {
   type Recurrence,
   type RecurrenceFrequency,
+  type RecurrenceOccurrence,
   type RecurrenceType,
   recurrenceFrequencySchema,
   recurrenceStateSchema,
@@ -190,6 +191,16 @@ export const toEndRecurrencePayload = (
   }
 
   return {};
+};
+
+export const isMovedPastRecurrenceEnd = (
+  date: Dayjs,
+  occurrence: Pick<RecurrenceOccurrence, 'date'>,
+  { endDate }: Pick<Recurrence, 'endDate'>,
+) => {
+  const next = formatDate(date);
+
+  return endDate !== null && next !== occurrence.date && next > endDate;
 };
 
 export const toOccurrencePayload = (

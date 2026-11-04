@@ -277,6 +277,150 @@ describe('RecurrencesPage', () => {
     });
   });
 
+  it('explains what ending the entire recurrence keeps', async () => {
+    const { sent } = renderRecurrences({
+      [`PUT /recurrences/${rent.uuid}/end`]: envelope(rent, 'Encerrada'),
+    });
+
+    await clickRowAction(
+      rent.uuid,
+      i18n.t('recurrences.actions.end', { description: 'Aluguel' }),
+    );
+    const dialog = await findDialog(i18n.t('recurrences.end.history'));
+    fireEvent.click(
+      within(dialog).getByRole('radio', {
+        name: i18n.t('recurrences.endModes.ENTIRE'),
+      }),
+    );
+
+    expect(
+      await within(dialog).findByText(i18n.t('recurrences.hints.endEntire')),
+    ).toBeInTheDocument();
+    save(dialog);
+
+    expect(await screen.findByText('Encerrada')).toBeInTheDocument();
+    expect(requestBody(sent(`PUT /recurrences/${rent.uuid}/end`)[0])).toEqual(
+      {},
+    );
+  });
+
+  describe('dates of an occurrence of a recurrence that ended', () => {
+    const endedRent = {
+      ...rent,
+      state: 'ENDED' as const,
+      stateLabel: 'Encerrada',
+      endDate: '2026-10-28',
+      nextOccurrenceDate: null,
+    };
+    const planned = buildRecurrenceOccurrence({
+      occurrenceDate: '2026-10-20',
+      date: '2026-10-20',
+    });
+    const rentOccurrences = `/recurrences/${rent.uuid}/occurrences`;
+    const occurrencePath = `${rentOccurrences}/${planned.uuid}`;
+
+    const openPlannedAction = async (
+      routes: Record<string, unknown>,
+      action:
+        | 'recurrences.actions.confirmOccurrence'
+        | 'recurrences.actions.editOccurrence',
+    ) => {
+      const rendered = renderRecurrences({
+        'GET /recurrences': listPage([endedRent]),
+        [`GET ${rentOccurrences}`]: listPage([planned]),
+        ...routes,
+      });
+
+      await clickRowAction(
+        rent.uuid,
+        i18n.t('recurrences.actions.occurrences', { description: 'Aluguel' }),
+      );
+      await findDialog(i18n.t('recurrences.occurrences.accountHint'));
+      fireEvent.click(
+        within(await findRow(planned.uuid)).getByRole('button', {
+          name: i18n.t(action, { date: date('2026-10-20') }),
+        }),
+      );
+
+      return rendered;
+    };
+
+    it('refuses to reschedule past the end date', async () => {
+      const { sent } = await openPlannedAction(
+        {
+          [`PATCH ${occurrencePath}`]: envelope(
+            { ...planned, date: '2026-10-28' },
+            'Ocorrência atualizada',
+          ),
+        },
+        'recurrences.actions.editOccurrence',
+      );
+      const dialog = await findDialog(
+        i18n.t('recurrences.editOccurrence.endDateLimit', {
+          date: date('2026-10-28'),
+        }),
+      );
+      const dateInput = within(dialog).getByLabelText(
+        i18n.t('recurrences.fields.expectedDate'),
+      );
+
+      const type = (value: string) => {
+        fireEvent.mouseDown(dateInput);
+        fireEvent.change(dateInput, { target: { value: date(value) } });
+        fireEvent.keyDown(dateInput, { key: 'Enter' });
+      };
+
+      type('2026-10-29');
+      save(dialog);
+
+      expect(
+        await within(dialog).findByText(
+          i18n.t('recurrences.validation.occurrenceAfterEnd', {
+            date: date('2026-10-28'),
+          }),
+        ),
+      ).toBeInTheDocument();
+      expect(sent(`PATCH ${occurrencePath}`)).toHaveLength(0);
+
+      type('2026-10-28');
+      save(dialog);
+
+      expect(
+        await screen.findByText('Ocorrência atualizada'),
+      ).toBeInTheDocument();
+      expect(requestBody(sent(`PATCH ${occurrencePath}`)[0])).toMatchObject({
+        date: '2026-10-28',
+      });
+    });
+
+    it('confirms with a completion date after the end date', async () => {
+      const { sent } = await openPlannedAction(
+        {
+          [`PUT ${occurrencePath}/confirmation`]: envelope(
+            { ...planned, state: 'COMPLETED', completedOn: '2026-10-29' },
+            'Ocorrência confirmada',
+          ),
+        },
+        'recurrences.actions.confirmOccurrence',
+      );
+      const dialog = await findDialog(i18n.t('recurrences.confirm.dateHint'));
+
+      expect(
+        within(dialog).getByLabelText(
+          i18n.t('transactions.fields.completedOn'),
+        ),
+      ).toHaveValue(date('2026-10-29'));
+      save(dialog);
+
+      expect(
+        await screen.findByText('Ocorrência confirmada'),
+      ).toBeInTheDocument();
+      expect(
+        requestBody(sent(`PUT ${occurrencePath}/confirmation`)[0]),
+      ).toMatchObject({ date: '2026-10-29' });
+    });
+  });
+
   it('confirms a planned card charge with an edited amount', async () => {
     const { sent } = renderRecurrences({
       [`PUT ${occurrencesPath}/${plannedCharge.uuid}/confirmation`]: envelope(

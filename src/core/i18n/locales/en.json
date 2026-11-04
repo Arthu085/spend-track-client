@@ -406,7 +406,8 @@
       "endMode": "How to end",
       "endFrom": "No occurrence from",
       "endFromInvoiceMonth": "No charge from the invoice of",
-      "date": "Date"
+      "date": "Date",
+      "expectedDate": "Expected date"
     },
     "targets": {
       "ACCOUNT": "Account",
@@ -443,10 +444,12 @@
       "cardCharges": "Each charge joins an invoice only when you confirm it.",
       "editLocked": "Changes apply to planned occurrences only; completed and canceled ones are never changed. The type, frequency, dates, and card are fixed: to change them, end this recurrence and create a new one.",
       "endFrom": "Planned occurrences on or after this date are removed.",
-      "endFromInvoiceMonth": "Planned charges on this invoice and later ones are removed. Earlier invoices stay as they are."
+      "endFromInvoiceMonth": "Planned charges on this invoice and later ones are removed. Earlier invoices stay as they are.",
+      "endEntire": "The recurrence ends today. Planned occurrences up to today are kept, and later ones are removed."
     },
     "validation": {
-      "endBeforeStart": "Choose an end date on or after the start date."
+      "endBeforeStart": "Choose an end date on or after the start date.",
+      "occurrenceAfterEnd": "Choose a date up to {{date}}, when this recurrence ends."
     },
     "actions": {
       "occurrences": "Occurrences of {{description}}",
@@ -466,7 +469,7 @@
     "end": {
       "title": "End recurrence",
       "description": "Choose when {{description}} stops.",
-      "history": "Completed occurrences always stay in the history, and planned ones before the cut are kept. Ending cannot be undone."
+      "history": "Completed and canceled occurrences always stay in the history. Planned ones up to the end can still be confirmed, edited, or skipped, and later ones are removed. Ending cannot be undone."
     },
     "occurrences": {
       "title": "Occurrences · {{description}}",
@@ -478,11 +481,13 @@
     "confirm": {
       "title": "Confirm occurrence",
       "accountDescription": "Enter the amount and the date {{description}} was actually paid or received. Balances change only after this step.",
-      "cardDescription": "Enter the amount and the purchase date of {{description}}. Confirming adds the charge to the matching invoice."
+      "cardDescription": "Enter the amount and the purchase date of {{description}}. Confirming adds the charge to the matching invoice.",
+      "dateHint": "This is when it actually happened, so it can be after the recurrence ends. The scheduled date stays the same."
     },
     "editOccurrence": {
       "title": "Edit occurrence",
-      "description": "Only this occurrence of {{description}} changes."
+      "description": "Only this occurrence of {{description}} changes.",
+      "endDateLimit": "Can't be after {{date}}, when this recurrence ends. The scheduled date stays the same."
     },
     "skip": {
       "title": "Skip occurrence",

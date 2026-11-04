@@ -5,6 +5,7 @@ import {
   buildRecurrenceOccurrence,
 } from '@/test/recurrence-fixture';
 import {
+  isMovedPastRecurrenceEnd,
   type RecurrenceForm,
   recurrenceFormSchema,
   toCreateRecurrencePayload,
@@ -144,6 +145,30 @@ describe('recurrence form schemas', () => {
     expect(
       toEndRecurrencePayload({ mode: 'ENTIRE', from: dayjs('2026-11-20') }),
     ).toEqual({});
+  });
+
+  it('flags only a planned date moved past the end of the recurrence', () => {
+    const occurrence = { date: '2026-10-20' };
+    const bounded = { endDate: '2026-10-28' };
+
+    expect(
+      isMovedPastRecurrenceEnd(dayjs('2026-10-29'), occurrence, bounded),
+    ).toBe(true);
+    expect(
+      isMovedPastRecurrenceEnd(dayjs('2026-10-28'), occurrence, bounded),
+    ).toBe(false);
+    expect(
+      isMovedPastRecurrenceEnd(
+        dayjs('2026-11-02'),
+        { date: '2026-11-02' },
+        bounded,
+      ),
+    ).toBe(false);
+    expect(
+      isMovedPastRecurrenceEnd(dayjs('2099-01-01'), occurrence, {
+        endDate: null,
+      }),
+    ).toBe(false);
   });
 
   it('builds occurrence payloads with date-only strings', () => {

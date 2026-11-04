@@ -1,13 +1,18 @@
 import { DatePicker, Form, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
-import { dateInputFormat, todayDateOnly } from '@/shared/date/date-only';
+import {
+  dateInputFormat,
+  formatDateOnly,
+  todayDateOnly,
+} from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
 import { zodRule } from '@/shared/forms/zod-rule';
 import { MoneyInput } from '@/shared/money/money-input';
 import {
   type OccurrenceForm,
+  isMovedPastRecurrenceEnd,
   occurrenceFormSchema,
   toOccurrencePayload,
 } from '../../domain/recurrence-form.schemas';
@@ -37,7 +42,7 @@ interface OccurrenceFormModalProps {
 
 const dateLabelKey = (action: OccurrenceAction, chargesCard: boolean) => {
   if (action === 'edit') {
-    return 'recurrences.fields.date';
+    return 'recurrences.fields.expectedDate';
   }
 
   return chargesCard
@@ -76,6 +81,18 @@ export const OccurrenceFormModal = ({
   const chargesCard = isCardRecurrence(recurrence);
   const action = target?.action ?? 'confirm';
   const { shape } = occurrenceFormSchema;
+  const endDate =
+    recurrence.endDate && formatDateOnly(recurrence.endDate, i18n.language);
+
+  const dateExtra = () => {
+    if (action === 'confirm') {
+      return t('recurrences.confirm.dateHint');
+    }
+
+    return endDate
+      ? t('recurrences.editOccurrence.endDateLimit', { date: endDate })
+      : undefined;
+  };
 
   const submit = (values: OccurrenceForm) => {
     if (!target) {
@@ -129,7 +146,25 @@ export const OccurrenceFormModal = ({
       <Form.Item
         name="date"
         label={t(dateLabelKey(action, chargesCard))}
-        rules={[zodRule(shape.date)]}
+        extra={dateExtra()}
+        rules={[
+          zodRule(shape.date),
+          {
+            validator: (_rule, value: unknown) =>
+              action === 'edit' &&
+              target &&
+              dayjs.isDayjs(value) &&
+              isMovedPastRecurrenceEnd(value, target.occurrence, recurrence)
+                ? Promise.reject(
+                    new Error(
+                      t('recurrences.validation.occurrenceAfterEnd', {
+                        date: endDate,
+                      }),
+                    ),
+                  )
+                : Promise.resolve(),
+          },
+        ]}
       >
         <DatePicker
           format={dateInputFormat(i18n.language)}

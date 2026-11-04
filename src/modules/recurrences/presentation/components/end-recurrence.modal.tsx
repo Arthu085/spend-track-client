@@ -76,6 +76,11 @@ const EndRecurrenceFields = ({ modes }: { modes: RecurrenceEndMode[] }) => {
           />
         </Form.Item>
       )}
+      {mode === 'ENTIRE' && (
+        <Typography.Paragraph>
+          {t('recurrences.hints.endEntire')}
+        </Typography.Paragraph>
+      )}
     </>
   );
 };
