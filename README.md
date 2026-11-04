@@ -126,7 +126,9 @@ SPEND_TRACK_API_PATH=../spend-track-api npm run test:integration
 `../spend-track-api`. That checkout must include `test/frontend/server.ts`. The suite starts an
 ephemeral PostgreSQL Testcontainer, applies the backend's migrations and seeds, and listens on an
 available localhost port. It closes the API and container after the run, using no developer database
-or running API. Both repositories keep their existing validation gates.
+or running API. Both repositories keep their existing validation gates. The access-token lifetime
+comes from the backend fixture (5 seconds by default); on a slow machine, raise it by setting
+`FRONTEND_FIXTURE_ACCESS_TOKEN_TTL_SECONDS` for this command, which the fixture inherits.
 
 These tests call the frontend's API functions and Zod parsers through real Axios XHR requests in
 jsdom, including credentialed cookies and CORS. They cover login, automatic refresh and rotation,

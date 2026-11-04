@@ -27,6 +27,8 @@ import {
 } from '@/modules/users/infra/users.api';
 import '../../../test/integration/context';
 
+const ACCESS_TOKEN_EXPIRY_MARGIN_MS = 250;
+
 const apiErrorSchema = z.object({
   statusCode: z.number(),
   error: z.string().min(1),
@@ -100,7 +102,12 @@ describe('real backend API contracts', () => {
   });
 
   it('refreshes an expired access cookie once and rotates refresh cookies sequentially', async () => {
-    await new Promise((resolve) => setTimeout(resolve, 5250));
+    await new Promise((resolve) =>
+      setTimeout(
+        resolve,
+        backend.accessTokenTtlMs + ACCESS_TOKEN_EXPIRY_MARGIN_MS,
+      ),
+    );
     const users = await fetchUsers({ page: 1, limit: 10 });
 
     expect(users.meta.total).toBeGreaterThanOrEqual(2);
