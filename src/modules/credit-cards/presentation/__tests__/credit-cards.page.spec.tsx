@@ -18,6 +18,7 @@ import {
   nubank,
   renderWithRoutes,
   save,
+  type StubRoutes,
 } from './credit-card-test-support';
 
 const visa = buildCreditCard({ creditBalance: '25.00' });
@@ -83,6 +84,164 @@ describe('CreditCardsPage', () => {
       page: 1,
       limit: 20,
       status: 'ACTIVE',
+    });
+  });
+
+  describe('archiving', () => {
+    const pendingPath = `GET /credit-cards/${visa.uuid}/pending-operations`;
+    const statusPath = `PUT /credit-cards/${visa.uuid}/status`;
+    const archived = envelope(
+      { ...visa, status: 'INACTIVE', statusLabel: 'Inativo' },
+      'Cartão atualizado',
+    );
+
+    const toggle = async () => {
+      fireEvent.click(
+        within(await findRow(visa.uuid)).getByRole('switch', {
+          name: i18n.t('creditCards.actions.toggleStatus', { name: 'Visa' }),
+        }),
+      );
+    };
+
+    const findArchiveDialog = () =>
+      findDialog(i18n.t('creditCards.archive.description'));
+
+    const renderCards = (routes: StubRoutes) =>
+      renderWithRoutes(AppRoutes.CREDIT_CARDS, {
+        'GET /credit-cards': listPage([visa]),
+        ...routes,
+      });
+
+    it('archives directly when nothing is planned', async () => {
+      const { sent } = renderCards({
+        [pendingPath]: envelope({ count: 0, total: '0.00' }),
+        [statusPath]: archived,
+      });
+
+      await toggle();
+
+      await waitFor(() => {
+        expect(sent(statusPath)).toHaveLength(1);
+      });
+      expect(requestBody(sent(statusPath)[0])).toEqual({ status: 'INACTIVE' });
+      expect(
+        screen.queryByText(i18n.t('creditCards.archive.description')),
+      ).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ['KEEP', 'pendingOperations.keep'],
+      ['CANCEL', 'pendingOperations.cancel'],
+    ] as const)(
+      'shows the count and total of planned charges and sends %s',
+      async (decision, label) => {
+        const { sent } = renderCards({
+          [pendingPath]: envelope({ count: 2, total: '111.80' }),
+          [statusPath]: archived,
+        });
+
+        await toggle();
+
+        const dialog = await findArchiveDialog();
+        expect(
+          within(dialog).getByText(
+            i18n.t('pendingOperations.summary', {
+              count: 2,
+              total: money('111.80'),
+            }),
+          ),
+        ).toBeInTheDocument();
+        expect(sent(statusPath)).toHaveLength(0);
+
+        fireEvent.click(
+          within(dialog).getByRole('button', { name: i18n.t(label) }),
+        );
+
+        await waitFor(() => {
+          expect(sent(statusPath)).toHaveLength(1);
+        });
+        expect(requestBody(sent(statusPath)[0])).toEqual({
+          status: 'INACTIVE',
+          pendingOperations: decision,
+        });
+        expect(
+          await screen.findByText('Cartão atualizado'),
+        ).toBeInTheDocument();
+      },
+    );
+
+    it('changes nothing when the dialog is closed', async () => {
+      const { sent } = renderCards({
+        [pendingPath]: envelope({ count: 1, total: '55.90' }),
+      });
+
+      await toggle();
+
+      fireEvent.click(
+        within(await findArchiveDialog()).getByText(i18n.t('common.close')),
+      );
+
+      expect(sent(statusPath)).toHaveLength(0);
+      expect(
+        within(await findRow(visa.uuid)).getByRole('switch'),
+      ).toBeChecked();
+    });
+
+    it('shows the API error and keeps the card when the check fails', async () => {
+      const { sent } = renderCards({
+        [pendingPath]: {
+          status: 404,
+          data: { message: 'Cartão não encontrado' },
+        },
+      });
+
+      await toggle();
+
+      expect(
+        await screen.findByText('Cartão não encontrado'),
+      ).toBeInTheDocument();
+      expect(sent(statusPath)).toHaveLength(0);
+    });
+
+    it('shows the API error when archiving is refused after the decision', async () => {
+      renderCards({
+        [pendingPath]: envelope({ count: 1, total: '55.90' }),
+        [statusPath]: {
+          status: 409,
+          data: { message: 'Conflito ao arquivar' },
+        },
+      });
+
+      await toggle();
+
+      fireEvent.click(
+        within(await findArchiveDialog()).getByRole('button', {
+          name: i18n.t('pendingOperations.keep'),
+        }),
+      );
+
+      expect(
+        await screen.findByText('Conflito ao arquivar'),
+      ).toBeInTheDocument();
+    });
+
+    it('reactivates without asking about planned charges', async () => {
+      const inactive = buildCreditCard({
+        status: 'INACTIVE',
+        statusLabel: 'Inativo',
+      });
+      const { sent } = renderCards({
+        'GET /credit-cards': listPage([inactive]),
+        [statusPath]: envelope(visa, 'Cartão atualizado'),
+      });
+
+      await toggle();
+
+      await waitFor(() => {
+        expect(sent(statusPath)).toHaveLength(1);
+      });
+      expect(requestBody(sent(statusPath)[0])).toEqual({ status: 'ACTIVE' });
+      expect(sent(pendingPath)).toHaveLength(0);
     });
   });
 

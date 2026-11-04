@@ -7,6 +7,11 @@ import {
   parsePaginatedResponse,
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
+import {
+  type ArchiveStatusVariables,
+  type PendingOperations,
+  pendingOperationsSchema,
+} from '@/shared/domain/pending-operations.schema';
 import type { RecordStatus } from '@/shared/domain/record-status.schema';
 import type {
   CreateCreditCardPurchasePayload,
@@ -53,10 +58,7 @@ export interface UpdateCreditCardVariables extends Partial<CreditCardPayload> {
   uuid: string;
 }
 
-export interface UpdateCreditCardStatusVariables {
-  uuid: string;
-  status: RecordStatus;
-}
+export type UpdateCreditCardStatusVariables = ArchiveStatusVariables;
 
 export interface UpdateCreditCardPurchaseVariables extends UpdateCreditCardPurchasePayload {
   uuid: string;
@@ -120,13 +122,23 @@ export const updateCreditCard = async ({
   return parseApiResponse(creditCardSchema, response.data);
 };
 
+export const fetchCreditCardPendingOperations = async (
+  uuid: string,
+): Promise<PendingOperations> => {
+  const response = await httpClient.get<unknown>(
+    `/credit-cards/${uuid}/pending-operations`,
+  );
+
+  return parseApiData(pendingOperationsSchema, response.data);
+};
+
 export const updateCreditCardStatus = async ({
   uuid,
-  status,
+  ...payload
 }: UpdateCreditCardStatusVariables): Promise<ApiResponse<CreditCard>> => {
   const response = await httpClient.put<unknown>(
     `/credit-cards/${uuid}/status`,
-    { status },
+    payload,
   );
 
   return parseApiResponse(creditCardSchema, response.data);

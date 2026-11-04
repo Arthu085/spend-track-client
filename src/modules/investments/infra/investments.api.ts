@@ -2,10 +2,16 @@ import { z } from 'zod';
 import {
   type ApiResponse,
   type PaginatedResponse,
+  parseApiData,
   parseApiResponse,
   parsePaginatedResponse,
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
+import {
+  type ArchiveStatusVariables,
+  type PendingOperations,
+  pendingOperationsSchema,
+} from '@/shared/domain/pending-operations.schema';
 import type { RecordStatus } from '@/shared/domain/record-status.schema';
 import type {
   InvestmentMovementPayload,
@@ -36,10 +42,7 @@ export interface UpdateInvestmentPayload extends Partial<InvestmentPayload> {
   uuid: string;
 }
 
-export interface UpdateInvestmentStatusPayload {
-  uuid: string;
-  status: RecordStatus;
-}
+export type UpdateInvestmentStatusPayload = ArchiveStatusVariables;
 
 export interface CreateInvestmentMovementPayload extends InvestmentMovementPayload {
   investmentUuid: string;
@@ -98,13 +101,23 @@ export const updateInvestment = async ({
   return parseApiResponse(investmentSchema, response.data);
 };
 
+export const fetchInvestmentPendingOperations = async (
+  uuid: string,
+): Promise<PendingOperations> => {
+  const response = await httpClient.get<unknown>(
+    `${investmentPath(uuid)}/pending-operations`,
+  );
+
+  return parseApiData(pendingOperationsSchema, response.data);
+};
+
 export const updateInvestmentStatus = async ({
   uuid,
-  status,
+  ...payload
 }: UpdateInvestmentStatusPayload): Promise<ApiResponse<Investment>> => {
   const response = await httpClient.put<unknown>(
     `${investmentPath(uuid)}/status`,
-    { status },
+    payload,
   );
 
   return parseApiResponse(investmentSchema, response.data);

@@ -249,6 +249,11 @@
       "title": "Excluir cartão",
       "description": "Excluir {{name}}? Cartões com compras não podem ser excluídos; arquive-os. A exclusão não pode ser desfeita."
     },
+    "archive": {
+      "description": "São cobranças recorrentes previstas. Compras, faturas e pagamentos já registrados nunca mudam.",
+      "keepHint": "Manter: elas continuam contando nas projeções e nos orçamentos, e cada uma pode ser confirmada depois na sua recorrência.",
+      "cancelHint": "Cancelar: elas ficam no histórico da recorrência como canceladas e deixam de contar nas projeções e nos orçamentos."
+    },
     "invoices": {
       "title": "Faturas",
       "titleOf": "Faturas de {{name}}",
@@ -591,6 +596,11 @@
       "title": "Excluir investimento",
       "description": "Excluir {{name}}? Investimentos com movimentações não podem ser excluídos; inative-os."
     },
+    "archive": {
+      "description": "São aportes e resgates previstos. O total soma todos eles, portanto não é o impacto líquido no saldo. Movimentações efetivadas nunca mudam.",
+      "keepHint": "Manter: eles continuam contando nos saldos projetados, e cada um pode ser confirmado depois no histórico.",
+      "cancelHint": "Cancelar: eles ficam no histórico como cancelados e deixam de contar nos saldos projetados."
+    },
     "confirm": {
       "title": "Confirmar movimentação",
       "description": "A movimentação vai alterar os saldos da conta e do investimento."
@@ -709,6 +719,13 @@
     "general": "Geral",
     "finances": "Finanças",
     "administration": "Administração"
+  },
+  "pendingOperations": {
+    "title": "Arquivar {{name}}",
+    "summary_one": "Há {{count}} operação pendente no total de {{total}}.",
+    "summary_other": "Há {{count}} operações pendentes no total de {{total}}.",
+    "keep": "Manter e arquivar",
+    "cancel": "Cancelar e arquivar"
   },
   "feedback": {
     "error": "Não foi possível concluir a ação",

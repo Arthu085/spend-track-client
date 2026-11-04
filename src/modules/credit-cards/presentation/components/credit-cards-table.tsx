@@ -18,6 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { creditCardInvoicesPath } from '@/core/router/app-routes';
+import { PendingOperationsModal } from '@/shared/components/pending-operations.modal';
+import { useArchiveWithPendingOperations } from '@/shared/components/use-archive-with-pending-operations';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import type { ListParams } from '@/shared/list/use-list-params';
@@ -25,6 +27,7 @@ import { MoneyText } from '@/shared/money/money-text';
 import { isPositiveMoney } from '@/shared/money/money';
 import type { creditCardFiltersShape } from '../../domain/credit-card-form.schemas';
 import type { CreditCard } from '../../domain/credit-card.schema';
+import { fetchCreditCardPendingOperations } from '../../infra/credit-cards.api';
 import {
   useDeleteCreditCard,
   useUpdateCreditCardStatus,
@@ -46,6 +49,10 @@ export const CreditCardsTable = ({
   const { page, limit, setPagination } = listParams;
   const statusMutation = useUpdateCreditCardStatus();
   const deleteMutation = useDeleteCreditCard();
+  const archiveFlow = useArchiveWithPendingOperations({
+    fetchPendingOperations: fetchCreditCardPendingOperations,
+    statusMutation,
+  });
 
   const removeCard = (uuid: string) => {
     const isLastRowOfPage = query.data?.data.length === 1 && page > 1;
@@ -115,13 +122,21 @@ export const CreditCardsTable = ({
             aria-label={t('creditCards.actions.toggleStatus', { name })}
             checked={status === 'ACTIVE'}
             loading={
-              statusMutation.isPending && statusMutation.variables.uuid === uuid
+              archiveFlow.isChecking(uuid) ||
+              (statusMutation.isPending &&
+                statusMutation.variables.uuid === uuid)
             }
             onChange={(checked) => {
-              statusMutation.mutate(
-                { uuid, status: checked ? 'ACTIVE' : 'INACTIVE' },
-                { onError: showError },
-              );
+              if (checked) {
+                statusMutation.mutate(
+                  { uuid, status: 'ACTIVE' },
+                  { onError: showError },
+                );
+
+                return;
+              }
+
+              archiveFlow.requestArchive({ uuid, name });
             }}
           />
           {statusLabel}
@@ -173,12 +188,20 @@ export const CreditCardsTable = ({
   ];
 
   return (
-    <PaginatedTable
-      query={query}
-      listParams={listParams}
-      rowKey="uuid"
-      columns={columns}
-      locale={{ emptyText: t('creditCards.empty') }}
-    />
+    <>
+      <PaginatedTable
+        query={query}
+        listParams={listParams}
+        rowKey="uuid"
+        columns={columns}
+        locale={{ emptyText: t('creditCards.empty') }}
+      />
+      <PendingOperationsModal
+        {...archiveFlow.dialog}
+        description={t('creditCards.archive.description')}
+        keepHint={t('creditCards.archive.keepHint')}
+        cancelHint={t('creditCards.archive.cancelHint')}
+      />
+    </>
   );
 };
