@@ -311,17 +311,18 @@ not-found and forbidden pages link back to it.
 `/` is where sign-in lands unless the guards remembered another page (see
 [Authentication](#authentication)). It greets the user and reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
-and available balances, and the balance of each active account, with an invitation to add an account when there is
-none. Previous and next buttons move through past and future months and keep the month in the URL
+and available balances, and the balance of each active account. A user without accounts sees the
+invitation to add one right below the month, and a negative available balance shows a warning with the amount missing. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
-saves the preference with `PATCH /preferences` and reloads the dashboard. Account, category,
+saves the preference with `PATCH /preferences` and reloads the dashboard, and a line below it says what the
+selected perspective changes: card spending moves between months, balances and invoices never do. Account, category,
 preference, transaction, credit card, recurrence, budget, and investment mutations invalidate the dashboard query;
 account and category mutations also invalidate the transactions, credit card, and recurrence
 queries (account mutations also the investment queries) (category mutations also the budget queries), which show their names and colors. The projected balance adds every planned
 transaction and planned investment contribution or withdrawal dated up to the end of the month,
 overdue ones included, to the actual balance; the
-available balance subtracts what is still due on card invoices and the planned recurring card
-charges of the month from the projected one.
+available balance subtracts what is still due on the invoices through the month and the planned recurring card
+charges expected on them (`creditCards.plannedDue`) from the projected one.
 
 Transaction indicators, each with its own empty state:
 
@@ -336,13 +337,16 @@ Transaction indicators, each with its own empty state:
   (in the category color) and its paid and pending amounts.
 - **Credit card invoices:** the month's card spending, what is still due on every invoice, and the
   invoices of the month plus older ones still due, with their card, due date, status, and amount
-  due. Each opens the invoice detail (see [Credit cards](#credit-cards)). When the month has
-  planned recurring card charges (`creditCards.planned`), the card also shows their total. The API
+  due. Each opens the invoice detail (see [Credit cards](#credit-cards)). The month's planned
+  recurring card charges (`creditCards.planned`) appear next to its card spending. Charges still
+  unconfirmed on the invoices through the month (`creditCards.plannedDue`) show their total and a
+  list of up to ten, oldest first, with their date, an overdue tag, card, and invoice month, and a
+  link to the recurrences page. The API
   counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
   following the perspective, and counts planned recurring card charges as pending expenses; invoice
   payments are never expenses.
-- **Budget and spending guidance:** the amount left to spend and the informational daily
-  allowance, then the month's overall limit and each category limit with its paid and pending
+- **Budget and spending guidance:** the amount left to spend, the lower of what the overall limit
+  leaves and the available balance, and the informational daily allowance, then the month's overall limit and each category limit with its paid and pending
   spending, what is left, and how much it is exceeded by (see [Budgets](#budgets)). It links to the
   month on the budgets page.
 - **Investments and goals:** the total value of active investments, the month's completed

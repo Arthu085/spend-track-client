@@ -26,7 +26,10 @@ export const buildDashboard = (
     spending: '0.00',
     outstanding: '0.00',
     planned: '0.00',
+    plannedDue: '0.00',
     invoices: [],
+    plannedCharges: [],
+    plannedChargesCount: 0,
   },
   budget: null,
   investments: {

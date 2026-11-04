@@ -163,7 +163,33 @@ describe('DashboardPage', () => {
           spending: '300.00',
           outstanding: '300.00',
           planned: '55.90',
+          plannedDue: '111.80',
           invoices: [invoice],
+          plannedCharges: [
+            {
+              uuid: 'charge-overdue',
+              recurrenceUuid: 'recurrence-uuid',
+              description: 'Netflix',
+              amount: '55.90',
+              date: '2026-09-15',
+              invoiceMonth: '2026-10-01',
+              overdue: true,
+              card: { uuid: 'card-uuid', name: 'Visa' },
+              category: { uuid: 'category-uuid', name: 'Lazer', color: null },
+            },
+            {
+              uuid: 'charge-next',
+              recurrenceUuid: 'recurrence-uuid',
+              description: 'Spotify',
+              amount: '55.90',
+              date: '2026-10-30',
+              invoiceMonth: '2026-10-01',
+              overdue: false,
+              card: { uuid: 'card-uuid', name: 'Visa' },
+              category: { uuid: 'category-uuid', name: 'Lazer', color: null },
+            },
+          ],
+          plannedChargesCount: 12,
         },
       }),
       [`GET /credit-card-invoices/${invoice.uuid}`]: envelope(
@@ -181,8 +207,34 @@ describe('DashboardPage', () => {
       within(page).getByLabelText(i18n.t('dashboard.creditCards.outstanding')),
     ).toHaveTextContent(money('300.00'));
     expect(
-      within(page).getByLabelText(i18n.t('dashboard.creditCards.planned')),
-    ).toHaveTextContent(money('55.90'));
+      within(page).getByLabelText(i18n.t('dashboard.creditCards.plannedDue')),
+    ).toHaveTextContent(money('111.80'));
+    expect(
+      within(page).getByText(
+        i18n.t('dashboard.creditCards.spendingPlanned', {
+          amount: money('55.90'),
+        }),
+      ),
+    ).toBeInTheDocument();
+
+    const overdueCharge = page.querySelector<HTMLElement>(
+      'tr[data-row-key="charge-overdue"]',
+    );
+    expect(overdueCharge).not.toBeNull();
+    expect(within(overdueCharge!).getByText('Netflix')).toBeInTheDocument();
+    expect(
+      within(overdueCharge!).getByText(i18n.t('transactions.overdue')),
+    ).toBeInTheDocument();
+    expect(
+      within(
+        page.querySelector<HTMLElement>('tr[data-row-key="charge-next"]')!,
+      ).queryByText(i18n.t('transactions.overdue')),
+    ).not.toBeInTheDocument();
+    expect(
+      within(page).getByText(
+        i18n.t('dashboard.upcoming.partial', { shown: 2, count: 12 }),
+      ),
+    ).toBeInTheDocument();
 
     const row = page.querySelector<HTMLElement>(
       `tr[data-row-key="${invoice.uuid}"]`,
@@ -287,6 +339,75 @@ describe('DashboardPage', () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(AppRoutes.ACCOUNTS);
     });
+  });
+
+  it('warns when the available balance is negative', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(
+        buildDashboard({
+          balances: {
+            actual: '100.00',
+            projected: '50.00',
+            available: '-250.50',
+          },
+        }),
+      ),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByText(
+        i18n.t('dashboard.balances.shortfall', { amount: money('250.50') }),
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByLabelText(i18n.t('dashboard.balances.available')),
+    ).toHaveTextContent(money('-250.50'));
+  });
+
+  it('does not warn while the available balance is not negative', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(buildDashboard()),
+    });
+
+    const page = await main();
+    await within(page).findByLabelText(i18n.t('dashboard.balances.available'));
+    expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('explains what the selected perspective changes', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(
+        buildDashboard({ perspective: 'INVOICE_MONTH' }),
+      ),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByText(
+        i18n.t('dashboard.perspective.INVOICE_MONTH'),
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('shows the amounts of a month whose refunds exceed its charges', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(
+        buildDashboard({
+          expenses: { total: '-50.00', completed: '-50.00', pending: '0.00' },
+        }),
+      ),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByLabelText(
+        i18n.t('dashboard.expenses.completed'),
+      ),
+    ).toHaveTextContent(money('-50.00'));
+    expect(
+      within(page).queryByText(i18n.t('dashboard.expenses.empty')),
+    ).not.toBeInTheDocument();
   });
 
   it('shows the API error when the dashboard cannot load', async () => {

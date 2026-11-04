@@ -4,8 +4,10 @@ import {
   Card,
   Empty,
   Flex,
+  Space,
   Table,
   type TableColumnsType,
+  Tag,
   Typography,
 } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -17,9 +19,12 @@ import { formatInvoiceMonth } from '@/modules/credit-cards/presentation/componen
 import { InvoiceStatusTag } from '@/modules/credit-cards/presentation/components/invoice-status-tag';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
-import { isPositiveMoney } from '@/shared/money/money';
+import { formatMoney, isPositiveMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
-import type { DashboardCreditCards } from '../../domain/dashboard.schema';
+import type {
+  DashboardCreditCards,
+  DashboardPlannedCardCharge,
+} from '../../domain/dashboard.schema';
 
 interface CreditCardInvoicesCardProps {
   creditCards: DashboardCreditCards;
@@ -77,6 +82,37 @@ export const CreditCardInvoicesCard = ({
     },
   ];
 
+  const plannedColumns: TableColumnsType<DashboardPlannedCardCharge> = [
+    {
+      title: t('transactions.fields.date'),
+      dataIndex: 'date',
+      render: (_, { date, overdue }) => (
+        <Space size="small" wrap>
+          {formatDateOnly(date, i18n.language)}
+          {overdue && <Tag color="error">{t('transactions.overdue')}</Tag>}
+        </Space>
+      ),
+    },
+    {
+      title: t('transactions.fields.description'),
+      dataIndex: 'description',
+      render: (_, { description, card, invoiceMonth }) => (
+        <Flex vertical>
+          {description}
+          <Typography.Text type="secondary">
+            {card.name} · {formatInvoiceMonth(invoiceMonth, i18n.language)}
+          </Typography.Text>
+        </Flex>
+      ),
+    },
+    {
+      title: t('transactions.fields.amount'),
+      dataIndex: 'amount',
+      align: 'right',
+      render: (_, { amount }) => <MoneyText amount={amount} strong />,
+    },
+  ];
+
   return (
     <Card
       title={t('dashboard.creditCards.title')}
@@ -95,6 +131,14 @@ export const CreditCardInvoicesCard = ({
               strong
               aria-label={t('dashboard.creditCards.spending')}
             />
+            {isPositiveMoney(creditCards.planned) && (
+              <Typography.Text type="secondary">
+                {' '}
+                {t('dashboard.creditCards.spendingPlanned', {
+                  amount: formatMoney(creditCards.planned, i18n.language),
+                })}
+              </Typography.Text>
+            )}
           </Typography.Text>
           <Typography.Text>
             {t('dashboard.creditCards.outstanding')}{' '}
@@ -104,13 +148,13 @@ export const CreditCardInvoicesCard = ({
               aria-label={t('dashboard.creditCards.outstanding')}
             />
           </Typography.Text>
-          {isPositiveMoney(creditCards.planned) && (
+          {isPositiveMoney(creditCards.plannedDue) && (
             <Typography.Text>
-              {t('dashboard.creditCards.planned')}{' '}
+              {t('dashboard.creditCards.plannedDue')}{' '}
               <MoneyText
-                amount={creditCards.planned}
+                amount={creditCards.plannedDue}
                 strong
-                aria-label={t('dashboard.creditCards.planned')}
+                aria-label={t('dashboard.creditCards.plannedDue')}
               />
             </Typography.Text>
           )}
@@ -129,6 +173,35 @@ export const CreditCardInvoicesCard = ({
             dataSource={creditCards.invoices}
             scroll={{ x: 'max-content' }}
           />
+        )}
+        {creditCards.plannedCharges.length > 0 && (
+          <>
+            <Flex justify="space-between" gap="middle" wrap>
+              <Typography.Text type="secondary">
+                {t('dashboard.creditCards.plannedHint')}
+              </Typography.Text>
+              <Link to={AppRoutes.RECURRENCES}>
+                {t('dashboard.creditCards.manageRecurrences')}
+              </Link>
+            </Flex>
+            <Table
+              rowKey="uuid"
+              size="small"
+              pagination={false}
+              columns={plannedColumns}
+              dataSource={creditCards.plannedCharges}
+              scroll={{ x: 'max-content' }}
+            />
+            {creditCards.plannedChargesCount >
+              creditCards.plannedCharges.length && (
+              <Typography.Text type="secondary">
+                {t('dashboard.upcoming.partial', {
+                  shown: creditCards.plannedCharges.length,
+                  count: creditCards.plannedChargesCount,
+                })}
+              </Typography.Text>
+            )}
+          </>
         )}
       </Flex>
       <CreditCardInvoiceModal

@@ -93,6 +93,9 @@ export const DashboardPage = () => {
               <PerspectiveSwitch value={dashboard.perspective} />
             </Flex>
           </Card>
+          {dashboard.accounts.length === 0 && (
+            <AccountBalancesCard accounts={dashboard.accounts} />
+          )}
           <BalanceSummary balances={dashboard.balances} />
           <CashFlowSummary
             income={dashboard.income}
@@ -124,7 +127,9 @@ export const DashboardPage = () => {
           </Row>
           <CreditCardInvoicesCard creditCards={dashboard.creditCards} />
           <InvestmentsCard investments={dashboard.investments} />
-          <AccountBalancesCard accounts={dashboard.accounts} />
+          {dashboard.accounts.length > 0 && (
+            <AccountBalancesCard accounts={dashboard.accounts} />
+          )}
         </>
       )}
       <TransactionFormModal
