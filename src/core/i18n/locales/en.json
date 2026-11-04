@@ -597,7 +597,7 @@
       "description": "Delete {{name}}? Investments with movements cannot be deleted; deactivate them instead."
     },
     "archive": {
-      "description": "They are planned contributions and withdrawals. Completed movements never change.",
+      "description": "They are planned contributions and withdrawals. The total adds them all together, so it is not the net impact on the balance. Completed movements never change.",
       "keepHint": "Keep: they still count in projected balances, and each one can be confirmed later from the history.",
       "cancelHint": "Cancel: they stay in the history as canceled and stop counting in projected balances."
     },

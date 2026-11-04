@@ -597,7 +597,7 @@
       "description": "Excluir {{name}}? Investimentos com movimentações não podem ser excluídos; inative-os."
     },
     "archive": {
-      "description": "São aportes e resgates previstos. Movimentações efetivadas nunca mudam.",
+      "description": "São aportes e resgates previstos. O total soma todos eles, portanto não é o impacto líquido no saldo. Movimentações efetivadas nunca mudam.",
       "keepHint": "Manter: eles continuam contando nos saldos projetados, e cada um pode ser confirmado depois no histórico.",
       "cancelHint": "Cancelar: eles ficam no histórico como cancelados e deixam de contar nos saldos projetados."
     },

@@ -37,6 +37,9 @@ export const PendingOperationsModal = ({
       open={open}
       title={t('pendingOperations.title', { name })}
       onCancel={onClose}
+      closable={{ disabled: deciding }}
+      keyboard={!deciding}
+      mask={{ closable: !deciding }}
       destroyOnHidden
       footer={
         <Flex wrap gap="small" justify="end">
