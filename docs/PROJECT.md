@@ -419,7 +419,7 @@ purchases are not transactions: they never change an account balance until an in
   over. A form modal creates and edits cards; marking one as default clears the previous default on
   the API. The status switch archives or reactivates a card (archived cards keep their history and
   can still be paid but take no new purchases), and delete asks for confirmation; the API refuses
-  to delete a card with purchases (`409`).
+  to delete a card with purchases or invoice payments, canceled ones included (`409`).
 - **Invoices:** `/credit-cards/:uuid/invoices` lists a card's invoices, newest first, with the
   reference month, closing and due dates, total, paid and due amounts, and status (open, closed,
   overdue, or paid). The invoice detail modal shows the totals (including credit from the previous
