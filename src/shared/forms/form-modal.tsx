@@ -45,7 +45,7 @@ export const FormModal = <T extends object>({
           requiredMark={false}
           disabled={submitting || readOnly}
           initialValues={initialValues}
-          onFinish={onSubmit}
+          onFinish={readOnly ? undefined : onSubmit}
         >
           {dom}
         </Form>

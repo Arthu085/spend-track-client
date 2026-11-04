@@ -112,4 +112,56 @@ describe('FormModal', () => {
     fireEvent.click(closeButton);
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it('does not submit a read-only form through a native submit', async () => {
+    const onSubmit = vi.fn<(values: NameForm) => void>();
+
+    render(
+      <FormModal<NameForm>
+        open
+        readOnly
+        title="Item details"
+        initialValues={{ name: 'Ada' }}
+        submitting={false}
+        onSubmit={onSubmit}
+        onCancel={() => undefined}
+      >
+        <Form.Item name="name" label="Name">
+          <Input />
+        </Form.Item>
+      </FormModal>,
+    );
+
+    const form = screen.getByLabelText('Name').closest('form');
+
+    if (!form) {
+      throw new Error('The modal did not render a form.');
+    }
+
+    fireEvent.submit(form);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('applies the configured width', () => {
+    render(
+      <FormModal<NameForm>
+        open
+        width={720}
+        title="Edit item"
+        submitting={false}
+        onSubmit={() => undefined}
+        onCancel={() => undefined}
+      >
+        <Form.Item name="name" label="Name">
+          <Input />
+        </Form.Item>
+      </FormModal>,
+    );
+
+    expect(document.querySelector('.ant-modal')).toHaveStyle({
+      width: '720px',
+    });
+  });
 });
