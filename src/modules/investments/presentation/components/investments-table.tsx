@@ -19,6 +19,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { investmentMovementsPath } from '@/core/router/app-routes';
+import { PendingOperationsModal } from '@/shared/components/pending-operations.modal';
+import { useArchiveWithPendingOperations } from '@/shared/components/use-archive-with-pending-operations';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import type { ListParams } from '@/shared/list/use-list-params';
@@ -28,6 +30,7 @@ import type {
   Investment,
   TransferMovementType,
 } from '../../domain/investment.schema';
+import { fetchInvestmentPendingOperations } from '../../infra/investments.api';
 import {
   useDeleteInvestment,
   useUpdateInvestmentStatus,
@@ -54,6 +57,10 @@ export const InvestmentsTable = ({
   const { page, limit, setPagination } = listParams;
   const statusMutation = useUpdateInvestmentStatus();
   const deleteMutation = useDeleteInvestment();
+  const archiveFlow = useArchiveWithPendingOperations({
+    fetchPendingOperations: fetchInvestmentPendingOperations,
+    statusMutation,
+  });
 
   const removeInvestment = (uuid: string) => {
     const isLastRowOfPage = query.data?.data.length === 1 && page > 1;
@@ -123,13 +130,21 @@ export const InvestmentsTable = ({
             aria-label={t('investments.actions.toggleStatus', { name })}
             checked={status === 'ACTIVE'}
             loading={
-              statusMutation.isPending && statusMutation.variables.uuid === uuid
+              archiveFlow.isChecking(uuid) ||
+              (statusMutation.isPending &&
+                statusMutation.variables.uuid === uuid)
             }
             onChange={(checked) => {
-              statusMutation.mutate(
-                { uuid, status: checked ? 'ACTIVE' : 'INACTIVE' },
-                { onError: showError },
-              );
+              if (checked) {
+                statusMutation.mutate(
+                  { uuid, status: 'ACTIVE' },
+                  { onError: showError },
+                );
+
+                return;
+              }
+
+              archiveFlow.requestArchive({ uuid, name });
             }}
           />
           {statusLabel}
@@ -202,12 +217,20 @@ export const InvestmentsTable = ({
   ];
 
   return (
-    <PaginatedTable
-      query={query}
-      listParams={listParams}
-      rowKey="uuid"
-      columns={columns}
-      locale={{ emptyText: t('investments.empty') }}
-    />
+    <>
+      <PaginatedTable
+        query={query}
+        listParams={listParams}
+        rowKey="uuid"
+        columns={columns}
+        locale={{ emptyText: t('investments.empty') }}
+      />
+      <PendingOperationsModal
+        {...archiveFlow.dialog}
+        description={t('investments.archive.description')}
+        keepHint={t('investments.archive.keepHint')}
+        cancelHint={t('investments.archive.cancelHint')}
+      />
+    </>
   );
 };

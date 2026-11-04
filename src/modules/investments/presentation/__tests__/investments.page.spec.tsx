@@ -82,6 +82,99 @@ describe('InvestmentsPage', () => {
     });
   });
 
+  describe('archiving', () => {
+    const pendingPath = `GET /investments/${trip.uuid}/pending-operations`;
+    const statusPath = `PUT /investments/${trip.uuid}/status`;
+    const archived = envelope(
+      { ...trip, status: 'INACTIVE', statusLabel: 'Inativo' },
+      'Investimento atualizado',
+    );
+
+    const toggle = async () => {
+      fireEvent.click(
+        within(await findRow(trip.uuid)).getByRole('switch', {
+          name: i18n.t('investments.actions.toggleStatus', { name: trip.name }),
+        }),
+      );
+    };
+
+    it('archives directly when nothing is planned', async () => {
+      const { sent } = renderInvestments({
+        [pendingPath]: envelope({ count: 0, total: '0.00' }),
+        [statusPath]: archived,
+      });
+
+      await toggle();
+
+      await waitFor(() => {
+        expect(sent(statusPath)).toHaveLength(1);
+      });
+      expect(requestBody(sent(statusPath)[0])).toEqual({ status: 'INACTIVE' });
+    });
+
+    it.each([
+      ['KEEP', 'pendingOperations.keep'],
+      ['CANCEL', 'pendingOperations.cancel'],
+    ] as const)(
+      'shows the count and total of planned movements and sends %s',
+      async (decision, label) => {
+        const { sent } = renderInvestments({
+          [pendingPath]: envelope({ count: 1, total: '150.00' }),
+          [statusPath]: archived,
+        });
+
+        await toggle();
+
+        const dialog = await findDialog(
+          i18n.t('investments.archive.description'),
+        );
+        expect(
+          within(dialog).getByText(
+            i18n.t('pendingOperations.summary', {
+              count: 1,
+              total: money('150.00'),
+            }),
+          ),
+        ).toBeInTheDocument();
+
+        fireEvent.click(
+          within(dialog).getByRole('button', { name: i18n.t(label) }),
+        );
+
+        await waitFor(() => {
+          expect(sent(statusPath)).toHaveLength(1);
+        });
+        expect(requestBody(sent(statusPath)[0])).toEqual({
+          status: 'INACTIVE',
+          pendingOperations: decision,
+        });
+      },
+    );
+
+    it('reactivates without asking about planned movements', async () => {
+      const reservePath = `PUT /investments/${reserve.uuid}/status`;
+      const { sent } = renderInvestments({
+        [reservePath]: envelope(
+          { ...reserve, status: 'ACTIVE', statusLabel: 'Ativo' },
+          'Investimento atualizado',
+        ),
+      });
+
+      fireEvent.click(
+        within(await findRow(reserve.uuid)).getByRole('switch', {
+          name: i18n.t('investments.actions.toggleStatus', {
+            name: reserve.name,
+          }),
+        }),
+      );
+
+      await waitFor(() => {
+        expect(sent(reservePath)).toHaveLength(1);
+      });
+      expect(requestBody(sent(reservePath)[0])).toEqual({ status: 'ACTIVE' });
+    });
+  });
+
   it('creates a goal with a target amount', async () => {
     const { sent } = renderInvestments({
       'POST /investments': envelope(trip, 'Investimento criado'),

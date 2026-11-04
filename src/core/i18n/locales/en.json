@@ -249,6 +249,11 @@
       "title": "Delete credit card",
       "description": "Delete {{name}}? Cards with purchases cannot be deleted; archive them instead. Deleting cannot be undone."
     },
+    "archive": {
+      "description": "They are planned recurring charges. Purchases, invoices, and payments already recorded never change.",
+      "keepHint": "Keep: they still count in projections and budgets, and each one can be confirmed later from its recurrence.",
+      "cancelHint": "Cancel: they stay in the recurrence history as canceled and stop counting in projections and budgets."
+    },
     "invoices": {
       "title": "Invoices",
       "titleOf": "Invoices of {{name}}",
@@ -591,6 +596,11 @@
       "title": "Delete investment",
       "description": "Delete {{name}}? Investments with movements cannot be deleted; deactivate them instead."
     },
+    "archive": {
+      "description": "They are planned contributions and withdrawals. Completed movements never change.",
+      "keepHint": "Keep: they still count in projected balances, and each one can be confirmed later from the history.",
+      "cancelHint": "Cancel: they stay in the history as canceled and stop counting in projected balances."
+    },
     "confirm": {
       "title": "Confirm movement",
       "description": "The movement will change the account and investment balances."
@@ -709,6 +719,13 @@
     "general": "General",
     "finances": "Finances",
     "administration": "Administration"
+  },
+  "pendingOperations": {
+    "title": "Archive {{name}}",
+    "summary_one": "There is {{count}} pending operation totaling {{total}}.",
+    "summary_other": "There are {{count}} pending operations totaling {{total}}.",
+    "keep": "Keep and archive",
+    "cancel": "Cancel them and archive"
   },
   "feedback": {
     "error": "Could not complete the action",

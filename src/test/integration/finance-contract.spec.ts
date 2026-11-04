@@ -24,9 +24,26 @@ import {
   createCreditCardRefund,
   fetchCreditCardInvoice,
   fetchCreditCardInvoices,
+  fetchCreditCardPendingOperations,
   fetchCreditCardPurchases,
+  fetchCreditCards,
   payCreditCardInvoice,
+  updateCreditCardStatus,
 } from '@/modules/credit-cards/infra/credit-cards.api';
+import {
+  createInvestment,
+  createInvestmentMovement,
+  fetchInvestmentMovements,
+  fetchInvestmentPendingOperations,
+  updateInvestmentMovementState,
+  updateInvestmentStatus,
+} from '@/modules/investments/infra/investments.api';
+import {
+  confirmRecurrenceOccurrence,
+  createRecurrence,
+  fetchRecurrenceOccurrences,
+} from '@/modules/recurrences/infra/recurrences.api';
+import { todayDateOnly } from '@/shared/date/date-only';
 import { fetchDashboard } from '@/modules/dashboard/infra/dashboard.api';
 import {
   createTransaction,
@@ -439,5 +456,163 @@ describe('real backend finance contracts', () => {
 
     await login(backend.user);
     await updateAccountStatus({ uuid: checking.data.uuid, status: 'INACTIVE' });
+  });
+
+  it('asks what to do with planned card charges when archiving a card', async () => {
+    const expenseCategory = (
+      await fetchTransactionCategories({ kind: 'EXPENSE', limit: 1 })
+    ).data[0];
+
+    const newCardWithCharges = async (name: string) => {
+      const card = await createCreditCard({
+        name,
+        creditLimit: '5000.00',
+        closingDay: 5,
+        dueDay: 12,
+        isDefault: false,
+      });
+
+      const recurrence = await createRecurrence({
+        type: 'EXPENSE',
+        description: `${name} subscription`,
+        amount: '10.00',
+        frequency: 'MONTHLY',
+        startDate: todayDateOnly(),
+        creditCardUuid: card.data.uuid,
+        categoryUuid: expenseCategory.uuid,
+      });
+
+      return { card: card.data.uuid, recurrence: recurrence.data.uuid };
+    };
+
+    const kept = await newCardWithCharges('Contract kept card');
+    const pending = await fetchCreditCardPendingOperations(kept.card);
+
+    expect(pending.count).toBeGreaterThan(0);
+    expect(Number(pending.total)).toBe(pending.count * 10);
+
+    await expectStatus(
+      updateCreditCardStatus({ uuid: kept.card, status: 'INACTIVE' }),
+      409,
+    );
+
+    await updateCreditCardStatus({
+      uuid: kept.card,
+      status: 'INACTIVE',
+      pendingOperations: 'KEEP',
+    });
+
+    const { data: planned } = await fetchRecurrenceOccurrences(
+      kept.recurrence,
+      {
+        limit: 1,
+      },
+    );
+    const confirmed = await confirmRecurrenceOccurrence({
+      recurrenceUuid: kept.recurrence,
+      occurrenceUuid: planned[0].uuid,
+    });
+
+    expect(confirmed.data.state).toBe('COMPLETED');
+    expect((await fetchCreditCardPendingOperations(kept.card)).count).toBe(
+      pending.count - 1,
+    );
+
+    const canceled = await newCardWithCharges('Contract canceled card');
+
+    await updateCreditCardStatus({
+      uuid: canceled.card,
+      status: 'INACTIVE',
+      pendingOperations: 'CANCEL',
+    });
+
+    expect(await fetchCreditCardPendingOperations(canceled.card)).toEqual({
+      count: 0,
+      total: '0.00',
+    });
+    expect(
+      (
+        await fetchRecurrenceOccurrences(canceled.recurrence, { limit: 50 })
+      ).data.every(({ state }) => state === 'CANCELED'),
+    ).toBe(true);
+    expect(
+      (await fetchCreditCards({ status: 'INACTIVE', limit: 50 })).data.map(
+        ({ uuid }) => uuid,
+      ),
+    ).toEqual(expect.arrayContaining([kept.card, canceled.card]));
+  });
+
+  it('asks what to do with planned movements when archiving an investment', async () => {
+    const checking = await createAccount({
+      name: 'Contract investment payer',
+      type: 'CHECKING',
+      openingBalance: '1000.00',
+      openingBalanceDate: '2025-01-01',
+      isDefault: false,
+    });
+
+    const newInvestmentWithPlans = async (name: string) => {
+      const investment = await createInvestment({
+        name,
+        type: 'RESERVE',
+        targetAmount: null,
+      });
+
+      const movement = await createInvestmentMovement({
+        investmentUuid: investment.data.uuid,
+        type: 'CONTRIBUTION',
+        accountUuid: checking.data.uuid,
+        amount: '100.00',
+        date: '2035-03-10',
+        state: 'PLANNED',
+      });
+
+      return { uuid: investment.data.uuid, movement: movement.data.uuid };
+    };
+
+    const kept = await newInvestmentWithPlans('Contract kept reserve');
+
+    expect(await fetchInvestmentPendingOperations(kept.uuid)).toEqual({
+      count: 1,
+      total: '100.00',
+    });
+    await expectStatus(
+      updateInvestmentStatus({ uuid: kept.uuid, status: 'INACTIVE' }),
+      409,
+    );
+
+    await updateInvestmentStatus({
+      uuid: kept.uuid,
+      status: 'INACTIVE',
+      pendingOperations: 'KEEP',
+    });
+
+    const confirmed = await updateInvestmentMovementState({
+      investmentUuid: kept.uuid,
+      movementUuid: kept.movement,
+      state: 'COMPLETED',
+    });
+
+    expect(confirmed.data.state).toBe('COMPLETED');
+
+    const canceled = await newInvestmentWithPlans('Contract canceled reserve');
+
+    await updateInvestmentStatus({
+      uuid: canceled.uuid,
+      status: 'INACTIVE',
+      pendingOperations: 'CANCEL',
+    });
+
+    expect(
+      (await fetchInvestmentMovements(canceled.uuid)).data[0],
+    ).toMatchObject({
+      uuid: canceled.movement,
+      state: 'CANCELED',
+      canceledAt: expect.any(String) as string,
+    });
+    expect(await fetchInvestmentPendingOperations(canceled.uuid)).toEqual({
+      count: 0,
+      total: '0.00',
+    });
   });
 });

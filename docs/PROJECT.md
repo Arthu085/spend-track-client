@@ -420,7 +420,10 @@ purchases are not transactions: they never change an account balance until an in
   over. A form modal creates and edits cards; marking one as default clears the previous default on
   the API. The status switch archives or reactivates a card (archived cards keep their history and
   can still be paid but take no new purchases), and delete asks for confirmation; the API refuses
-  to delete a card with purchases or invoice payments, canceled ones included (`409`).
+  to delete a card with purchases or invoice payments, canceled ones included (`409`). Archiving a
+  card with planned recurring charges first opens a dialog with their count and total, where the
+  user keeps them (still confirmable from their recurrence) or cancels them. Purchases, invoices,
+  and payments never change.
 - **Invoices:** `/credit-cards/:uuid/invoices` lists a card's invoices, newest first, with the
   reference month, closing and due dates, total, paid and due amounts, and status (open, closed,
   overdue, or paid). The invoice detail modal shows the totals (including credit from the previous
@@ -511,7 +514,8 @@ API derives from its movements: contributions minus withdrawals plus valuation a
   bar stops at 100% while the label shows the real percentage.
 - **Edit:** a form modal creates or edits the name, type, and target; a cleared target is sent as
   `null`. The status switch archives or restores an investment, and delete works only while it has
-  no movements (the API explains otherwise).
+  no movements (the API explains otherwise). Archiving one with planned movements first opens a
+  dialog with their count and total, where the user keeps or cancels them.
 - **Contribute and withdraw:** a form modal posts `POST /investments/:uuid/movements` with the
   account (the default account preselected), amount, date (today by default), and state (completed
   by default, or planned). A contribution moves money from the account into the investment and a
@@ -522,7 +526,8 @@ API derives from its movements: contributions minus withdrawals plus valuation a
 - **History:** `/investments/:uuid/movements` lists every movement, newest first, with the signed
   amount, account, and state. A planned movement can be confirmed and any movement not yet canceled
   can be canceled; movements are never edited or deleted, so the history stays traceable. An
-  archived investment accepts no new movements but keeps its history.
+  archived investment accepts no new movements but keeps its history, and its planned movements can
+  still be confirmed or canceled here.
 - **Freshness:** investment mutations show the API message and invalidate the investment, dashboard,
   and accounts queries, because contributions and withdrawals change account balances.
 
