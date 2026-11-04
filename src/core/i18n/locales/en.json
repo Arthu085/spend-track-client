@@ -152,7 +152,8 @@
       "actions": "Actions"
     },
     "hints": {
-      "openingBalance": "Account balance on the given date. Use a negative amount for an overdrawn balance."
+      "openingBalance": "Account balance on the given date. Use a negative amount for an overdrawn balance. Changing it later shifts the balance by the difference.",
+      "openingBalanceDate": "Operations on this account cannot be dated before this date. It can always move earlier, and later only up to the earliest operation."
     },
     "types": {
       "CHECKING": "Checking",

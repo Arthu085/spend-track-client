@@ -275,6 +275,39 @@ describe('AccountsPage', () => {
     );
   });
 
+  it('explains the opening date rules and shows why a date was rejected', async () => {
+    const message =
+      'A data do saldo inicial não pode ser posterior à primeira operação desta conta';
+
+    const { sent } = renderAccounts({
+      [`PATCH /accounts/${checking.uuid}`]: {
+        status: 422,
+        data: { statusCode: 422, message },
+      },
+    });
+
+    const row = await findRow(checking.uuid);
+    fireEvent.click(
+      within(row).getByRole('button', {
+        name: i18n.t('accounts.actions.edit', { name: checking.name }),
+      }),
+    );
+
+    const dialog = await findDialog(i18n.t('accounts.edit.title'));
+    expect(
+      within(dialog).getByText(i18n.t('accounts.hints.openingBalanceDate')),
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: i18n.t('common.save') }),
+    );
+
+    expect(await findDialog(i18n.t('feedback.error'))).toHaveTextContent(
+      message,
+    );
+    expect(sent(`PATCH /accounts/${checking.uuid}`)).toHaveLength(1);
+  });
+
   it('shows the API error when an account cannot be found', async () => {
     renderAccounts({
       [`PUT /accounts/${checking.uuid}/status`]: {

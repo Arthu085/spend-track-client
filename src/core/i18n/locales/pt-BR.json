@@ -152,7 +152,8 @@
       "actions": "Ações"
     },
     "hints": {
-      "openingBalance": "Saldo da conta na data informada. Use valor negativo para saldo devedor."
+      "openingBalance": "Saldo da conta na data informada. Use valor negativo para saldo devedor. Alterá-lo depois muda o saldo pela diferença.",
+      "openingBalanceDate": "Operações nesta conta não podem ter data anterior a esta. Ela sempre pode ser antecipada, e adiada apenas até a primeira operação."
     },
     "types": {
       "CHECKING": "Conta corrente",
