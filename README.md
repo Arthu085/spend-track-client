@@ -1,12 +1,32 @@
 # Spend Track Client
 
-The web client for **Spend Track**, a personal financial organization system, built with React 19,
-TypeScript, and Vite.
-
-The application foundation (providers, routing, HTTP client, localization, and tests) and
-authentication (sign-in, sign-out, password recovery, and route guards) are in place, along with
-users management, a self-service account page, and admin change requests.
+The web client for **Spend Track**, a private personal finance application, built with React 19,
+TypeScript, and Vite. It covers the complete MVP, with the monthly dashboard as its main page.
 See [`docs/PROJECT.md`](docs/PROJECT.md) for scope, architecture, and source layout.
+
+## Features
+
+| Page                                                            | What it does                                                                                                 |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Dashboard (`/`)                                                 | Income, expenses, balances, invoices, budgets, investments, and daily spending guidance for a selected month |
+| Transactions (`/transactions`)                                  | Planned and completed income and expenses, and transfers between the user's accounts                         |
+| Recurrences (`/recurrences`)                                    | Recurring income, expenses, and card charges, with each occurrence confirmed, edited, or canceled            |
+| Credit cards (`/credit-cards`, `/credit-card-purchases`)        | Cards, invoices, installment purchases, refunds, and partial invoice payments                                |
+| Budgets (`/budgets`)                                            | Overall and category limits per month, optionally copied from the previous month                             |
+| Investments (`/investments`)                                    | Investments, reserves, and goals with contributions, withdrawals, and manual valuations                      |
+| Accounts (`/accounts`)                                          | Accounts with opening balances, a default account, and deactivation                                          |
+| Financial settings (`/settings`)                                | Spending perspective, the dashboard's default month, and personal categories                                 |
+| My account (`/account`)                                         | Profile and password changes                                                                                 |
+| Administration (`/users`, `/roles`, `/account/change-requests`) | User and permission management, and approval of changes requested by another administrator                   |
+
+Forms preselect the default account or card, and the user can choose another. Pages and actions
+follow the user's abilities, and administrators see only their own finances. The interface is
+available in `pt-BR` and `en`, in light and dark themes, and installs as a
+[progressive web app](#progressive-web-app).
+
+The API defines the financial rules, including how opening balances, invoices, and the dashboard
+figures work. They are summarized in the
+[API README](https://github.com/Arthu085/spend-track-api#financial-features).
 
 ## Related repository
 
@@ -32,7 +52,9 @@ npm run dev
 ```
 
 Vite serves the app at `http://localhost:5173` by default and uses another port if it is occupied.
-The API must allow that origin in its `CORS_ORIGINS`.
+Start the API first by following its
+[quick start](https://github.com/Arthu085/spend-track-api#quick-start). It must allow the client's
+origin in its `CORS_ORIGINS`, and `VITE_API_URL` must point to it.
 
 ## Environment
 
