@@ -6,12 +6,22 @@ import {
   parseApiResponse,
   parsePaginatedResponse,
 } from '@/core/http/api-envelope';
+import { getApiErrorMessage } from '@/core/http/api-error';
 import { httpClient } from '@/core/http/http-client';
 import type {
   CreateTransactionPayload,
   TransactionFilters,
   UpdateTransactionPayload,
 } from '../domain/transaction-form.schemas';
+import {
+  BULK_CONFIRMATION_MAX_ITEMS,
+  type BulkConfirmation,
+  type BulkConfirmationItem,
+  type BulkConfirmationResult,
+  bulkConfirmationSchema,
+  type PendingConfirmations,
+  pendingConfirmationsSchema,
+} from '../domain/transaction-confirmation.schema';
 import {
   type Transaction,
   transactionSchema,
@@ -85,4 +95,60 @@ export const deleteTransaction = async (
   const response = await httpClient.delete<unknown>(`/transactions/${uuid}`);
 
   return parseApiResponse(z.null(), response.data);
+};
+
+export const fetchPendingConfirmations = async (
+  until: string,
+): Promise<PendingConfirmations> => {
+  const response = await httpClient.get<unknown>(
+    '/transactions/pending-confirmations',
+    { params: { until } },
+  );
+
+  return parseApiData(pendingConfirmationsSchema, response.data);
+};
+
+export const bulkConfirmTransactions = async (
+  items: BulkConfirmationItem[],
+): Promise<BulkConfirmation> => {
+  const response = await httpClient.post<unknown>(
+    '/transactions/bulk-confirmation',
+    { items },
+  );
+
+  return parseApiData(bulkConfirmationSchema, response.data);
+};
+
+export const confirmTransactionsInChunks = async (
+  items: BulkConfirmationItem[],
+): Promise<BulkConfirmationResult[]> => {
+  const results: BulkConfirmationResult[] = [];
+
+  for (
+    let start = 0;
+    start < items.length;
+    start += BULK_CONFIRMATION_MAX_ITEMS
+  ) {
+    try {
+      const { results: chunkResults } = await bulkConfirmTransactions(
+        items.slice(start, start + BULK_CONFIRMATION_MAX_ITEMS),
+      );
+
+      results.push(...chunkResults);
+    } catch (error) {
+      const message = getApiErrorMessage(error);
+
+      return [
+        ...results,
+        ...items.slice(start).map(({ uuid }): BulkConfirmationResult => ({
+          uuid,
+          outcome: 'FAILED',
+          message,
+          transaction: null,
+        })),
+      ];
+    }
+  }
+
+  return results;
 };

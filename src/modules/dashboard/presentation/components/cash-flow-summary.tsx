@@ -1,5 +1,6 @@
-import { Card, Col, Flex, Progress, Row, Typography } from 'antd';
+import { Col, Flex, Progress, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { isNegativeMoney, isPositiveMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type { DashboardAmounts } from '../../domain/dashboard.schema';
@@ -23,7 +24,7 @@ const CashFlowCard = ({ kind, amounts }: CashFlowCardProps) => {
   ] as const;
 
   return (
-    <Card>
+    <EqualHeightCard>
       <Typography.Text type="secondary">
         {t(`dashboard.${kind}.title`)}
       </Typography.Text>
@@ -57,7 +58,7 @@ const CashFlowCard = ({ kind, amounts }: CashFlowCardProps) => {
           {t(`dashboard.${kind}.empty`)}
         </Typography.Text>
       )}
-    </Card>
+    </EqualHeightCard>
   );
 };
 
@@ -67,7 +68,7 @@ interface CashFlowSummaryProps {
 }
 
 export const CashFlowSummary = ({ income, expenses }: CashFlowSummaryProps) => (
-  <Row gutter={[16, 16]}>
+  <Row gutter={[16, 16]} align="stretch">
     <Col xs={24} md={12}>
       <CashFlowCard kind="income" amounts={income} />
     </Col>

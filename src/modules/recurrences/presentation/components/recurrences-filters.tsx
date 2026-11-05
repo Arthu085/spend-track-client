@@ -34,7 +34,7 @@ export const RecurrencesFilters = ({ listParams }: RecurrencesFiltersProps) => {
           allowClear
           options={recurrenceTypeSchema.options.map((option) => ({
             value: option,
-            label: t(`transactions.types.${option}`),
+            label: t(`recurrences.types.${option}`),
           }))}
         />
       </Form.Item>

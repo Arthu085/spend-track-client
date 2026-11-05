@@ -1,4 +1,8 @@
-import { DollarOutlined, StopOutlined } from '@ant-design/icons';
+import {
+  DollarOutlined,
+  HistoryOutlined,
+  StopOutlined,
+} from '@ant-design/icons';
 import {
   Alert,
   Badge,
@@ -14,6 +18,7 @@ import {
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { getApiErrorMessage } from '@/core/http/api-error';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
@@ -24,6 +29,7 @@ import type {
   CreditCardPayment,
   CreditCardRefund,
 } from '../../domain/credit-card.schema';
+import { isHistoricalSettlement } from '../../domain/credit-card.schema';
 import {
   useCancelCreditCardPayment,
   useCreditCardInvoice,
@@ -31,6 +37,7 @@ import {
 import { formatInvoiceMonth } from './invoice-month';
 import { InvoiceStatusTag } from './invoice-status-tag';
 import { PayInvoiceModal } from './pay-invoice.modal';
+import { RecordHistoricalPaymentModal } from './record-historical-payment.modal';
 
 type Charge = CreditCardInvoiceDetail['chargeEntries'][number];
 
@@ -54,13 +61,18 @@ export const CreditCardInvoiceModal = ({
   } = useCreditCardInvoice(open ? invoiceUuid : undefined);
   const cancelMutation = useCancelCreditCardPayment();
   const paying = useModalTarget<CreditCardInvoiceDetail>();
+  const settling = useModalTarget<CreditCardInvoiceDetail>();
   const formatDate = (date: string) => formatDateOnly(date, i18n.language);
 
   const cancelPayment = (payment: CreditCardPayment) => {
+    const copy = isHistoricalSettlement(payment)
+      ? 'cancelSettlement'
+      : 'cancelPayment';
+
     confirmWarning({
-      title: t('creditCards.cancelPayment.title'),
-      content: t('creditCards.cancelPayment.description'),
-      okText: t('creditCards.cancelPayment.confirm'),
+      title: t(`creditCards.${copy}.title`),
+      content: t(`creditCards.${copy}.description`),
+      okText: t(`creditCards.${copy}.confirm`),
       onOk: () => {
         cancelMutation.mutate(
           { invoiceUuid: payment.invoice.uuid, paymentUuid: payment.uuid },
@@ -127,10 +139,13 @@ export const CreditCardInvoiceModal = ({
     {
       title: t('creditCards.fields.paidOn'),
       dataIndex: 'paidOn',
-      render: (_, { paidOn, canceledAt }) => (
+      render: (_, payment) => (
         <Flex gap="small" wrap>
-          {formatDate(paidOn)}
-          {canceledAt && <Tag>{t('creditCards.paymentCanceled')}</Tag>}
+          {formatDate(payment.paidOn)}
+          {isHistoricalSettlement(payment) && (
+            <Tag color="purple">{payment.sourceLabel}</Tag>
+          )}
+          {payment.canceledAt && <Tag>{t('creditCards.paymentCanceled')}</Tag>}
         </Flex>
       ),
     },
@@ -152,12 +167,15 @@ export const CreditCardInvoiceModal = ({
       key: 'actions',
       render: (_, payment) =>
         payment.canceledAt === null && (
-          <Button
+          <IconActionButton
             size="small"
             icon={<StopOutlined />}
-            aria-label={t('creditCards.actions.cancelPayment', {
-              amount: payment.amount,
-            })}
+            label={t(
+              isHistoricalSettlement(payment)
+                ? 'creditCards.actions.cancelSettlement'
+                : 'creditCards.actions.cancelPayment',
+              { amount: payment.amount },
+            )}
             loading={
               cancelMutation.isPending &&
               cancelMutation.variables.paymentUuid === payment.uuid
@@ -199,14 +217,23 @@ export const CreditCardInvoiceModal = ({
         <Flex vertical gap="small">
           <Flex justify="space-between" align="center" gap="middle" wrap>
             <InvoiceStatusTag {...invoice} />
-            <Button
-              type="primary"
-              icon={<DollarOutlined />}
-              disabled={!isPositiveMoney(invoice.outstanding)}
-              onClick={() => paying.show(invoice)}
-            >
-              {t('creditCards.pay.title')}
-            </Button>
+            <Flex gap="small" wrap>
+              <Button
+                icon={<HistoryOutlined />}
+                disabled={!isPositiveMoney(invoice.outstanding)}
+                onClick={() => settling.show(invoice)}
+              >
+                {t('creditCards.historical.title')}
+              </Button>
+              <Button
+                type="primary"
+                icon={<DollarOutlined />}
+                disabled={!isPositiveMoney(invoice.outstanding)}
+                onClick={() => paying.show(invoice)}
+              >
+                {t('creditCards.pay.title')}
+              </Button>
+            </Flex>
           </Flex>
           <Descriptions
             size="small"
@@ -247,6 +274,20 @@ export const CreditCardInvoiceModal = ({
                 label: t('creditCards.fields.paid'),
                 children: <MoneyText amount={invoice.paid} />,
               },
+              ...(isPositiveMoney(invoice.historicalPaid)
+                ? [
+                    {
+                      key: 'historicalPaid',
+                      label: t('creditCards.fields.historicalPaid'),
+                      children: (
+                        <MoneyText
+                          amount={invoice.historicalPaid}
+                          aria-label={t('creditCards.fields.historicalPaid')}
+                        />
+                      ),
+                    },
+                  ]
+                : []),
               {
                 key: 'outstanding',
                 label: t('creditCards.fields.outstanding'),
@@ -310,6 +351,11 @@ export const CreditCardInvoiceModal = ({
         open={paying.open}
         invoice={paying.target}
         onClose={paying.close}
+      />
+      <RecordHistoricalPaymentModal
+        open={settling.open}
+        invoice={settling.target}
+        onClose={settling.close}
       />
     </Modal>
   );

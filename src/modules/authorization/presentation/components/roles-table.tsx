@@ -1,8 +1,9 @@
 import { SafetyCertificateOutlined } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
-import { Alert, Button, Flex, Table, type TableColumnsType } from 'antd';
+import { Alert, Flex, Table, type TableColumnsType } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { getApiErrorMessage } from '@/core/http/api-error';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import type { Role } from '../../domain/role.schema';
 
 interface RolesTableProps {
@@ -26,10 +27,10 @@ export const RolesTable = ({ query, onOpenAbilities }: RolesTableProps) => {
       title: t('roles.fields.actions'),
       key: 'actions',
       render: (_, role) => (
-        <Button
+        <IconActionButton
           size="small"
           icon={<SafetyCertificateOutlined />}
-          aria-label={t('roles.actions.abilities', { role: role.roleLabel })}
+          label={t('roles.actions.abilities', { role: role.roleLabel })}
           disabled={role.status === 'INACTIVE'}
           onClick={() => onOpenAbilities(role)}
         />

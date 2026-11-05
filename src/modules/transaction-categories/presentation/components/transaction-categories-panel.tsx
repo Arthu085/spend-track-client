@@ -12,6 +12,7 @@ import {
 } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import { useListParams } from '@/shared/list/use-list-params';
@@ -120,10 +121,10 @@ export const TransactionCategoriesPanel = () => {
       render: (_, category) =>
         isPersonalTransactionCategory(category) && (
           <Space>
-            <Button
+            <IconActionButton
               size="small"
               icon={<EditOutlined />}
-              aria-label={t('transactionCategories.actions.edit', {
+              label={t('transactionCategories.actions.edit', {
                 name: category.name,
               })}
               disabled={category.status === 'INACTIVE'}
@@ -139,11 +140,11 @@ export const TransactionCategoriesPanel = () => {
               okButtonProps={{ danger: true }}
               onConfirm={() => removeTransactionCategory(category.uuid)}
             >
-              <Button
+              <IconActionButton
                 size="small"
                 danger
                 icon={<DeleteOutlined />}
-                aria-label={t('transactionCategories.actions.delete', {
+                label={t('transactionCategories.actions.delete', {
                   name: category.name,
                 })}
                 loading={

@@ -5,6 +5,7 @@ import {
   investmentProgressSchema,
   investmentTypeSchema,
 } from '@/modules/investments/domain/investment.schema';
+import { savingPlanSchema } from '@/modules/recurrences/domain/saving-plan.schema';
 import { spendingPerspectiveSchema } from '@/modules/preferences/domain/preferences.schema';
 import {
   transactionAccountSchema,
@@ -111,10 +112,21 @@ export const dashboardInvestmentSchema = z.object({
   progress: investmentProgressSchema.nullable(),
 });
 
+export const contributionBreakdownSchema = z.object({
+  mandatoryPlanned: moneySchema,
+  mandatoryCompleted: moneySchema,
+  additionalPlanned: moneySchema,
+  additionalCompleted: moneySchema,
+  oneTimePlanned: moneySchema,
+  oneTimeCompleted: moneySchema,
+});
+
 export const dashboardInvestmentsSchema = z.object({
   totalValue: moneySchema,
   contributions: dashboardAmountsSchema,
   withdrawals: dashboardAmountsSchema,
+  contributionBreakdown: contributionBreakdownSchema,
+  savingPlans: z.array(savingPlanSchema),
   items: z.array(dashboardInvestmentSchema),
 });
 
@@ -161,6 +173,7 @@ export type DashboardPlannedCardCharge = z.infer<
 export type DashboardCreditCards = z.infer<typeof dashboardCreditCardsSchema>;
 export type DashboardBudgetLimit = z.infer<typeof dashboardBudgetLimitSchema>;
 export type DashboardBudget = z.infer<typeof dashboardBudgetSchema>;
+export type ContributionBreakdown = z.infer<typeof contributionBreakdownSchema>;
 export type DashboardInvestments = z.infer<typeof dashboardInvestmentsSchema>;
 export type DashboardSpendingGuidance = z.infer<
   typeof dashboardSpendingGuidanceSchema

@@ -59,6 +59,20 @@ describe('InvestmentsPage', () => {
     vi.useRealTimers();
   });
 
+  it('links to the recurring contributions', async () => {
+    renderInvestments();
+
+    const link = await screen.findByRole('link', {
+      name: new RegExp(i18n.t('investments.recurringContributions')),
+    });
+
+    expect(link).toHaveAttribute(
+      'href',
+      `${AppRoutes.RECURRENCES}?type=INVESTMENT_CONTRIBUTION`,
+    );
+    expect(within(link).queryByRole('button')).not.toBeInTheDocument();
+  });
+
   it('lists active investments with their value and target progress', async () => {
     const { sent } = renderInvestments();
 
@@ -135,6 +149,13 @@ describe('InvestmentsPage', () => {
               total: money('150.00'),
             }),
           ),
+        ).toBeInTheDocument();
+
+        expect(
+          within(dialog).getByText(i18n.t('investments.archive.keepHint')),
+        ).toBeInTheDocument();
+        expect(
+          within(dialog).getByText(i18n.t('investments.archive.cancelHint')),
         ).toBeInTheDocument();
 
         fireEvent.click(

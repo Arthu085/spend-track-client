@@ -76,12 +76,19 @@ export const creditCardRefundSchema = z.object({
   createdAt: z.string(),
 });
 
+export const creditCardPaymentSourceSchema = z.enum([
+  'ACCOUNT',
+  'HISTORICAL_SETTLEMENT',
+]);
+
 export const creditCardPaymentSchema = z.object({
   uuid: z.string(),
   invoice: creditCardInvoiceRefSchema,
   account: transactionAccountSchema,
   amount: moneySchema,
   paidOn: z.iso.date(),
+  source: creditCardPaymentSourceSchema,
+  sourceLabel: z.string(),
   canceledAt: z.string().nullable(),
   createdAt: z.string(),
 });
@@ -90,6 +97,7 @@ export const creditCardInvoiceDetailSchema = creditCardInvoiceSchema.extend({
   chargeEntries: z.array(creditCardInvoiceChargeSchema),
   refundEntries: z.array(creditCardRefundSchema),
   payments: z.array(creditCardPaymentSchema),
+  historicalPaid: moneySchema,
 });
 
 export const creditCardInstallmentSchema = z.object({
@@ -136,6 +144,10 @@ export type CreditCardInvoiceDetail = z.infer<
 export type CreditCardRefund = z.infer<typeof creditCardRefundSchema>;
 export type CreditCardPayment = z.infer<typeof creditCardPaymentSchema>;
 export type CreditCardPurchase = z.infer<typeof creditCardPurchaseSchema>;
+
+export const isHistoricalSettlement = ({
+  source,
+}: Pick<CreditCardPayment, 'source'>) => source === 'HISTORICAL_SETTLEMENT';
 
 export const isInvoiceOpen = ({ status }: Pick<CreditCardInvoice, 'status'>) =>
   status === 'OPEN';

@@ -9,7 +9,6 @@ import {
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
   Badge,
-  Button,
   Flex,
   Popconfirm,
   Space,
@@ -19,6 +18,7 @@ import {
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly, todayDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
@@ -178,10 +178,10 @@ export const TransactionsTable = ({
 
         return (
           <Space>
-            <Button
+            <IconActionButton
               size="small"
               icon={isCanceled ? <EyeOutlined /> : <EditOutlined />}
-              aria-label={t(
+              label={t(
                 isCanceled
                   ? 'transactions.actions.view'
                   : 'transactions.actions.edit',
@@ -190,20 +190,20 @@ export const TransactionsTable = ({
               onClick={() => onEdit(transaction)}
             />
             {isPlanned && (
-              <Button
+              <IconActionButton
                 size="small"
                 icon={<CheckOutlined />}
-                aria-label={t('transactions.actions.complete', {
+                label={t('transactions.actions.complete', {
                   description,
                 })}
                 onClick={() => onComplete(transaction)}
               />
             )}
             {!isCanceled && (
-              <Button
+              <IconActionButton
                 size="small"
                 icon={<StopOutlined />}
-                aria-label={t('transactions.actions.cancel', {
+                label={t('transactions.actions.cancel', {
                   description,
                 })}
                 loading={
@@ -224,11 +224,11 @@ export const TransactionsTable = ({
                 okButtonProps={{ danger: true }}
                 onConfirm={() => removeTransaction(uuid)}
               >
-                <Button
+                <IconActionButton
                   size="small"
                   danger
                   icon={<DeleteOutlined />}
-                  aria-label={t('transactions.actions.delete', {
+                  label={t('transactions.actions.delete', {
                     description,
                   })}
                   loading={

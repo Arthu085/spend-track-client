@@ -5,6 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
+import {
+  buildInvestment,
+  buildInvestmentMovement,
+} from '@/modules/investments/presentation/__tests__/investment-fixture';
 import type { Preferences } from '@/modules/preferences/domain/preferences.schema';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
 import {
@@ -483,6 +487,9 @@ describe('DashboardPage', () => {
             pending: '200.00',
           },
           withdrawals: { total: '0.00', completed: '0.00', pending: '0.00' },
+          contributionBreakdown:
+            buildDashboard().investments.contributionBreakdown,
+          savingPlans: [],
           items: [
             {
               uuid: '7a1b2c3d-7777-4c3e-9f1a-1a2b3c4d5e6f',
@@ -533,6 +540,210 @@ describe('DashboardPage', () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(AppRoutes.INVESTMENTS);
     });
+  });
+
+  describe('contribute from the investments card', () => {
+    const activeAccount = {
+      uuid: '1b0f7d6e-1111-4c3e-9f1a-1a2b3c4d5e6f',
+      name: 'Nubank',
+      type: 'CHECKING',
+      typeLabel: 'Conta corrente',
+      openingBalance: '0.00',
+      openingBalanceDate: '2026-10-01',
+      currentBalance: '1000.00',
+      isDefault: true,
+      status: 'ACTIVE',
+      statusLabel: 'Ativo',
+      createdAt: '2026-10-01T12:00:00.000Z',
+      updatedAt: '2026-10-01T12:00:00.000Z',
+    };
+    const trip = buildInvestment();
+    const reserve = buildInvestment({
+      uuid: '9c3d4e5f-9999-4c3e-9f1a-1a2b3c4d5e6f',
+      name: 'Reserva',
+    });
+    const movementPath = (uuid: string) =>
+      `POST /investments/${uuid}/movements`;
+    const paged = (data: unknown[]): StubResponse => ({
+      status: 200,
+      data: { data, meta: { total: data.length, page: 1, limit: 50 } },
+    });
+    const withInvestments = envelope({
+      ...withAccounts,
+      investments: {
+        ...withAccounts.investments,
+        items: [trip, reserve].map(
+          ({
+            uuid,
+            name,
+            type,
+            typeLabel,
+            currentValue,
+            targetAmount,
+            progress,
+          }) => ({
+            uuid,
+            name,
+            type,
+            typeLabel,
+            currentValue,
+            targetAmount,
+            progress,
+          }),
+        ),
+      },
+    });
+    const routes = (path: string) => ({
+      'GET /dashboard': withInvestments,
+      'GET /accounts': paged([activeAccount]),
+      'GET /investments': paged([trip, reserve]),
+      [path]: envelope(buildInvestmentMovement(), 'Aporte registrado'),
+    });
+    const fill = (dialog: HTMLElement) =>
+      fireEvent.change(
+        within(dialog).getByLabelText(i18n.t('investments.fields.amount')),
+        { target: { value: '500' } },
+      );
+    const save = (dialog: HTMLElement) =>
+      fireEvent.click(
+        within(dialog).getByRole('button', { name: i18n.t('common.save') }),
+      );
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-10-29T15:00:00Z'));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('offers only active records, requires an investment, and explains it is one-time', async () => {
+      const { sent } = renderDashboard(
+        AppRoutes.DASHBOARD,
+        routes(movementPath(reserve.uuid)),
+      );
+
+      fireEvent.click(
+        await screen.findByRole('button', {
+          name: new RegExp(`${i18n.t('dashboard.investments.contribute')}$`),
+        }),
+      );
+      const dialog = await findDialog(i18n.t('investments.contribution.title'));
+
+      expect(
+        within(dialog).getByText(i18n.t('investments.contribution.hint')),
+      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(sent('GET /investments')[0]?.params).toMatchObject({
+          status: 'ACTIVE',
+        });
+      });
+      expect(sent('GET /accounts')[0].params).toMatchObject({
+        status: 'ACTIVE',
+      });
+      await waitFor(() => {
+        expect(within(dialog).getByTitle('Nubank')).toBeInTheDocument();
+      });
+
+      fill(dialog);
+      save(dialog);
+
+      expect(
+        await within(dialog).findByText(i18n.t('validation.required')),
+      ).toBeInTheDocument();
+      expect(sent(movementPath(reserve.uuid))).toHaveLength(0);
+
+      fireEvent.mouseDown(
+        within(dialog).getByLabelText(i18n.t('investments.fields.investment')),
+      );
+      fireEvent.click(await screen.findByTitle(reserve.name));
+      save(dialog);
+
+      await waitFor(() => {
+        expect(sent(movementPath(reserve.uuid))).toHaveLength(1);
+      });
+      expect(requestBody(sent(movementPath(reserve.uuid))[0])).toEqual({
+        type: 'CONTRIBUTION',
+        accountUuid: activeAccount.uuid,
+        amount: '500',
+        date: '2026-10-29',
+        state: 'COMPLETED',
+      });
+    });
+
+    it('preselects the investment of the row and refreshes the dashboard', async () => {
+      const { sent } = renderDashboard(
+        AppRoutes.DASHBOARD,
+        routes(movementPath(trip.uuid)),
+      );
+
+      fireEvent.click(
+        await screen.findByRole('button', {
+          name: i18n.t('investments.actions.contribute', { name: trip.name }),
+        }),
+      );
+      const dialog = await findDialog(i18n.t('investments.contribution.title'));
+
+      expect(within(dialog).getByTitle(trip.name)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(within(dialog).getByTitle('Nubank')).toBeInTheDocument();
+      });
+      const dashboardLoads = sent('GET /dashboard').length;
+
+      fill(dialog);
+      save(dialog);
+
+      await waitFor(() => {
+        expect(sent(movementPath(trip.uuid))).toHaveLength(1);
+      });
+      await waitFor(() => {
+        expect(sent('GET /dashboard').length).toBeGreaterThan(dashboardLoads);
+      });
+    });
+
+    it('does not offer the action without investments', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': envelope(buildDashboard()),
+      });
+
+      await screen.findByText(i18n.t('dashboard.investments.empty'));
+
+      expect(
+        screen.queryByRole('button', {
+          name: new RegExp(`${i18n.t('dashboard.investments.contribute')}$`),
+        }),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('stretches every card of a row to the height of the row, whatever its content', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(
+        buildDashboard({
+          expensesByCategory: [],
+        }),
+      ),
+    });
+
+    await screen.findByText(i18n.t('dashboard.expensesByCategory.empty'));
+
+    const rows = document.querySelectorAll<HTMLElement>('.ant-row');
+    const rowsOfCards = [...rows].filter((row) =>
+      row.querySelector(':scope > .ant-col > .ant-card'),
+    );
+
+    expect(rowsOfCards).toHaveLength(3);
+
+    for (const row of rowsOfCards) {
+      expect(row).toHaveClass('ant-row-stretch');
+
+      for (const card of row.querySelectorAll<HTMLElement>(
+        ':scope > .ant-col > .ant-card',
+      )) {
+        expect(card).toHaveStyle({ height: '100%' });
+      }
+    }
   });
 
   it('shows no daily allowance once the month is over', async () => {

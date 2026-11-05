@@ -14,6 +14,12 @@ export const investmentMovementTypeSchema = z.enum([
   'VALUATION',
 ]);
 
+export const contributionKindSchema = z.enum([
+  'ONE_TIME',
+  'MANDATORY',
+  'ADDITIONAL',
+]);
+
 export const investmentProgressSchema = z.object({
   remaining: moneySchema,
   percent: z.number().int().nonnegative(),
@@ -47,6 +53,17 @@ export const investmentMovementSchema = z.object({
   completedOn: z.iso.date().nullable(),
   canceledAt: z.string().nullable(),
   account: transactionAccountSchema.nullable(),
+  contributionKind: contributionKindSchema,
+  contributionKindLabel: z.string(),
+  recurrence: z
+    .object({
+      uuid: z.string(),
+      occurrenceDate: z.iso.date().nullable(),
+    })
+    .nullable(),
+  surplusMonth: z.iso.date().nullable(),
+  suggestedAmount: moneySchema.nullable(),
+  retainedMinimum: moneySchema.nullable(),
   createdAt: z.string(),
 });
 
@@ -55,6 +72,7 @@ export type InvestmentMovementType = z.infer<
   typeof investmentMovementTypeSchema
 >;
 export type TransferMovementType = Exclude<InvestmentMovementType, 'VALUATION'>;
+export type ContributionKind = z.infer<typeof contributionKindSchema>;
 export type InvestmentProgress = z.infer<typeof investmentProgressSchema>;
 export type Investment = z.infer<typeof investmentSchema>;
 export type InvestmentMovement = z.infer<typeof investmentMovementSchema>;

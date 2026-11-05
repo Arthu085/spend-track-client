@@ -12,6 +12,7 @@ import {
   renderWithRoutes,
   save,
 } from '@/modules/credit-cards/presentation/__tests__/credit-card-test-support';
+import { buildInvestment } from '@/modules/investments/presentation/__tests__/investment-fixture';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { formatMonthLabel } from '@/shared/date/month-ref';
 import { formatMoney } from '@/shared/money/money';
@@ -151,6 +152,239 @@ describe('RecurrencesPage', () => {
       startDate: '2026-10-29',
       creditCardUuid: visa.uuid,
       categoryUuid: groceries.uuid,
+    });
+  });
+
+  describe('investment contributions', () => {
+    const reserve = buildInvestment({ name: 'Reserva', type: 'RESERVE' });
+    const contribution = buildRecurrence({
+      uuid: 'e1f2a3b4-1111-4c3e-9f1a-1a2b3c4d5e6f',
+      type: 'INVESTMENT_CONTRIBUTION',
+      typeLabel: 'Aporte em investimento',
+      description: 'Reserva mensal',
+      amount: '700.00',
+      creditCard: null,
+      category: null,
+      account: { uuid: nubank.uuid, name: nubank.name, status: 'ACTIVE' },
+      investment: {
+        uuid: reserve.uuid,
+        name: reserve.name,
+        type: reserve.type,
+        typeLabel: reserve.typeLabel,
+        status: 'ACTIVE',
+      },
+      savingStrategy: {
+        minimumRetainedBalance: '200.00',
+        additionalContribution: 'REMAINING_SURPLUS',
+        additionalContributionLabel: 'Sobra do mês',
+      },
+    });
+    const renderContribution = (routes = {}) =>
+      renderWithRoutes(AppRoutes.RECURRENCES, {
+        'GET /credit-cards': listPage([visa]),
+        'GET /recurrences': listPage([contribution]),
+        ...routes,
+      });
+
+    it('lists a contribution without a category and shows its investment and strategy', async () => {
+      renderContribution();
+
+      const row = await findRow(contribution.uuid);
+
+      expect(
+        within(row).getByText(
+          i18n.t('transactions.transferRoute', {
+            from: nubank.name,
+            to: reserve.name,
+          }),
+        ),
+      ).toBeInTheDocument();
+      expect(within(row).getByText('—')).toBeInTheDocument();
+      expect(
+        within(row).getByText(
+          i18n.t('recurrences.strategySummary', {
+            strategy: 'Sobra do mês',
+            amount: money('200.00'),
+          }),
+        ),
+      ).toBeInTheDocument();
+      expect(within(row).getByText(money('700.00'))).toBeInTheDocument();
+    });
+
+    it('creates a contribution with a saving strategy, asking for no category', async () => {
+      const { sent } = renderContribution({
+        'GET /investments': listPage([reserve]),
+        'POST /recurrences': envelope(contribution, 'Recorrência criada'),
+      });
+
+      await findRow(contribution.uuid);
+      fireEvent.click(
+        screen.getByRole('button', {
+          name: new RegExp(i18n.t('recurrences.create.title')),
+        }),
+      );
+
+      const dialog = await findDialog(i18n.t('recurrences.hints.planned'));
+
+      fireEvent.click(
+        within(dialog).getByRole('radio', {
+          name: i18n.t('recurrences.types.INVESTMENT_CONTRIBUTION'),
+        }),
+      );
+      await within(dialog).findByLabelText(
+        i18n.t('recurrences.fields.investment'),
+      );
+      await chooseOption(
+        dialog,
+        i18n.t('recurrences.fields.investment'),
+        reserve.name,
+      );
+
+      expect(
+        within(dialog).queryByLabelText(i18n.t('recurrences.fields.category')),
+      ).not.toBeInTheDocument();
+
+      fireEvent.change(
+        within(dialog).getByLabelText(i18n.t('recurrences.fields.description')),
+        { target: { value: 'Reserva mensal' } },
+      );
+      fireEvent.change(
+        within(dialog).getByLabelText(i18n.t('recurrences.fields.amount')),
+        { target: { value: '700.00' } },
+      );
+      fireEvent.click(within(dialog).getByRole('switch'));
+      fireEvent.change(
+        await within(dialog).findByLabelText(
+          i18n.t('recurrences.fields.minimumRetainedBalance'),
+        ),
+        { target: { value: '200.00' } },
+      );
+      await waitFor(() => {
+        expect(within(dialog).getByTitle(nubank.name)).toBeInTheDocument();
+      });
+      save(dialog);
+
+      expect(await screen.findByText('Recorrência criada')).toBeInTheDocument();
+      expect(requestBody(sent('POST /recurrences')[0])).toEqual({
+        type: 'INVESTMENT_CONTRIBUTION',
+        description: 'Reserva mensal',
+        amount: expect.stringMatching(/^700(\.00?)?$/) as unknown,
+        frequency: 'MONTHLY',
+        startDate: '2026-10-29',
+        accountUuid: nubank.uuid,
+        investmentUuid: reserve.uuid,
+        savingStrategy: {
+          minimumRetainedBalance: expect.stringMatching(
+            /^200(\.00?)?$/,
+          ) as unknown,
+          additionalContribution: 'REMAINING_SURPLUS',
+        },
+      });
+    });
+
+    it('offers no saving strategy for another frequency', async () => {
+      renderContribution({ 'GET /investments': listPage([reserve]) });
+
+      await findRow(contribution.uuid);
+      fireEvent.click(
+        screen.getByRole('button', {
+          name: new RegExp(i18n.t('recurrences.create.title')),
+        }),
+      );
+
+      const dialog = await findDialog(i18n.t('recurrences.hints.planned'));
+
+      fireEvent.click(
+        within(dialog).getByRole('radio', {
+          name: i18n.t('recurrences.types.INVESTMENT_CONTRIBUTION'),
+        }),
+      );
+
+      expect(await within(dialog).findByRole('switch')).toBeInTheDocument();
+
+      await chooseOption(
+        dialog,
+        i18n.t('recurrences.fields.frequency'),
+        i18n.t('recurrences.frequencies.WEEKLY'),
+      );
+
+      await waitFor(() => {
+        expect(within(dialog).queryByRole('switch')).not.toBeInTheDocument();
+      });
+    });
+
+    it('edits a contribution showing its investment, with no category request', async () => {
+      const { sent } = renderContribution({
+        [`PATCH /recurrences/${contribution.uuid}`]: envelope(
+          contribution,
+          'Recorrência atualizada',
+        ),
+      });
+
+      await clickRowAction(
+        contribution.uuid,
+        i18n.t('recurrences.actions.edit', {
+          description: contribution.description,
+        }),
+      );
+
+      const dialog = await findDialog(i18n.t('recurrences.hints.editLocked'));
+
+      expect(
+        within(dialog).getByLabelText(i18n.t('recurrences.fields.investment')),
+      ).toBeDisabled();
+      expect(
+        within(dialog).queryByLabelText(i18n.t('recurrences.fields.category')),
+      ).not.toBeInTheDocument();
+
+      save(dialog);
+
+      expect(
+        await screen.findByText('Recorrência atualizada'),
+      ).toBeInTheDocument();
+
+      const body = requestBody(
+        sent(`PATCH /recurrences/${contribution.uuid}`)[0],
+      );
+
+      expect(body).not.toHaveProperty('amount');
+      expect(body).not.toHaveProperty('categoryUuid');
+      expect(body).toMatchObject({
+        savingStrategy: {
+          minimumRetainedBalance: '200.00',
+          additionalContribution: 'REMAINING_SURPLUS',
+        },
+      });
+    });
+
+    it('shows the occurrences of a contribution', async () => {
+      renderContribution({
+        [`GET /recurrences/${contribution.uuid}/occurrences`]: listPage([
+          buildRecurrenceOccurrence({
+            description: contribution.description,
+            amount: '700.00',
+            invoiceMonth: null,
+            movementUuid: 'movement-uuid',
+          }),
+        ]),
+      });
+
+      await clickRowAction(
+        contribution.uuid,
+        i18n.t('recurrences.actions.occurrences', {
+          description: contribution.description,
+        }),
+      );
+
+      const dialog = await findDialog(
+        i18n.t('recurrences.occurrences.contributionHint', {
+          investment: reserve.name,
+        }),
+      );
+
+      expect(
+        await within(dialog).findByText(money('700.00')),
+      ).toBeInTheDocument();
     });
   });
 

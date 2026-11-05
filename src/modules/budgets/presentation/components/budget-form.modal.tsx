@@ -3,6 +3,7 @@ import { Button, Col, Form, Row, Select, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useTransactionCategories } from '@/modules/transaction-categories/infra/transaction-categories.queries';
 import { toReferenceOptions } from '@/modules/transactions/presentation/components/reference-options';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatMonthLabel, type MonthRef } from '@/shared/date/month-ref';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { FormModal } from '@/shared/forms/form-modal';
@@ -108,11 +109,11 @@ const BudgetFormFields = ({ retained }: BudgetFormFieldsProps) => {
                   </Form.Item>
                 </Col>
                 <Col style={{ paddingTop: 30 }}>
-                  <Button
+                  <IconActionButton
                     type="text"
                     danger
                     icon={<DeleteOutlined />}
-                    aria-label={t('budgets.actions.removeCategoryLimit')}
+                    label={t('budgets.actions.removeCategoryLimit')}
                     onClick={() => remove(name)}
                   />
                 </Col>

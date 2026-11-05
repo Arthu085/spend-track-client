@@ -2,7 +2,6 @@ import { CheckOutlined } from '@ant-design/icons';
 import {
   Badge,
   Button,
-  Card,
   Empty,
   Flex,
   Space,
@@ -11,6 +10,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -18,7 +18,10 @@ import {
   type CompletableTransaction,
   CompleteTransactionModal,
 } from '@/modules/transactions/presentation/components/complete-transaction.modal';
+import { ConfirmPendingTransactionsModal } from '@/modules/transactions/presentation/components/confirm-pending-transactions.modal';
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
+import { EqualHeightCard } from '@/shared/components/equal-height-card';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import type {
@@ -45,6 +48,7 @@ export const UpcomingTransactionsCard = ({
 }: UpcomingTransactionsCardProps) => {
   const { t, i18n } = useTranslation();
   const completing = useModalTarget<CompletableTransaction>();
+  const [confirmingPending, setConfirmingPending] = useState(false);
 
   const columns: TableColumnsType<DashboardUpcoming> = [
     {
@@ -89,10 +93,10 @@ export const UpcomingTransactionsCard = ({
       title: t('transactions.fields.actions'),
       key: 'actions',
       render: (_, { uuid, description }) => (
-        <Button
+        <IconActionButton
           size="small"
           icon={<CheckOutlined />}
-          aria-label={t('transactions.actions.complete', { description })}
+          label={t('transactions.actions.complete', { description })}
           onClick={() => completing.show({ uuid, description })}
         />
       ),
@@ -100,7 +104,7 @@ export const UpcomingTransactionsCard = ({
   ];
 
   return (
-    <Card
+    <EqualHeightCard
       title={t('dashboard.upcoming.title')}
       extra={
         <Link to={transactionsOfMonth(period)}>
@@ -115,9 +119,19 @@ export const UpcomingTransactionsCard = ({
         />
       ) : (
         <Flex vertical gap="small">
-          <Typography.Text type="secondary">
-            {t('dashboard.upcoming.hint')}
-          </Typography.Text>
+          <Flex justify="space-between" align="center" gap="small" wrap>
+            <Typography.Text type="secondary">
+              {t('dashboard.upcoming.hint')}
+            </Typography.Text>
+            <Button
+              icon={<CheckOutlined />}
+              onClick={() => {
+                setConfirmingPending(true);
+              }}
+            >
+              {t('transactions.confirmPending.open')}
+            </Button>
+          </Flex>
           <Table
             rowKey="uuid"
             size="small"
@@ -141,6 +155,13 @@ export const UpcomingTransactionsCard = ({
         transaction={completing.target}
         onClose={completing.close}
       />
-    </Card>
+      <ConfirmPendingTransactionsModal
+        open={confirmingPending}
+        until={period.endDate}
+        onClose={() => {
+          setConfirmingPending(false);
+        }}
+      />
+    </EqualHeightCard>
   );
 };

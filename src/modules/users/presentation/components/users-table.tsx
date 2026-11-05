@@ -1,7 +1,6 @@
 import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
 import { type UseQueryResult, useQueryClient } from '@tanstack/react-query';
 import {
-  Button,
   Popconfirm,
   Space,
   Switch,
@@ -18,6 +17,7 @@ import {
 } from '@/modules/authorization/domain/ability.schema';
 import { useAbilities } from '@/modules/authorization/infra/abilities.queries';
 import { RoleTags } from '@/modules/authorization/presentation/components/role-tags';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import type { ListParams } from '@/shared/list/use-list-params';
@@ -139,19 +139,19 @@ export const UsersTable = ({
       key: 'actions',
       render: (_, { uuid, name, status }) => (
         <Space>
-          <Button
+          <IconActionButton
             size="small"
             icon={<EyeOutlined />}
-            aria-label={t('users.actions.details', { name })}
+            label={t('users.actions.details', { name })}
             disabled={status === 'INACTIVE'}
             loading={isLoadingUser(uuid, 'details')}
             onClick={() => openWithCurrentUser(uuid, 'details', onView)}
           />
           {canManageUsers('UPDATE') && (
-            <Button
+            <IconActionButton
               size="small"
               icon={<EditOutlined />}
-              aria-label={t('users.actions.edit', { name })}
+              label={t('users.actions.edit', { name })}
               disabled={status === 'INACTIVE'}
               loading={isLoadingUser(uuid, 'edit')}
               onClick={() => openWithCurrentUser(uuid, 'edit', onEdit)}
@@ -166,11 +166,11 @@ export const UsersTable = ({
               okButtonProps={{ danger: true }}
               onConfirm={() => removeUser(uuid)}
             >
-              <Button
+              <IconActionButton
                 size="small"
                 danger
                 icon={<DeleteOutlined />}
-                aria-label={t('users.actions.delete', { name })}
+                label={t('users.actions.delete', { name })}
                 loading={
                   deleteMutation.isPending && deleteMutation.variables === uuid
                 }

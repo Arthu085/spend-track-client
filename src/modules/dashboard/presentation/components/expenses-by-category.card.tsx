@@ -1,5 +1,6 @@
-import { Badge, Card, Empty, Flex, Progress, Typography } from 'antd';
+import { Badge, Empty, Flex, Progress, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { formatMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type {
@@ -21,7 +22,7 @@ export const ExpensesByCategoryCard = ({
   const money = (amount: string) => formatMoney(amount, i18n.language);
 
   return (
-    <Card title={t('dashboard.expensesByCategory.title')}>
+    <EqualHeightCard title={t('dashboard.expensesByCategory.title')}>
       {categories.length === 0 ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -54,6 +55,6 @@ export const ExpensesByCategoryCard = ({
           ))}
         </Flex>
       )}
-    </Card>
+    </EqualHeightCard>
   );
 };

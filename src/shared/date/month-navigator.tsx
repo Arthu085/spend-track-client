@@ -3,6 +3,7 @@ import { Button, Flex, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatMonthLabel, type MonthRef, shiftMonth } from './month-ref';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 
 interface MonthNavigatorProps {
   value: MonthRef;
@@ -24,9 +25,9 @@ export const MonthNavigator = ({
 
   return (
     <Flex align="center" gap="small" wrap>
-      <Button
+      <IconActionButton
         icon={<LeftOutlined />}
-        aria-label={t('month.previous')}
+        label={t('month.previous')}
         onClick={() => onChange(shiftMonth(value, -1))}
       />
       <Typography.Title
@@ -35,9 +36,9 @@ export const MonthNavigator = ({
       >
         {formatMonthLabel(value, i18n.language)}
       </Typography.Title>
-      <Button
+      <IconActionButton
         icon={<RightOutlined />}
-        aria-label={t('month.next')}
+        label={t('month.next')}
         onClick={() => onChange(shiftMonth(value, 1))}
       />
       {children}

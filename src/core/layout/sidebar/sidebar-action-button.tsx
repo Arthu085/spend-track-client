@@ -1,5 +1,6 @@
-import { Button, theme, Tooltip } from 'antd';
+import { Button, theme } from 'antd';
 import type { ReactNode } from 'react';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 
 type SidebarActionButtonProps = {
   collapsed: boolean;
@@ -20,22 +21,32 @@ export const SidebarActionButton = ({
 }: SidebarActionButtonProps) => {
   const { token } = theme.useToken();
 
-  return (
-    <Tooltip title={collapsed ? label : undefined} placement="right">
-      <Button
+  if (collapsed) {
+    return (
+      <IconActionButton
         type="text"
         block
         icon={icon}
-        aria-label={label}
+        label={label}
+        tooltipPlacement="right"
         loading={loading}
         onClick={onClick}
-        style={{
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          paddingInline: collapsed ? 0 : token.padding,
-        }}
-      >
-        {collapsed ? null : text}
-      </Button>
-    </Tooltip>
+        style={{ justifyContent: 'center', paddingInline: 0 }}
+      />
+    );
+  }
+
+  return (
+    <Button
+      type="text"
+      block
+      icon={icon}
+      aria-label={label}
+      loading={loading}
+      onClick={onClick}
+      style={{ justifyContent: 'flex-start', paddingInline: token.padding }}
+    >
+      {text}
+    </Button>
   );
 };

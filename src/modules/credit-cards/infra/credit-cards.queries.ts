@@ -25,6 +25,7 @@ import {
   fetchCreditCardPurchases,
   fetchCreditCards,
   payCreditCardInvoice,
+  recordHistoricalSettlement,
   updateCreditCard,
   updateCreditCardPurchase,
   updateCreditCardStatus,
@@ -97,6 +98,9 @@ export const useDeleteCreditCard = () =>
 
 export const usePayCreditCardInvoice = () =>
   useCreditCardMutation(payCreditCardInvoice);
+
+export const useRecordHistoricalSettlement = () =>
+  useCreditCardMutation(recordHistoricalSettlement);
 
 export const useCancelCreditCardPayment = () =>
   useCreditCardMutation(cancelCreditCardPayment);

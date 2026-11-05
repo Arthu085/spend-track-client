@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/modules/accounts/infra/accounts.queries';
 import { useCreditCards } from '@/modules/credit-cards/infra/credit-cards.queries';
-import { useTransactionCategories } from '@/modules/transaction-categories/infra/transaction-categories.queries';
+import { useInvestments } from '@/modules/investments/infra/investments.queries';
 import { requiredUuidSchema } from '@/modules/transactions/domain/transaction-form.schemas';
 import { toReferenceOptions } from '@/modules/transactions/presentation/components/reference-options';
 import { dateInputFormat, todayDateOnly } from '@/shared/date/date-only';
@@ -21,11 +21,14 @@ import {
   toCreateRecurrencePayload,
 } from '../../domain/recurrence-form.schemas';
 import {
+  type RecurrenceFrequency,
   recurrenceFrequencySchema,
   type RecurrenceType,
   recurrenceTypeSchema,
 } from '../../domain/recurrence.schema';
 import { useCreateRecurrence } from '../../infra/recurrences.queries';
+import { RecurrenceCategoryField } from './recurrence-category-field';
+import { SavingStrategyFields } from './saving-strategy-fields';
 
 interface RecurrenceFormModalProps {
   open: boolean;
@@ -52,6 +55,28 @@ const useDefaultReference = (
   }, [form, field, defaultUuid]);
 };
 
+const InvestmentField = () => {
+  const { t } = useTranslation();
+  const { data: investments } = useInvestments({
+    status: 'ACTIVE',
+    limit: MAX_PAGE_SIZE,
+  });
+
+  return (
+    <Form.Item
+      name="investmentUuid"
+      label={t('recurrences.fields.investment')}
+      extra={t('recurrences.hints.investmentFixed')}
+      rules={[zodRule(requiredUuidSchema)]}
+    >
+      <Select
+        showSearch={{ optionFilterProp: 'label' }}
+        options={toReferenceOptions(investments?.data ?? [])}
+      />
+    </Form.Item>
+  );
+};
+
 const RecurrenceFields = () => {
   const { t, i18n } = useTranslation();
   const form = Form.useFormInstance<RecurrenceForm>();
@@ -66,14 +91,11 @@ const RecurrenceFields = () => {
     status: 'ACTIVE',
     limit: MAX_PAGE_SIZE,
   });
-  const { data: categories } = useTransactionCategories({
-    kind: type,
-    status: 'ACTIVE',
-    limit: MAX_PAGE_SIZE,
-  });
+  const frequency = Form.useWatch<RecurrenceFrequency | undefined>('frequency');
   const { shape } = recurrenceFormSchema;
   const dateFormat = dateInputFormat(i18n.language);
   const chargesCard = type === 'EXPENSE' && target === 'CREDIT_CARD';
+  const contributes = type === 'INVESTMENT_CONTRIBUTION';
 
   useDefaultReference(
     'accountUuid',
@@ -85,48 +107,47 @@ const RecurrenceFields = () => {
   );
 
   const changeType = () => {
-    form.setFieldsValue({ categoryUuid: undefined, target: 'ACCOUNT' });
+    form.setFieldsValue({
+      categoryUuid: undefined,
+      investmentUuid: undefined,
+      target: 'ACCOUNT',
+    });
   };
 
   return (
     <>
-      <Row gutter={16}>
-        <Col {...HALF_WIDTH}>
-          <Form.Item
-            name="type"
-            label={t('recurrences.fields.type')}
-            rules={[zodRule(shape.type)]}
-          >
-            <Radio.Group
-              optionType="button"
-              buttonStyle="solid"
-              onChange={changeType}
-              options={recurrenceTypeSchema.options.map((option) => ({
-                value: option,
-                label: t(`transactions.types.${option}`),
-              }))}
-            />
-          </Form.Item>
-        </Col>
-        <Col {...HALF_WIDTH}>
-          <Form.Item
-            name="target"
-            label={t('recurrences.fields.target')}
-            extra={
-              type === 'INCOME' ? t('recurrences.hints.cardOnlyExpense') : null
-            }
-            rules={[zodRule(shape.target)]}
-          >
-            <Radio.Group
-              options={recurrenceTargetSchema.options.map((option) => ({
-                value: option,
-                label: t(`recurrences.targets.${option}`),
-                disabled: option === 'CREDIT_CARD' && type === 'INCOME',
-              }))}
-            />
-          </Form.Item>
-        </Col>
-      </Row>
+      <Form.Item
+        name="type"
+        label={t('recurrences.fields.type')}
+        rules={[zodRule(shape.type)]}
+      >
+        <Radio.Group
+          optionType="button"
+          buttonStyle="solid"
+          onChange={changeType}
+          options={recurrenceTypeSchema.options.map((option) => ({
+            value: option,
+            label: t(`recurrences.types.${option}`),
+          }))}
+        />
+      </Form.Item>
+      <Form.Item
+        name="target"
+        label={t('recurrences.fields.target')}
+        hidden={contributes}
+        extra={
+          type === 'INCOME' ? t('recurrences.hints.cardOnlyExpense') : null
+        }
+        rules={[zodRule(shape.target)]}
+      >
+        <Radio.Group
+          options={recurrenceTargetSchema.options.map((option) => ({
+            value: option,
+            label: t(`recurrences.targets.${option}`),
+            disabled: option === 'CREDIT_CARD' && type === 'INCOME',
+          }))}
+        />
+      </Form.Item>
       <Form.Item
         name="description"
         label={t('recurrences.fields.description')}
@@ -213,7 +234,11 @@ const RecurrenceFields = () => {
           ) : (
             <Form.Item
               name="accountUuid"
-              label={t(`transactions.accountLabels.${type}`)}
+              label={
+                contributes
+                  ? t('recurrences.fields.sourceAccount')
+                  : t(`transactions.accountLabels.${type}`)
+              }
               rules={[zodRule(requiredUuidSchema)]}
             >
               <Select
@@ -224,18 +249,14 @@ const RecurrenceFields = () => {
           )}
         </Col>
         <Col {...HALF_WIDTH}>
-          <Form.Item
-            name="categoryUuid"
-            label={t('recurrences.fields.category')}
-            rules={[zodRule(shape.categoryUuid)]}
-          >
-            <Select
-              showSearch={{ optionFilterProp: 'label' }}
-              options={toReferenceOptions(categories?.data ?? [])}
-            />
-          </Form.Item>
+          {contributes ? (
+            <InvestmentField />
+          ) : (
+            <RecurrenceCategoryField kind={type} />
+          )}
         </Col>
       </Row>
+      {contributes && frequency === 'MONTHLY' && <SavingStrategyFields />}
       <Form.Item
         name="notes"
         label={t('recurrences.fields.notes')}

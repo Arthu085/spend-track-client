@@ -5,7 +5,6 @@ import {
 } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
-  Button,
   Flex,
   Popconfirm,
   Space,
@@ -18,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { creditCardInvoicesPath } from '@/core/router/app-routes';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { PendingOperationsModal } from '@/shared/components/pending-operations.modal';
 import { useArchiveWithPendingOperations } from '@/shared/components/use-archive-with-pending-operations';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
@@ -154,10 +154,10 @@ export const CreditCardsTable = ({
           >
             <FileTextOutlined /> {t('creditCards.invoices.title')}
           </Link>
-          <Button
+          <IconActionButton
             size="small"
             icon={<EditOutlined />}
-            aria-label={t('creditCards.actions.edit', { name: card.name })}
+            label={t('creditCards.actions.edit', { name: card.name })}
             disabled={card.status === 'INACTIVE'}
             onClick={() => onEdit(card)}
           />
@@ -171,11 +171,11 @@ export const CreditCardsTable = ({
             okButtonProps={{ danger: true }}
             onConfirm={() => removeCard(card.uuid)}
           >
-            <Button
+            <IconActionButton
               size="small"
               danger
               icon={<DeleteOutlined />}
-              aria-label={t('creditCards.actions.delete', { name: card.name })}
+              label={t('creditCards.actions.delete', { name: card.name })}
               loading={
                 deleteMutation.isPending &&
                 deleteMutation.variables === card.uuid

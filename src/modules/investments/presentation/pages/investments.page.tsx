@@ -1,7 +1,9 @@
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined, SyncOutlined } from '@ant-design/icons';
 import { Button, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
+import { AppRoutes } from '@/core/router/app-routes';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { useListParams } from '@/shared/list/use-list-params';
 import {
@@ -21,6 +23,8 @@ import { InvestmentsTable } from '../components/investments-table';
 
 type EditorState =
   { mode: 'create' } | { mode: 'edit'; investment: Investment };
+
+const RECURRING_CONTRIBUTIONS_PATH = `${AppRoutes.RECURRENCES}?type=INVESTMENT_CONTRIBUTION`;
 
 export const InvestmentsPage = () => {
   const { t } = useTranslation();
@@ -45,13 +49,18 @@ export const InvestmentsPage = () => {
             {t('investments.description')}
           </Typography.Text>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setEditor({ mode: 'create' })}
-        >
-          {t('investments.create.title')}
-        </Button>
+        <Flex gap="middle" align="center" wrap>
+          <Link to={RECURRING_CONTRIBUTIONS_PATH}>
+            <SyncOutlined /> {t('investments.recurringContributions')}
+          </Link>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setEditor({ mode: 'create' })}
+          >
+            {t('investments.create.title')}
+          </Button>
+        </Flex>
       </Flex>
       <InvestmentsFilters listParams={listParams} />
       <InvestmentsTable

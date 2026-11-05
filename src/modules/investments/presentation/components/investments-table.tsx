@@ -7,18 +7,12 @@ import {
   PlusCircleOutlined,
 } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
-import {
-  Button,
-  Popconfirm,
-  Space,
-  Switch,
-  type TableColumnsType,
-  Tooltip,
-} from 'antd';
+import { Popconfirm, Space, Switch, type TableColumnsType } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { investmentMovementsPath } from '@/core/router/app-routes';
+import { IconActionButton } from '@/shared/components/icon-action-button';
+import { IconActionLink } from '@/shared/components/icon-action-link';
 import { PendingOperationsModal } from '@/shared/components/pending-operations.modal';
 import { useArchiveWithPendingOperations } from '@/shared/components/use-archive-with-pending-operations';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
@@ -81,15 +75,13 @@ export const InvestmentsTable = ({
     onClick: () => void,
     disabled: boolean,
   ) => (
-    <Tooltip title={label}>
-      <Button
-        size="small"
-        icon={icon}
-        aria-label={label}
-        disabled={disabled}
-        onClick={onClick}
-      />
-    </Tooltip>
+    <IconActionButton
+      size="small"
+      icon={icon}
+      label={label}
+      disabled={disabled}
+      onClick={onClick}
+    />
   );
 
   const columns: TableColumnsType<Investment> = [
@@ -178,14 +170,11 @@ export const InvestmentsTable = ({
               () => onValuate(investment),
               archived,
             )}
-            <Tooltip title={t('investments.actions.history', { name })}>
-              <Link
-                to={investmentMovementsPath(uuid)}
-                aria-label={t('investments.actions.history', { name })}
-              >
-                <HistoryOutlined />
-              </Link>
-            </Tooltip>
+            <IconActionLink
+              to={investmentMovementsPath(uuid)}
+              label={t('investments.actions.history', { name })}
+              icon={<HistoryOutlined />}
+            />
             {actionButton(
               t('investments.actions.edit', { name }),
               <EditOutlined />,
@@ -200,11 +189,11 @@ export const InvestmentsTable = ({
               okButtonProps={{ danger: true }}
               onConfirm={() => removeInvestment(uuid)}
             >
-              <Button
+              <IconActionButton
                 size="small"
                 danger
                 icon={<DeleteOutlined />}
-                aria-label={t('investments.actions.delete', { name })}
+                label={t('investments.actions.delete', { name })}
                 loading={
                   deleteMutation.isPending && deleteMutation.variables === uuid
                 }

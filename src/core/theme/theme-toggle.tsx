@@ -11,7 +11,7 @@ export const ThemeToggle = () => {
   return (
     <FloatButton
       icon={isDark ? <SunOutlined /> : <MoonOutlined />}
-      tooltip={label}
+      tooltip={{ title: label, trigger: ['hover', 'focus'] }}
       aria-label={label}
       onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
     />

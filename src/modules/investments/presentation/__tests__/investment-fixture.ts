@@ -40,6 +40,12 @@ export const buildInvestmentMovement = (
     name: 'Nubank',
     status: 'ACTIVE',
   },
+  contributionKind: 'ONE_TIME',
+  contributionKindLabel: 'Avulso',
+  recurrence: null,
+  surplusMonth: null,
+  suggestedAmount: null,
+  retainedMinimum: null,
   createdAt: '2026-10-10T12:00:00.000Z',
   ...overrides,
 });

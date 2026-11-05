@@ -6,7 +6,12 @@ import {
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
 import type { TransactionState } from '@/modules/transactions/domain/transaction.schema';
+import {
+  type InvestmentMovement,
+  investmentMovementSchema,
+} from '@/modules/investments/domain/investment.schema';
 import type {
+  AdditionalContributionPayload,
   CreateRecurrencePayload,
   EndRecurrencePayload,
   OccurrencePayload,
@@ -45,6 +50,10 @@ export interface UpdateRecurrenceStateVariables {
 export interface EndRecurrenceVariables {
   uuid: string;
   payload: EndRecurrencePayload;
+}
+
+export interface AcceptAdditionalContributionVariables extends AdditionalContributionPayload {
+  recurrenceUuid: string;
 }
 
 export interface OccurrenceVariables {
@@ -161,4 +170,18 @@ export const cancelRecurrenceOccurrence = async (
   );
 
   return parseApiResponse(recurrenceOccurrenceSchema, response.data);
+};
+
+export const acceptAdditionalContribution = async ({
+  recurrenceUuid,
+  ...payload
+}: AcceptAdditionalContributionVariables): Promise<
+  ApiResponse<InvestmentMovement>
+> => {
+  const response = await httpClient.post<unknown>(
+    `${recurrencePath(recurrenceUuid)}/additional-contributions`,
+    payload,
+  );
+
+  return parseApiResponse(investmentMovementSchema, response.data);
 };

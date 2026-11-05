@@ -4,8 +4,15 @@ import i18n from '@/core/i18n/i18n.config';
 import { requiredUuidSchema } from '@/modules/transactions/domain/transaction-form.schemas';
 import { DATE_ONLY_FORMAT } from '@/shared/date/date-only';
 import type { ListFilters } from '@/shared/list/use-list-params';
-import { positiveMoneyInputSchema } from '@/shared/money/money';
 import {
+  moneyToCents,
+  nonNegativeMoneyInputSchema,
+  positiveMoneyInputSchema,
+} from '@/shared/money/money';
+import {
+  type AdditionalContributionStrategy,
+  additionalContributionStrategySchema,
+  isContributionRecurrence,
   type Recurrence,
   type RecurrenceFrequency,
   type RecurrenceOccurrence,
@@ -49,6 +56,14 @@ const notesSchema = z
   })
   .nullish();
 
+export const savingStrategyFormShape = {
+  useSavingStrategy: z.boolean().nullish(),
+  minimumRetainedBalance: nonNegativeMoneyInputSchema.nullish(),
+  additionalContribution: z
+    .enum(additionalContributionStrategySchema.options, { error: required })
+    .nullish(),
+};
+
 export const recurrenceFormSchema = z.object({
   type: z.enum(recurrenceTypeSchema.options, { error: required }),
   target: z.enum(recurrenceTargetSchema.options, { error: required }),
@@ -59,7 +74,9 @@ export const recurrenceFormSchema = z.object({
   endDate: requiredDateSchema.nullish(),
   accountUuid: requiredUuidSchema.nullish(),
   creditCardUuid: requiredUuidSchema.nullish(),
-  categoryUuid: requiredUuidSchema,
+  categoryUuid: requiredUuidSchema.nullish(),
+  investmentUuid: requiredUuidSchema.nullish(),
+  ...savingStrategyFormShape,
   notes: notesSchema,
 });
 
@@ -69,7 +86,8 @@ export const editRecurrenceFormSchema = z.object({
   description: descriptionSchema,
   amount: positiveMoneyInputSchema,
   accountUuid: requiredUuidSchema.nullish(),
-  categoryUuid: requiredUuidSchema,
+  categoryUuid: requiredUuidSchema.nullish(),
+  ...savingStrategyFormShape,
   notes: notesSchema,
 });
 
@@ -82,6 +100,13 @@ export const endRecurrenceFormSchema = z.object({
 export const occurrenceFormSchema = z.object({
   amount: positiveMoneyInputSchema,
   date: requiredDateSchema,
+});
+
+export const additionalContributionFormSchema = z.object({
+  amount: positiveMoneyInputSchema,
+  date: requiredDateSchema,
+  state: z.enum(['COMPLETED', 'PLANNED'], { error: required }),
+  allowExceedingSuggestion: z.boolean().optional(),
 });
 
 export const recurrenceFiltersShape = {
@@ -97,6 +122,9 @@ export type RecurrenceForm = z.infer<typeof recurrenceFormSchema>;
 export type EditRecurrenceForm = z.infer<typeof editRecurrenceFormSchema>;
 export type EndRecurrenceForm = z.infer<typeof endRecurrenceFormSchema>;
 export type OccurrenceForm = z.infer<typeof occurrenceFormSchema>;
+export type AdditionalContributionForm = z.infer<
+  typeof additionalContributionFormSchema
+>;
 export type RecurrenceFilters = ListFilters<typeof recurrenceFiltersShape>;
 
 export interface CreateRecurrencePayload {
@@ -108,17 +136,25 @@ export interface CreateRecurrencePayload {
   endDate?: string;
   accountUuid?: string;
   creditCardUuid?: string;
-  categoryUuid: string;
+  categoryUuid?: string;
+  investmentUuid?: string;
+  savingStrategy?: SavingStrategyPayload;
   notes?: string;
+}
+
+export interface SavingStrategyPayload {
+  minimumRetainedBalance: string;
+  additionalContribution: AdditionalContributionStrategy;
 }
 
 export interface UpdateRecurrencePayload {
   scope: RecurrenceUpdateScope;
   from?: string;
   description: string;
-  amount: string;
+  amount?: string;
   categoryUuid?: string;
   accountUuid?: string;
+  savingStrategy?: SavingStrategyPayload | null;
   notes: string | null;
 }
 
@@ -130,6 +166,15 @@ export interface OccurrencePayload {
   date: string;
 }
 
+export interface AdditionalContributionPayload {
+  year: number;
+  month: number;
+  amount: string;
+  date: string;
+  state: AdditionalContributionForm['state'];
+  allowExceedingSuggestion?: boolean;
+}
+
 const formatDate = (date: Dayjs) => date.format(DATE_ONLY_FORMAT);
 
 const filledNotes = (notes: string | null | undefined) =>
@@ -138,9 +183,41 @@ const filledNotes = (notes: string | null | undefined) =>
 const changedUuid = (next: string | null | undefined, current?: string) =>
   next && next !== current ? next : undefined;
 
+type SavingStrategyForm = Pick<
+  RecurrenceForm,
+  'useSavingStrategy' | 'minimumRetainedBalance' | 'additionalContribution'
+>;
+
+const toSavingStrategyPayload = ({
+  useSavingStrategy,
+  minimumRetainedBalance,
+  additionalContribution,
+}: SavingStrategyForm): SavingStrategyPayload | null =>
+  useSavingStrategy && minimumRetainedBalance && additionalContribution
+    ? { minimumRetainedBalance, additionalContribution }
+    : null;
+
 export const toCreateRecurrencePayload = (
   form: RecurrenceForm,
 ): CreateRecurrencePayload => {
+  if (form.type === 'INVESTMENT_CONTRIBUTION') {
+    return {
+      type: form.type,
+      description: form.description,
+      amount: form.amount,
+      frequency: form.frequency,
+      startDate: formatDate(form.startDate),
+      endDate: form.endDate ? formatDate(form.endDate) : undefined,
+      accountUuid: form.accountUuid ?? undefined,
+      investmentUuid: form.investmentUuid ?? undefined,
+      savingStrategy:
+        form.frequency === 'MONTHLY'
+          ? (toSavingStrategyPayload(form) ?? undefined)
+          : undefined,
+      notes: filledNotes(form.notes),
+    };
+  }
+
   const chargesCard = form.type === 'EXPENSE' && form.target === 'CREDIT_CARD';
 
   return {
@@ -154,26 +231,54 @@ export const toCreateRecurrencePayload = (
     creditCardUuid: chargesCard
       ? (form.creditCardUuid ?? undefined)
       : undefined,
-    categoryUuid: form.categoryUuid,
+    categoryUuid: form.categoryUuid ?? undefined,
     notes: filledNotes(form.notes),
   };
+};
+
+const isSameAmount = (first: string, second: string) =>
+  moneyToCents(first) === moneyToCents(second);
+
+const updatedSavingStrategy = (
+  form: EditRecurrenceForm,
+  { frequency, savingStrategy }: Recurrence,
+) => {
+  if (frequency !== 'MONTHLY') {
+    return undefined;
+  }
+
+  const next = toSavingStrategyPayload(form);
+
+  return next === null && savingStrategy === null ? undefined : next;
 };
 
 export const toUpdateRecurrencePayload = (
   form: EditRecurrenceForm,
   recurrence: Recurrence,
-): UpdateRecurrencePayload => ({
-  scope: form.scope,
-  from:
-    form.scope === 'FUTURE' && form.from ? formatDate(form.from) : undefined,
-  description: form.description,
-  amount: form.amount,
-  categoryUuid: changedUuid(form.categoryUuid, recurrence.category.uuid),
-  accountUuid: recurrence.account
-    ? changedUuid(form.accountUuid, recurrence.account.uuid)
-    : undefined,
-  notes: filledNotes(form.notes) ?? null,
-});
+): UpdateRecurrencePayload => {
+  const contributes = isContributionRecurrence(recurrence);
+
+  return {
+    scope: form.scope,
+    from:
+      form.scope === 'FUTURE' && form.from ? formatDate(form.from) : undefined,
+    description: form.description,
+    amount:
+      contributes && isSameAmount(form.amount, recurrence.amount)
+        ? undefined
+        : form.amount,
+    categoryUuid: contributes
+      ? undefined
+      : changedUuid(form.categoryUuid, recurrence.category?.uuid),
+    accountUuid: recurrence.account
+      ? changedUuid(form.accountUuid, recurrence.account.uuid)
+      : undefined,
+    savingStrategy: contributes
+      ? updatedSavingStrategy(form, recurrence)
+      : undefined,
+    notes: filledNotes(form.notes) ?? null,
+  };
+};
 
 const firstDayOfMonth = (month: Dayjs) => month.startOf('month');
 
@@ -208,4 +313,16 @@ export const toOccurrencePayload = (
 ): OccurrencePayload => ({
   amount: form.amount,
   date: formatDate(form.date),
+});
+
+export const toAdditionalContributionPayload = (
+  form: AdditionalContributionForm,
+  month: string,
+): AdditionalContributionPayload => ({
+  year: Number(month.slice(0, 4)),
+  month: Number(month.slice(5, 7)),
+  amount: form.amount,
+  date: formatDate(form.date),
+  state: form.state,
+  ...(form.allowExceedingSuggestion ? { allowExceedingSuggestion: true } : {}),
 });

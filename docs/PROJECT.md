@@ -34,7 +34,8 @@ ability change them. The `home` module's page at `/home` links to every page the
 financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
 balances with month navigation and the spending perspective), the `transactions` module at
 `/transactions` (planned and completed income, expenses, and transfers), the `recurrences` module
-at `/recurrences` (recurring income, expenses, and card charges with their occurrences), the
+at `/recurrences` (recurring income, expenses, card charges, and investment contributions with
+their occurrences), the
 `budgets` module at `/budgets` (monthly overall and category limits), the `investments` module at `/investments` (investments, reserves, and goals with contributions, withdrawals, and valuations), the `accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
 invoices, installment purchases, refunds, and invoice payments), and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
@@ -334,6 +335,16 @@ Transaction indicators, each with its own empty state:
   an overdue tag, the category or transfer route, and a quick action that marks one as completed
   (asking for the effective date, today by default). When more exist, the card says how many and
   links to the month on the transactions page.
+- **Confirm pending transactions:** a labeled button on the upcoming card opens a review of every
+  planned income, expense, and transfer up to the end of the month, not just the ten shown on the
+  card. Nothing changes before confirming there. Rows that are due start selected, rows dated after
+  today stay visible but unselected until chosen, and rows that cannot be confirmed are disabled
+  with the reason. One effective date (today by default) applies to all rows, each row can override
+  it, and a date after today or before the account's opening date blocks the submit. The modal
+  totals the selection by type and says that card charges and investment contributions are not included. Selections over
+  200 go out sequentially in chunks of 200 and their results are aggregated. After a partial failure
+  the modal lists only the failed rows with their reasons and retries only those. The review stays
+  open with that state whatever the background refresh of the list answers.
 - **Expenses by category:** each category's total with a bar for its share of the month's expenses
   (in the category color) and its paid and pending amounts.
 - **Credit card invoices:** the month's card spending, what is still due on every invoice, and the
@@ -354,6 +365,23 @@ Transaction indicators, each with its own empty state:
   contributions and withdrawals (with the planned amount when there is one), and each active
   investment with its value and target progress (see [Investments](#investments)). It links to the
   investments page. Contributions and withdrawals never count as income or expenses.
+- **Contributions by kind:** when the month has any, the investments card separates mandatory,
+  optional additional, and one-time contributions, each with confirmed and planned amounts.
+- **Saving plans:** each monthly contribution with a saving strategy shows the balance for the
+  remaining contributions (completed ones have already left it), the mandatory amount, the
+  suggested additional amount (or the accepted one), the resulting total, and the retained balance,
+  all taken from `investments.savingPlans` for the month. A shortfall is a clear alert and never lowers the mandatory target. A note says that all
+  card bills count against this account, because cards are not linked to accounts. Suggestions are
+  shown per plan and never added: plans sharing an account get a warning that they draw on the same
+  money until one is accepted. A row confirms a planned mandatory occurrence and records an
+  additional contribution; nothing is created without that action. The modal prefills the suggestion,
+  warns when the amount exceeds it (including a zero suggestion) and requires explicit override
+  acknowledgement, keeps the date inside the month, and offers only the planned
+  state for a date after today, which is the default for future months. An accepted contribution
+  links to the investment's movements, where canceling it frees the month. Acceptance refreshes all
+  plans and balances before closing. A stale amount above the current server suggestion is rejected
+  unless explicitly acknowledged; a rejection refreshes the open form's suggestion and requires fresh
+  acknowledgement after an amount or suggestion change.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -431,6 +459,13 @@ purchases are not transactions: they never change an account balance until an in
   payments. **Pay invoice** asks for an active account (the default one first), the amount (the
   amount due by default; partial payments are allowed, and the API rejects more than the amount
   due), and the date. A payment can be canceled after confirmation; it stays listed as canceled.
+- **Historical invoice payments:** **Record historical payment** is a separate invoice action for a
+  bill that was paid before the account's opening balance date, when the opening balance already
+  reflects that money leaving. It asks for the account (archived accounts are allowed), the amount
+  (the amount due by default), and the date, which must be before the account's opening date and
+  not in the future. It settles the invoice without moving any account balance. The payments list
+  marks these rows with a tag, and canceling one reopens the invoice amount, again without moving a
+  balance.
 - **Purchases:** `/credit-card-purchases` lists the purchases of one month by purchase date, with
   the month in the URL like the transactions page, filtered by card, category, and description.
   Each row expands to its installments (date, invoice month, amount) and refunds. The form creates
@@ -480,6 +515,14 @@ operation changes.
   that occurrence only), or skipped after a warning, which keeps them listed as canceled. The
   scheduled date never changes. The expected date cannot move past the recurrence's end date, while
   the confirmation date records when it actually happened and may be later.
+- **Investment contributions:** a recurrence of this type needs an investment, which never changes
+  afterward, and a source account, and has no category or card. Lists, the occurrences modal, and
+  the edit modal show the investment and tolerate the missing category. Occurrences are planned
+  mandatory contributions, confirmed like any occurrence. Editing a contribution sends the amount
+  only when it changed, so a change made to a single occurrence survives.
+- **Saving strategy:** a monthly contribution can keep a minimum balance in the account and suggest
+  what is left of the month as an additional contribution. Turning the switch off on edit sends
+  `savingStrategy: null`, which clears it without changing existing movements.
 - **Freshness:** every recurrence mutation shows the API message and invalidates the recurrence,
   transactions, credit card, dashboard, and accounts queries, because occurrences are planned
   transactions or card charges, and confirming changes balances and invoices.
@@ -518,13 +561,22 @@ API derives from its movements: contributions minus withdrawals plus valuation a
   bar stops at 100% while the label shows the real percentage.
 - **Edit:** a form modal creates or edits the name, type, and target; a cleared target is sent as
   `null`. The status switch archives or restores an investment, and delete works only while it has
-  no movements (the API explains otherwise). Archiving one with planned movements first opens a
-  dialog with their count and total, where the user keeps or cancels them.
+  no movements and no active or paused recurrence (the API explains otherwise and asks the user to
+  end the recurrence first). Archiving one with planned movements first opens a dialog with their
+  count and total. Keeping movements pauses contribution recurrences; canceling movements ends them.
+  Reactivating an investment never restarts its recurrences. A paused recurrence must be resumed
+  explicitly; an ended recurrence remains ended. Completed history and canceled dates are preserved.
 - **Contribute and withdraw:** a form modal posts `POST /investments/:uuid/movements` with the
   account (the default account preselected), amount, date (today by default), and state (completed
   by default, or planned). A contribution moves money from the account into the investment and a
   withdrawal moves it back; neither is income or an expense, and the API refuses a withdrawal larger
   than the current value.
+- **Recurring contributions:** the investments page links to the recurrences page filtered to
+  investment contributions, where they are configured (see [Recurrences](#recurrences)). The history
+  tags every contribution as one-time, mandatory, or additional.
+- **From the dashboard:** the investments card opens a one-time contribution form with the same
+  fields and rules plus the investment (`InvestmentContributionModal`), offering only active
+  investments and active accounts; each row's action preselects its investment.
 - **Update value:** a form modal posts `POST /investments/:uuid/valuations` with the new market value;
   only the investment changes, never an account balance.
 - **History:** `/investments/:uuid/movements` lists every movement, newest first, with the signed

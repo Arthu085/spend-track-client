@@ -4,7 +4,6 @@ import {
   CloseOutlined,
 } from '@ant-design/icons';
 import {
-  Button,
   Flex,
   Popconfirm,
   Space,
@@ -15,6 +14,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
@@ -32,6 +32,12 @@ const stateColors = {
   PLANNED: 'gold',
   COMPLETED: 'green',
   CANCELED: 'default',
+} as const;
+
+const kindColors = {
+  ONE_TIME: 'default',
+  MANDATORY: 'blue',
+  ADDITIONAL: 'purple',
 } as const;
 
 const signedAmount = ({ type, amount }: InvestmentMovement) =>
@@ -65,6 +71,19 @@ export const InvestmentMovementsPage = () => {
     {
       title: t('investments.fields.movementType'),
       dataIndex: 'typeLabel',
+      render: (
+        _,
+        { type, typeLabel, contributionKind, contributionKindLabel },
+      ) => (
+        <Space size="small" wrap>
+          {typeLabel}
+          {type === 'CONTRIBUTION' && (
+            <Tag color={kindColors[contributionKind]}>
+              {contributionKindLabel}
+            </Tag>
+          )}
+        </Space>
+      ),
     },
     {
       title: t('investments.fields.account'),
@@ -102,10 +121,10 @@ export const InvestmentMovementsPage = () => {
               cancelText={t('common.cancel')}
               onConfirm={() => changeState(movement.uuid, 'COMPLETED')}
             >
-              <Button
+              <IconActionButton
                 size="small"
                 icon={<CheckOutlined />}
-                aria-label={t('investments.actions.confirmMovement', {
+                label={t('investments.actions.confirmMovement', {
                   type: movement.typeLabel,
                 })}
               />
@@ -120,11 +139,11 @@ export const InvestmentMovementsPage = () => {
               okButtonProps={{ danger: true }}
               onConfirm={() => changeState(movement.uuid, 'CANCELED')}
             >
-              <Button
+              <IconActionButton
                 size="small"
                 danger
                 icon={<CloseOutlined />}
-                aria-label={t('investments.actions.cancelMovement', {
+                label={t('investments.actions.cancelMovement', {
                   type: movement.typeLabel,
                 })}
               />
