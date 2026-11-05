@@ -138,7 +138,7 @@
     "savingPlans": {
       "title": "Planos de poupança",
       "hint": "As sugestões não alteram nenhum saldo, e nada é criado até você aceitar uma.",
-      "balanceBefore": "Saldo antes do aporte",
+      "balanceForRemaining": "Saldo para os aportes restantes",
       "mandatory": "Obrigatório",
       "mandatoryDetail": "{{planned}} planejado · {{completed}} confirmado",
       "suggested": "Adicional sugerido",

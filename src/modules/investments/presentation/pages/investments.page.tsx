@@ -1,5 +1,5 @@
 import { PlusOutlined, SyncOutlined } from '@ant-design/icons';
-import { Button, Flex, Space, Typography } from 'antd';
+import { Button, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -49,11 +49,9 @@ export const InvestmentsPage = () => {
             {t('investments.description')}
           </Typography.Text>
         </div>
-        <Space wrap>
+        <Flex gap="middle" align="center" wrap>
           <Link to={RECURRING_CONTRIBUTIONS_PATH}>
-            <Button icon={<SyncOutlined />}>
-              {t('investments.recurringContributions')}
-            </Button>
+            <SyncOutlined /> {t('investments.recurringContributions')}
           </Link>
           <Button
             type="primary"
@@ -62,7 +60,7 @@ export const InvestmentsPage = () => {
           >
             {t('investments.create.title')}
           </Button>
-        </Space>
+        </Flex>
       </Flex>
       <InvestmentsFilters listParams={listParams} />
       <InvestmentsTable

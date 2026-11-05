@@ -126,7 +126,7 @@ describe('Saving plans on the dashboard', () => {
     const group = await planGroup('Reserva mensal');
 
     expect(
-      amountOf(group, i18n.t('dashboard.savingPlans.balanceBefore')),
+      amountOf(group, i18n.t('dashboard.savingPlans.balanceForRemaining')),
     ).toHaveTextContent(money('1500.00'));
     expect(
       within(group).getByText(
@@ -154,6 +154,33 @@ describe('Saving plans on the dashboard', () => {
       ),
     ).toBeInTheDocument();
     expect(sent(acceptPath(buildSavingPlan()))).toHaveLength(0);
+  });
+
+  it('reconciles the figures after the mandatory contribution is confirmed', async () => {
+    renderPlans([
+      buildSavingPlan({
+        balanceBeforeContribution: '800.00',
+        mandatory: {
+          planned: '0.00',
+          completed: '700.00',
+          plannedOccurrences: [],
+        },
+      }),
+    ]);
+    const group = await planGroup('Reserva mensal');
+
+    expect(
+      amountOf(group, i18n.t('dashboard.savingPlans.balanceForRemaining')),
+    ).toHaveTextContent(money('800.00'));
+    expect(
+      amountOf(group, i18n.t('dashboard.savingPlans.suggested')),
+    ).toHaveTextContent(money('600.00'));
+    expect(
+      amountOf(group, i18n.t('dashboard.savingPlans.retained')),
+    ).toHaveTextContent(money('200.00'));
+    expect(
+      amountOf(group, i18n.t('dashboard.savingPlans.total')),
+    ).toHaveTextContent(money('1300.00'));
   });
 
   it('alerts about a shortfall without lowering the mandatory target', async () => {

@@ -138,7 +138,7 @@
     "savingPlans": {
       "title": "Saving plans",
       "hint": "Suggestions change no balance, and nothing is created until you accept one.",
-      "balanceBefore": "Balance before contribution",
+      "balanceForRemaining": "Balance for remaining contributions",
       "mandatory": "Mandatory",
       "mandatoryDetail": "{{planned}} planned · {{completed}} confirmed",
       "suggested": "Suggested additional",

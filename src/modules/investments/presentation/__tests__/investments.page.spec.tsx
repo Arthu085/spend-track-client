@@ -62,14 +62,15 @@ describe('InvestmentsPage', () => {
   it('links to the recurring contributions', async () => {
     renderInvestments();
 
-    expect(
-      await screen.findByRole('link', {
-        name: new RegExp(i18n.t('investments.recurringContributions')),
-      }),
-    ).toHaveAttribute(
+    const link = await screen.findByRole('link', {
+      name: new RegExp(i18n.t('investments.recurringContributions')),
+    });
+
+    expect(link).toHaveAttribute(
       'href',
       `${AppRoutes.RECURRENCES}?type=INVESTMENT_CONTRIBUTION`,
     );
+    expect(within(link).queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('lists active investments with their value and target progress', async () => {

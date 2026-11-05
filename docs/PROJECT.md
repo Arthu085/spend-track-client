@@ -367,10 +367,10 @@ Transaction indicators, each with its own empty state:
   investments page. Contributions and withdrawals never count as income or expenses.
 - **Contributions by kind:** when the month has any, the investments card separates mandatory,
   optional additional, and one-time contributions, each with confirmed and planned amounts.
-- **Saving plans:** each monthly contribution with a saving strategy shows the balance before the
-  contribution, the mandatory amount, the suggested additional amount (or the accepted one), the
-  resulting total, and the retained balance, all taken from `investments.savingPlans` for the
-  month. A shortfall is a clear alert and never lowers the mandatory target. A note says that all
+- **Saving plans:** each monthly contribution with a saving strategy shows the balance for the
+  remaining contributions (completed ones have already left it), the mandatory amount, the
+  suggested additional amount (or the accepted one), the resulting total, and the retained balance,
+  all taken from `investments.savingPlans` for the month. A shortfall is a clear alert and never lowers the mandatory target. A note says that all
   card bills count against this account, because cards are not linked to accounts. Suggestions are
   shown per plan and never added: plans sharing an account get a warning that they draw on the same
   money until one is accepted. A row confirms a planned mandatory occurrence and records an

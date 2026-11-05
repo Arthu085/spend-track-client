@@ -77,8 +77,8 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
             column={{ xs: 1, sm: 2, lg: 3 }}
             items={[
               labelled(
-                'balanceBefore',
-                t('dashboard.savingPlans.balanceBefore'),
+                'balanceForRemaining',
+                t('dashboard.savingPlans.balanceForRemaining'),
                 plan.balanceBeforeContribution,
               ),
               {
