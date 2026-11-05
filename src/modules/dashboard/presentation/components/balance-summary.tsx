@@ -1,5 +1,6 @@
-import { Alert, Card, Col, Flex, Row, Typography } from 'antd';
+import { Alert, Col, Flex, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { formatMoney, isNegativeMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type { Dashboard } from '../../domain/dashboard.schema';
@@ -46,16 +47,16 @@ export const BalanceSummary = ({ balances }: BalanceSummaryProps) => {
           })}
         />
       )}
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} align="stretch">
         {items.map(({ key, label, hint, amount }) => (
           <Col key={key} xs={24} md={8}>
-            <Card>
+            <EqualHeightCard>
               <Typography.Text type="secondary">{label}</Typography.Text>
               <Typography.Title level={3} style={{ margin: '4px 0' }}>
                 <MoneyText amount={amount} aria-label={label} />
               </Typography.Title>
               <Typography.Text type="secondary">{hint}</Typography.Text>
-            </Card>
+            </EqualHeightCard>
           </Col>
         ))}
       </Row>

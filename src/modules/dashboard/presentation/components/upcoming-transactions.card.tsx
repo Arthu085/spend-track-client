@@ -2,7 +2,6 @@ import { CheckOutlined } from '@ant-design/icons';
 import {
   Badge,
   Button,
-  Card,
   Empty,
   Flex,
   Space,
@@ -19,6 +18,7 @@ import {
   CompleteTransactionModal,
 } from '@/modules/transactions/presentation/components/complete-transaction.modal';
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
+import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import type {
@@ -100,7 +100,7 @@ export const UpcomingTransactionsCard = ({
   ];
 
   return (
-    <Card
+    <EqualHeightCard
       title={t('dashboard.upcoming.title')}
       extra={
         <Link to={transactionsOfMonth(period)}>
@@ -141,6 +141,6 @@ export const UpcomingTransactionsCard = ({
         transaction={completing.target}
         onClose={completing.close}
       />
-    </Card>
+    </EqualHeightCard>
   );
 };

@@ -535,6 +535,35 @@ describe('DashboardPage', () => {
     });
   });
 
+  it('stretches every card of a row to the height of the row, whatever its content', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(
+        buildDashboard({
+          expensesByCategory: [],
+        }),
+      ),
+    });
+
+    await screen.findByText(i18n.t('dashboard.expensesByCategory.empty'));
+
+    const rows = document.querySelectorAll<HTMLElement>('.ant-row');
+    const rowsOfCards = [...rows].filter((row) =>
+      row.querySelector(':scope > .ant-col > .ant-card'),
+    );
+
+    expect(rowsOfCards).toHaveLength(3);
+
+    for (const row of rowsOfCards) {
+      expect(row).toHaveClass('ant-row-stretch');
+
+      for (const card of row.querySelectorAll<HTMLElement>(
+        ':scope > .ant-col > .ant-card',
+      )) {
+        expect(card).toHaveStyle({ height: '100%' });
+      }
+    }
+  });
+
   it('shows no daily allowance once the month is over', async () => {
     renderDashboard(AppRoutes.DASHBOARD, {
       'GET /dashboard': envelope({

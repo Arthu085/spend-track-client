@@ -121,7 +121,7 @@ export const DashboardPage = () => {
               </Link>
             }
           />
-          <Row gutter={[16, 16]}>
+          <Row gutter={[16, 16]} align="stretch">
             <Col xs={24} xl={14}>
               <UpcomingTransactionsCard
                 period={dashboard.period}
