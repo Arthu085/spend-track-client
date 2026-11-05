@@ -1,7 +1,9 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import dayjs from 'dayjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes, creditCardInvoicesPath } from '@/core/router/app-routes';
+import { dateInputFormat } from '@/shared/date/date-only';
 import { formatMonthLabel } from '@/shared/date/month-ref';
 import { formatMoney } from '@/shared/money/money';
 import {
@@ -43,6 +45,8 @@ const invoiceDetail = buildCreditCardInvoiceDetail({
       account: { uuid: nubank.uuid, name: nubank.name, status: 'ACTIVE' },
       amount: '100.00',
       paidOn: '2026-11-06',
+      source: 'ACCOUNT',
+      sourceLabel: 'Conta',
       canceledAt: null,
       createdAt: '2026-11-06T12:00:00.000Z',
     },
@@ -388,5 +392,254 @@ describe('CreditCardsPage', () => {
     );
 
     expect(await screen.findByText('Pagamento cancelado')).toBeInTheDocument();
+  });
+
+  describe('historical payments', () => {
+    const settlementPath = `POST /credit-card-invoices/${invoice.uuid}/historical-settlements`;
+    const settlement = {
+      ...invoiceDetail.payments[0],
+      uuid: 'd4e5f6a7-dddd-4c3e-9f1a-1a2b3c4d5e6f',
+      amount: '200.00',
+      paidOn: '2026-09-20',
+      source: 'HISTORICAL_SETTLEMENT' as const,
+      sourceLabel: 'Pagamento histórico',
+    };
+    const archived = {
+      ...nubank,
+      uuid: 'e5f6a7b8-eeee-4c3e-9f1a-1a2b3c4d5e6f',
+      name: 'Banco antigo',
+      isDefault: false,
+      status: 'INACTIVE' as const,
+      statusLabel: 'Inativo',
+    };
+
+    const openModal = async (routes: StubRoutes = {}) => {
+      const rendered = renderWithRoutes(creditCardInvoicesPath(visa.uuid), {
+        [`GET /credit-cards/${visa.uuid}/invoices`]: listPage([invoice]),
+        [`GET /credit-card-invoices/${invoice.uuid}`]: envelope(invoiceDetail),
+        'GET /accounts': ({ params }) =>
+          listPage(
+            (params as { status: string }).status === 'INACTIVE'
+              ? [archived]
+              : [nubank],
+          ),
+        [settlementPath]: envelope(
+          settlement,
+          'Pagamento histórico registrado',
+        ),
+        ...routes,
+      });
+
+      fireEvent.click(
+        within(await findRow(invoice.uuid)).getByRole('button', {
+          name: i18n.t('creditCards.actions.viewInvoice', {
+            month: november(),
+          }),
+        }),
+      );
+      const invoiceDialog = await findDialog(
+        i18n.t('creditCards.invoice.payments'),
+      );
+
+      fireEvent.click(
+        within(invoiceDialog).getByRole('button', {
+          name: new RegExp(i18n.t('creditCards.historical.title')),
+        }),
+      );
+      const dialog = await findDialog(i18n.t('creditCards.historical.hint'));
+      await within(dialog).findByText(nubank.name);
+
+      return { ...rendered, dialog, invoiceDialog };
+    };
+
+    const setDate = (dialog: HTMLElement, value: string) => {
+      const input = within(dialog).getByLabelText(
+        i18n.t('creditCards.fields.paidOn'),
+      );
+
+      fireEvent.mouseDown(input);
+      fireEvent.change(input, {
+        target: { value: dayjs(value).format(dateInputFormat(i18n.language)) },
+      });
+      fireEvent.keyDown(input, { key: 'Enter' });
+    };
+
+    it('explains that no balance changes and prefills the outstanding amount', async () => {
+      const { dialog } = await openModal();
+
+      expect(
+        within(dialog).getByLabelText(i18n.t('creditCards.fields.amount')),
+      ).toHaveValue('200.00');
+      expect(
+        within(dialog).getByText(
+          i18n.t('creditCards.historical.openingDate', {
+            date: new Intl.DateTimeFormat(i18n.language, {
+              timeZone: 'UTC',
+            }).format(new Date('2026-10-01T00:00:00Z')),
+          }),
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('records a payment dated before the opening date of the account', async () => {
+      const { dialog, sent } = await openModal();
+
+      setDate(dialog, '2026-09-20');
+      save(dialog);
+
+      expect(
+        await screen.findByText('Pagamento histórico registrado'),
+      ).toBeInTheDocument();
+      expect(requestBody(sent(settlementPath)[0])).toEqual({
+        accountUuid: nubank.uuid,
+        amount: '200.00',
+        paidOn: '2026-09-20',
+      });
+    });
+
+    it('requires a date', async () => {
+      const { dialog, sent } = await openModal();
+
+      save(dialog);
+
+      expect(
+        await within(dialog).findByText(i18n.t('validation.required')),
+      ).toBeInTheDocument();
+      expect(sent(settlementPath)).toHaveLength(0);
+    });
+
+    it('rejects a date on or after the opening date without calling the API', async () => {
+      const { dialog, sent } = await openModal();
+
+      setDate(dialog, '2026-10-01');
+      save(dialog);
+
+      expect(
+        await within(dialog).findByText(
+          i18n.t('creditCards.historical.dateNotBeforeOpening', {
+            date: new Intl.DateTimeFormat(i18n.language, {
+              timeZone: 'UTC',
+            }).format(new Date('2026-10-01T00:00:00Z')),
+          }),
+        ),
+      ).toBeInTheDocument();
+      expect(sent(settlementPath)).toHaveLength(0);
+    });
+
+    it('rejects a future date whatever the opening date of the account', async () => {
+      const opensLater = { ...nubank, openingBalanceDate: '2027-01-01' };
+      const { dialog, sent } = await openModal({
+        'GET /accounts': ({ params }) =>
+          listPage(
+            (params as { status: string }).status === 'INACTIVE'
+              ? []
+              : [opensLater],
+          ),
+      });
+
+      setDate(dialog, '2026-11-20');
+      save(dialog);
+
+      expect(
+        await within(dialog).findByText(
+          i18n.t('creditCards.historical.dateInFuture'),
+        ),
+      ).toBeInTheDocument();
+      expect(sent(settlementPath)).toHaveLength(0);
+    });
+
+    it('offers archived accounts, identified as such', async () => {
+      const { dialog } = await openModal();
+
+      fireEvent.mouseDown(
+        within(dialog).getByLabelText(i18n.t('creditCards.fields.account')),
+      );
+
+      expect(
+        await screen.findByTitle(
+          i18n.t('creditCards.historical.archivedAccount', {
+            name: archived.name,
+          }),
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it('shows an API refusal and keeps the modal open', async () => {
+      const { dialog } = await openModal({
+        [settlementPath]: {
+          status: 409,
+          data: {
+            statusCode: 409,
+            message: 'Pagamento histórico já registrado',
+          },
+        },
+      });
+
+      setDate(dialog, '2026-09-20');
+      save(dialog);
+
+      expect(
+        await screen.findByText('Pagamento histórico já registrado'),
+      ).toBeInTheDocument();
+      expect(dialog).toBeInTheDocument();
+    });
+
+    it('marks settlements in the list and warns that canceling moves no balance', async () => {
+      const cancelPath = `PUT /credit-card-invoices/${invoice.uuid}/payments/${settlement.uuid}/cancellation`;
+      const { sent } = renderWithRoutes(creditCardInvoicesPath(visa.uuid), {
+        [`GET /credit-cards/${visa.uuid}/invoices`]: listPage([invoice]),
+        [`GET /credit-card-invoices/${invoice.uuid}`]: envelope({
+          ...invoiceDetail,
+          payments: [settlement],
+          historicalPaid: '200.00',
+        }),
+        [cancelPath]: envelope(
+          { ...settlement, canceledAt: '2026-11-08T15:00:00Z' },
+          'Pagamento histórico cancelado',
+        ),
+      });
+
+      fireEvent.click(
+        within(await findRow(invoice.uuid)).getByRole('button', {
+          name: i18n.t('creditCards.actions.viewInvoice', {
+            month: november(),
+          }),
+        }),
+      );
+      const dialog = await findDialog(i18n.t('creditCards.invoice.payments'));
+
+      expect(
+        within(dialog).getByText(settlement.sourceLabel),
+      ).toBeInTheDocument();
+      expect(
+        within(dialog).getByLabelText(
+          i18n.t('creditCards.fields.historicalPaid'),
+        ),
+      ).toHaveTextContent(money('200.00'));
+
+      fireEvent.click(
+        within(dialog).getByRole('button', {
+          name: i18n.t('creditCards.actions.cancelSettlement', {
+            amount: settlement.amount,
+          }),
+        }),
+      );
+      const confirm = await findDialog(
+        i18n.t('creditCards.cancelSettlement.description'),
+      );
+
+      expect(sent(cancelPath)).toHaveLength(0);
+
+      fireEvent.click(
+        within(confirm).getByRole('button', {
+          name: i18n.t('creditCards.cancelSettlement.confirm'),
+        }),
+      );
+
+      expect(
+        await screen.findByText('Pagamento histórico cancelado'),
+      ).toBeInTheDocument();
+      expect(sent(cancelPath)).toHaveLength(1);
+    });
   });
 });

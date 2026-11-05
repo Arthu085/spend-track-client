@@ -431,6 +431,13 @@ purchases are not transactions: they never change an account balance until an in
   payments. **Pay invoice** asks for an active account (the default one first), the amount (the
   amount due by default; partial payments are allowed, and the API rejects more than the amount
   due), and the date. A payment can be canceled after confirmation; it stays listed as canceled.
+- **Historical invoice payments:** **Record historical payment** is a separate invoice action for a
+  bill that was paid before the account's opening balance date, when the opening balance already
+  reflects that money leaving. It asks for the account (archived accounts are allowed), the amount
+  (the amount due by default), and the date, which must be before the account's opening date and
+  not in the future. It settles the invoice without moving any account balance. The payments list
+  marks these rows with a tag, and canceling one reopens the invoice amount, again without moving a
+  balance.
 - **Purchases:** `/credit-card-purchases` lists the purchases of one month by purchase date, with
   the month in the URL like the transactions page, filtered by card, category, and description.
   Each row expands to its installments (date, invoice month, amount) and refunds. The form creates

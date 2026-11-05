@@ -174,6 +174,18 @@ export const payCreditCardInvoice = async ({
   return parseApiResponse(creditCardPaymentSchema, response.data);
 };
 
+export const recordHistoricalSettlement = async ({
+  invoiceUuid,
+  ...payload
+}: PayCreditCardInvoiceVariables): Promise<ApiResponse<CreditCardPayment>> => {
+  const response = await httpClient.post<unknown>(
+    `/credit-card-invoices/${invoiceUuid}/historical-settlements`,
+    payload,
+  );
+
+  return parseApiResponse(creditCardPaymentSchema, response.data);
+};
+
 export const cancelCreditCardPayment = async ({
   invoiceUuid,
   paymentUuid,

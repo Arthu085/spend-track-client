@@ -222,7 +222,8 @@
       "notes": "Observações",
       "refundDate": "Data do estorno",
       "installment": "Parcela",
-      "invoice": "Fatura"
+      "invoice": "Fatura",
+      "historicalPaid": "Pagamentos históricos"
     },
     "hints": {
       "billingDays": "Compras feitas no dia do fechamento ou depois entram na fatura seguinte. Alterar os dias só afeta faturas futuras.",
@@ -244,7 +245,8 @@
       "editPurchase": "Editar {{description}}",
       "refund": "Estornar {{description}}",
       "deletePurchase": "Excluir {{description}}",
-      "deleteRefund": "Excluir estorno de {{date}}"
+      "deleteRefund": "Excluir estorno de {{date}}",
+      "cancelSettlement": "Cancelar pagamento histórico de {{amount}}"
     },
     "delete": {
       "title": "Excluir cartão",
@@ -278,6 +280,20 @@
       "title": "Cancelar pagamento",
       "description": "Cancelar este pagamento? O valor volta para a conta e para o saldo da fatura. O pagamento fica no histórico.",
       "confirm": "Cancelar pagamento"
+    },
+    "historical": {
+      "title": "Registrar pagamento histórico",
+      "hint": "Para uma fatura já paga antes de você começar a acompanhar a conta. Nenhum saldo bancário muda: o saldo inicial já inclui este dinheiro. A data precisa ser anterior à data de abertura da conta.",
+      "accountHint": "A conta cujo saldo inicial já inclui este pagamento. Pode estar arquivada.",
+      "openingDate": "Data do saldo inicial desta conta: {{date}}",
+      "dateNotBeforeOpening": "A data precisa ser anterior à data do saldo inicial da conta ({{date}}). Para uma data posterior, use um pagamento normal.",
+      "dateInFuture": "A data não pode estar no futuro.",
+      "archivedAccount": "{{name}} (arquivada)"
+    },
+    "cancelSettlement": {
+      "title": "Cancelar pagamento histórico",
+      "description": "Cancelar este pagamento histórico? Nenhum saldo de conta se move: o valor apenas volta para o saldo da fatura. Ele fica como histórico, e você pode registrá-lo de novo para corrigir.",
+      "confirm": "Cancelar pagamento histórico"
     },
     "purchases": {
       "title": "Compras no cartão",

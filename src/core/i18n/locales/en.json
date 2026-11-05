@@ -222,7 +222,8 @@
       "notes": "Notes",
       "refundDate": "Refund date",
       "installment": "Installment",
-      "invoice": "Invoice"
+      "invoice": "Invoice",
+      "historicalPaid": "Historical payments"
     },
     "hints": {
       "billingDays": "Purchases made on or after the closing day go to the next invoice. Changing the days only affects future invoices.",
@@ -244,7 +245,8 @@
       "editPurchase": "Edit {{description}}",
       "refund": "Refund {{description}}",
       "deletePurchase": "Delete {{description}}",
-      "deleteRefund": "Delete refund of {{date}}"
+      "deleteRefund": "Delete refund of {{date}}",
+      "cancelSettlement": "Cancel historical payment of {{amount}}"
     },
     "delete": {
       "title": "Delete credit card",
@@ -278,6 +280,20 @@
       "title": "Cancel payment",
       "description": "Cancel this payment? The amount returns to the account and to the invoice balance. The payment stays as history.",
       "confirm": "Cancel payment"
+    },
+    "historical": {
+      "title": "Record historical payment",
+      "hint": "For an invoice already paid before you started tracking the account. No bank balance changes: the opening balance already includes this money. The date must be before the opening date of the account.",
+      "accountHint": "The account whose opening balance already includes this payment. It may be archived.",
+      "openingDate": "Opening balance date of this account: {{date}}",
+      "dateNotBeforeOpening": "The date must be before the opening balance date of the account ({{date}}). For a later date, use a normal payment.",
+      "dateInFuture": "The date cannot be in the future.",
+      "archivedAccount": "{{name}} (archived)"
+    },
+    "cancelSettlement": {
+      "title": "Cancel historical payment",
+      "description": "Cancel this historical payment? No account balance moves: the amount only returns to the invoice balance. It stays as history, and you can record it again to correct it.",
+      "confirm": "Cancel historical payment"
     },
     "purchases": {
       "title": "Card purchases",

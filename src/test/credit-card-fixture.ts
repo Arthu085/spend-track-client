@@ -74,6 +74,7 @@ export const buildCreditCardInvoiceDetail = (
   ],
   refundEntries: [],
   payments: [],
+  historicalPaid: '0.00',
   ...overrides,
 });
 
