@@ -122,11 +122,38 @@
       "withdrawals": "Withdrawn this month:",
       "pending": "(+{{amount}} planned)",
       "empty": "No active investments, reserves, or goals.",
-      "contribute": "Contribute"
+      "contribute": "Contribute",
+      "breakdown": {
+        "label": "Contributions by kind",
+        "mandatory": "Mandatory",
+        "additional": "Optional additional",
+        "oneTime": "One-time",
+        "amounts": "{{completed}} confirmed · {{planned}} planned"
+      }
     },
     "perspective": {
       "PURCHASE_DATE": "Card spending counts in the month of the purchase. Balances and invoices stay the same.",
       "INVOICE_MONTH": "Card spending counts in the month of its invoice. Balances and invoices stay the same."
+    },
+    "savingPlans": {
+      "title": "Saving plans",
+      "hint": "Suggestions change no balance, and nothing is created until you accept one.",
+      "balanceBefore": "Balance before contribution",
+      "mandatory": "Mandatory",
+      "mandatoryDetail": "{{planned}} planned · {{completed}} confirmed",
+      "suggested": "Suggested additional",
+      "additional": "Additional",
+      "additionalOf": "Suggested when accepted: {{amount}}",
+      "total": "Resulting total",
+      "retained": "Retained balance",
+      "retainedMinimum": "Minimum to keep: {{amount}}",
+      "cardNote": "All card bills ({{amount}}) count against {{account}}, because cards are not linked to accounts. This is a conservative estimate.",
+      "shortfall": "The mandatory contribution is {{amount}} above what {{account}} can spare this month. The target stays the same.",
+      "overlap": "Suggestions on {{account}} draw on the same money, so they overlap until one is accepted. Do not add them together.",
+      "confirmOccurrence": "Confirm {{amount}} of {{date}}",
+      "accept": "Record additional contribution",
+      "viewMovements": "View movements",
+      "route": "{{account}} → {{investment}}"
     }
   },
   "month": {
@@ -458,7 +485,12 @@
       "endFrom": "No occurrence from",
       "endFromInvoiceMonth": "No charge from the invoice of",
       "date": "Date",
-      "expectedDate": "Expected date"
+      "expectedDate": "Expected date",
+      "investment": "Investment",
+      "sourceAccount": "Source account",
+      "savingStrategy": "Use the leftover money of the month",
+      "minimumRetainedBalance": "Balance to keep in the account",
+      "additionalContribution": "Additional contribution"
     },
     "targets": {
       "ACCOUNT": "Account",
@@ -496,7 +528,10 @@
       "editLocked": "Changes apply to planned occurrences only; completed and canceled ones are never changed. The type, frequency, dates, and card are fixed: to change them, end this recurrence and create a new one.",
       "endFrom": "Planned occurrences on or after this date are removed.",
       "endFromInvoiceMonth": "Planned charges on this invoice and later ones are removed. Earlier invoices stay as they are.",
-      "endEntire": "The recurrence ends today. Planned occurrences up to today are kept, and later ones are removed."
+      "endEntire": "The recurrence ends today. Planned occurrences up to today are kept, and later ones are removed.",
+      "investmentFixed": "The investment cannot change later.",
+      "savingStrategy": "Monthly only. The amount above stays mandatory, and the dashboard suggests what is left of the month. Nothing is created until you accept it.",
+      "minimumRetainedBalance": "Kept in the account before anything is suggested."
     },
     "validation": {
       "endBeforeStart": "Choose an end date on or after the start date.",
@@ -527,13 +562,15 @@
       "empty": "No occurrences yet.",
       "scheduledFor": "Scheduled for {{date}}",
       "accountHint": "Each occurrence is a planned transaction until you confirm it.",
-      "cardHint": "Planned charges show the invoice they are expected on and join it only once confirmed."
+      "cardHint": "Planned charges show the invoice they are expected on and join it only once confirmed.",
+      "contributionHint": "Each occurrence is a planned contribution to {{investment}}. The money only leaves the account once it is confirmed."
     },
     "confirm": {
       "title": "Confirm occurrence",
       "accountDescription": "Enter the amount and the date {{description}} was actually paid or received. Balances change only after this step.",
       "cardDescription": "Enter the amount and the purchase date of {{description}}. Confirming adds the charge to the matching invoice.",
-      "dateHint": "This is when it actually happened, so it can be after the recurrence ends. The scheduled date stays the same."
+      "dateHint": "This is when it actually happened, so it can be after the recurrence ends. The scheduled date stays the same.",
+      "contributionDescription": "Confirm the amount and date of the contribution {{description}}. The money only leaves the account after this step."
     },
     "editOccurrence": {
       "title": "Edit occurrence",
@@ -544,6 +581,32 @@
       "title": "Skip occurrence",
       "description": "Skip the occurrence of {{date}}? It stays listed as canceled and the rest of the recurrence is unchanged. This cannot be undone.",
       "confirm": "Skip occurrence"
+    },
+    "types": {
+      "INCOME": "Income",
+      "EXPENSE": "Expense",
+      "INVESTMENT_CONTRIBUTION": "Investment contribution"
+    },
+    "additionalContributions": {
+      "NONE": "Do not suggest",
+      "REMAINING_SURPLUS": "Suggest what is left"
+    },
+    "strategySummary": "{{strategy}} · keeps {{amount}}",
+    "additional": {
+      "title": "Record additional contribution",
+      "description": "This records one additional contribution of {{description}} to {{investment}} for this month, on top of the mandatory one. Nothing else changes.",
+      "suggested": "Suggested for this month: {{amount}}. It is only a suggestion, so you can change it.",
+      "noSuggestion": "Nothing is suggested for this month, so check that the account can cover this amount.",
+      "exceedsSuggestion": "This is more than the {{amount}} suggested, so it can eat into the balance you chose to keep.",
+      "amount": "Amount",
+      "date": "Date",
+      "state": "State",
+      "states": {
+        "COMPLETED": "Completed now, the money leaves the account",
+        "PLANNED": "Planned, it only lowers the projection"
+      },
+      "dateOutsideMonth": "Pick a date inside this month.",
+      "futureOnlyPlanned": "A date after today can only be planned."
     }
   },
   "budgets": {
@@ -675,7 +738,8 @@
       "description": "Contributions, withdrawals, and valuations, newest first.",
       "empty": "No movements recorded yet."
     },
-    "empty": "No investments found."
+    "empty": "No investments found.",
+    "recurringContributions": "Recurring contributions"
   },
   "transactionCategories": {
     "title": "Categories",

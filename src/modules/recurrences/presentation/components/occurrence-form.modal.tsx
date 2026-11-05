@@ -18,6 +18,7 @@ import {
 } from '../../domain/recurrence-form.schemas';
 import {
   isCardRecurrence,
+  isContributionRecurrence,
   type Recurrence,
   type RecurrenceOccurrence,
 } from '../../domain/recurrence.schema';
@@ -30,12 +31,15 @@ export type OccurrenceAction = 'confirm' | 'edit';
 
 export interface OccurrenceTarget {
   action: OccurrenceAction;
-  occurrence: RecurrenceOccurrence;
+  occurrence: Pick<RecurrenceOccurrence, 'uuid' | 'date' | 'amount'>;
 }
 
 interface OccurrenceFormModalProps {
   open: boolean;
-  recurrence: Recurrence;
+  recurrence: Pick<
+    Recurrence,
+    'uuid' | 'type' | 'description' | 'endDate' | 'creditCard'
+  >;
   target?: OccurrenceTarget;
   onClose: () => void;
 }
@@ -50,9 +54,17 @@ const dateLabelKey = (action: OccurrenceAction, chargesCard: boolean) => {
     : 'transactions.fields.completedOn';
 };
 
-const descriptionKey = (action: OccurrenceAction, chargesCard: boolean) => {
+const descriptionKey = (
+  action: OccurrenceAction,
+  chargesCard: boolean,
+  contributes: boolean,
+) => {
   if (action === 'edit') {
     return 'recurrences.editOccurrence.description';
+  }
+
+  if (contributes) {
+    return 'recurrences.confirm.contributionDescription';
   }
 
   return chargesCard
@@ -79,6 +91,7 @@ export const OccurrenceFormModal = ({
   const confirmMutation = useConfirmRecurrenceOccurrence();
   const updateMutation = useUpdateRecurrenceOccurrence();
   const chargesCard = isCardRecurrence(recurrence);
+  const contributes = isContributionRecurrence(recurrence);
   const action = target?.action ?? 'confirm';
   const { shape } = occurrenceFormSchema;
   const endDate =
@@ -132,7 +145,7 @@ export const OccurrenceFormModal = ({
       onCancel={onClose}
     >
       <Typography.Paragraph>
-        {t(descriptionKey(action, chargesCard), {
+        {t(descriptionKey(action, chargesCard, contributes), {
           description: recurrence.description,
         })}
       </Typography.Paragraph>

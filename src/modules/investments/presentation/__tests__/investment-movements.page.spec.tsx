@@ -47,6 +47,27 @@ const renderMovements = (routes = {}) =>
   });
 
 describe('InvestmentMovementsPage', () => {
+  it('tags a contribution with its kind but not a withdrawal', async () => {
+    renderMovements({
+      [`GET ${movementsPath}`]: listPage([
+        buildInvestmentMovement({
+          contributionKind: 'ADDITIONAL',
+          contributionKindLabel: 'Adicional',
+        }),
+        buildInvestmentMovement({
+          uuid: 'withdrawal',
+          type: 'WITHDRAWAL',
+          typeLabel: 'Resgate',
+          contributionKindLabel: 'Avulso',
+        }),
+      ]),
+    });
+
+    expect(await screen.findByText('Adicional')).toBeInTheDocument();
+    expect(screen.getByText('Resgate')).toBeInTheDocument();
+    expect(screen.queryByText('Avulso')).not.toBeInTheDocument();
+  });
+
   it('lists every movement with its signed amount and account', async () => {
     renderMovements();
 

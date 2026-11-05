@@ -1,6 +1,7 @@
 import {
   CreditCardOutlined,
   EditOutlined,
+  FundOutlined,
   PauseCircleOutlined,
   PlayCircleOutlined,
   StopOutlined,
@@ -11,12 +12,13 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { Badge, Flex, Space, type TableColumnsType, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
-import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
 import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import type { ListParams } from '@/shared/list/use-list-params';
+import { formatMoney } from '@/shared/money/money';
+import { MoneyText } from '@/shared/money/money-text';
 import type { recurrenceFiltersShape } from '../../domain/recurrence-form.schemas';
 import {
   isRecurrenceEnded,
@@ -81,7 +83,23 @@ export const RecurrencesTable = ({
     },
     {
       title: t('recurrences.fields.type'),
-      dataIndex: 'typeLabel',
+      key: 'type',
+      render: (_, { typeLabel, savingStrategy }) => (
+        <Flex vertical>
+          {typeLabel}
+          {savingStrategy && (
+            <Typography.Text type="secondary">
+              {t('recurrences.strategySummary', {
+                strategy: savingStrategy.additionalContributionLabel,
+                amount: formatMoney(
+                  savingStrategy.minimumRetainedBalance,
+                  i18n.language,
+                ),
+              })}
+            </Typography.Text>
+          )}
+        </Flex>
+      ),
     },
     {
       title: t('recurrences.fields.schedule'),
@@ -111,19 +129,31 @@ export const RecurrencesTable = ({
     {
       title: t('recurrences.fields.target'),
       key: 'target',
-      render: (_, { account, creditCard }) => (
-        <Space size="small">
-          {creditCard ? <CreditCardOutlined /> : <WalletOutlined />}
-          {creditCard?.name ?? account?.name}
-        </Space>
-      ),
+      render: (_, { account, creditCard, investment }) =>
+        investment ? (
+          <Space size="small">
+            <FundOutlined />
+            {t('transactions.transferRoute', {
+              from: account?.name,
+              to: investment.name,
+            })}
+          </Space>
+        ) : (
+          <Space size="small">
+            {creditCard ? <CreditCardOutlined /> : <WalletOutlined />}
+            {creditCard?.name ?? account?.name}
+          </Space>
+        ),
     },
     {
       title: t('recurrences.fields.category'),
       key: 'category',
-      render: (_, { category }) => (
-        <Badge color={category.color ?? undefined} text={category.name} />
-      ),
+      render: (_, { category }) =>
+        category ? (
+          <Badge color={category.color ?? undefined} text={category.name} />
+        ) : (
+          '—'
+        ),
     },
     {
       title: t('recurrences.fields.state'),
@@ -134,7 +164,9 @@ export const RecurrencesTable = ({
       title: t('recurrences.fields.amount'),
       dataIndex: 'amount',
       align: 'right',
-      render: (_, recurrence) => <TransactionAmount transaction={recurrence} />,
+      render: (_, { type, amount }) => (
+        <MoneyText amount={type === 'EXPENSE' ? `-${amount}` : amount} />
+      ),
     },
     {
       title: t('recurrences.fields.actions'),

@@ -7,6 +7,7 @@ import {
 import type { ApiResponse } from '@/core/http/api-envelope';
 import { accountsKey } from '@/modules/accounts/infra/accounts.queries';
 import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
+import { recurrencesKey } from '@/modules/recurrences/infra/recurrences.keys';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
 import {
   createInvestment,
@@ -51,8 +52,8 @@ const useInvestmentMutation = <TVariables, TData>(
     onSuccess: async (response) => {
       showSuccessMessage(response);
       await Promise.all(
-        [investmentsKey, dashboardKey, accountsKey].map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey }),
+        [investmentsKey, dashboardKey, accountsKey, recurrencesKey].map(
+          (queryKey) => queryClient.invalidateQueries({ queryKey }),
         ),
       );
     },

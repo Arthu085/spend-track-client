@@ -30,6 +30,8 @@ export const buildRecurrence = (
     color: '#52C41A',
     status: 'ACTIVE',
   },
+  investment: null,
+  savingStrategy: null,
   notes: null,
   nextOccurrenceDate: '2026-11-15',
   createdAt: '2026-10-01T12:00:00.000Z',
@@ -50,6 +52,7 @@ export const buildRecurrenceOccurrence = (
   completedOn: null,
   transactionUuid: null,
   purchaseUuid: null,
+  movementUuid: null,
   invoiceMonth: '2026-12-01',
   ...overrides,
 });

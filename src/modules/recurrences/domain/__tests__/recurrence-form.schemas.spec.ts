@@ -6,6 +6,7 @@ import {
 } from '@/test/recurrence-fixture';
 import {
   isMovedPastRecurrenceEnd,
+  toAdditionalContributionPayload,
   type RecurrenceForm,
   recurrenceFormSchema,
   toCreateRecurrencePayload,
@@ -107,7 +108,7 @@ describe('recurrence form schemas', () => {
       description: 'Netflix',
       amount: '59.90',
       accountUuid: 'account-1',
-      categoryUuid: recurrence.category.uuid,
+      categoryUuid: recurrence.category?.uuid,
       notes: null,
     };
 
@@ -175,5 +176,136 @@ describe('recurrence form schemas', () => {
     expect(
       toOccurrencePayload({ amount: '60.00', date: dayjs('2026-11-16') }),
     ).toEqual({ amount: '60.00', date: '2026-11-16' });
+  });
+});
+
+describe('investment contribution recurrences', () => {
+  const contributionForm: RecurrenceForm = {
+    type: 'INVESTMENT_CONTRIBUTION',
+    target: 'ACCOUNT',
+    description: 'Reserva',
+    amount: '700.00',
+    frequency: 'MONTHLY',
+    startDate: dayjs('2026-10-15'),
+    endDate: null,
+    accountUuid: 'account-1',
+    investmentUuid: 'investment-1',
+    notes: null,
+  };
+  const contribution = buildRecurrence({
+    type: 'INVESTMENT_CONTRIBUTION',
+    amount: '700.00',
+    account: { uuid: 'account-1', name: 'Nubank', status: 'ACTIVE' },
+    creditCard: null,
+    category: null,
+    investment: {
+      uuid: 'investment-1',
+      name: 'Reserva',
+      type: 'RESERVE',
+      typeLabel: 'Reserva',
+      status: 'ACTIVE',
+    },
+  });
+  const edit = {
+    scope: 'FUTURE' as const,
+    from: dayjs('2026-12-01'),
+    description: 'Reserva',
+    amount: '700.00',
+    accountUuid: 'account-1',
+    notes: null,
+  };
+  const strategy = {
+    useSavingStrategy: true,
+    minimumRetainedBalance: '200.00',
+    additionalContribution: 'REMAINING_SURPLUS' as const,
+  };
+
+  it('accepts a contribution without a category', () => {
+    expect(recurrenceFormSchema.safeParse(contributionForm).success).toBe(true);
+  });
+
+  it('creates a contribution with its investment and no category or card', () => {
+    expect(
+      toCreateRecurrencePayload({
+        ...contributionForm,
+        creditCardUuid: 'card-1',
+        categoryUuid: 'category-1',
+        ...strategy,
+      }),
+    ).toEqual({
+      type: 'INVESTMENT_CONTRIBUTION',
+      description: 'Reserva',
+      amount: '700.00',
+      frequency: 'MONTHLY',
+      startDate: '2026-10-15',
+      accountUuid: 'account-1',
+      investmentUuid: 'investment-1',
+      savingStrategy: {
+        minimumRetainedBalance: '200.00',
+        additionalContribution: 'REMAINING_SURPLUS',
+      },
+    });
+  });
+
+  it('sends a saving strategy only for a monthly contribution', () => {
+    expect(
+      toCreateRecurrencePayload({
+        ...contributionForm,
+        frequency: 'WEEKLY',
+        ...strategy,
+      }).savingStrategy,
+    ).toBeUndefined();
+  });
+
+  it('omits an unchanged amount so a change per occurrence survives', () => {
+    const payload = toUpdateRecurrencePayload(edit, contribution);
+
+    expect(payload.amount).toBeUndefined();
+    expect(payload.categoryUuid).toBeUndefined();
+    expect(payload.savingStrategy).toBeUndefined();
+    expect(
+      toUpdateRecurrencePayload({ ...edit, amount: '800.00' }, contribution)
+        .amount,
+    ).toBe('800.00');
+  });
+
+  it('clears an existing strategy with null and keeps sending the edited one', () => {
+    const withStrategy = buildRecurrence({
+      ...contribution,
+      savingStrategy: {
+        minimumRetainedBalance: '100.00',
+        additionalContribution: 'NONE',
+        additionalContributionLabel: 'Nenhum',
+      },
+    });
+
+    expect(
+      toUpdateRecurrencePayload(
+        { ...edit, useSavingStrategy: false },
+        withStrategy,
+      ).savingStrategy,
+    ).toBeNull();
+    expect(
+      toUpdateRecurrencePayload({ ...edit, ...strategy }, withStrategy)
+        .savingStrategy,
+    ).toEqual({
+      minimumRetainedBalance: '200.00',
+      additionalContribution: 'REMAINING_SURPLUS',
+    });
+  });
+
+  it('splits the plan month into the year and month of the additional contribution', () => {
+    expect(
+      toAdditionalContributionPayload(
+        { amount: '600.00', date: dayjs('2026-11-20'), state: 'PLANNED' },
+        '2026-11-01',
+      ),
+    ).toEqual({
+      year: 2026,
+      month: 11,
+      amount: '600.00',
+      date: '2026-11-20',
+      state: 'PLANNED',
+    });
   });
 });

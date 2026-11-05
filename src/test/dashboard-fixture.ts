@@ -36,6 +36,15 @@ export const buildDashboard = (
     totalValue: '0.00',
     contributions: { total: '0.00', completed: '0.00', pending: '0.00' },
     withdrawals: { total: '0.00', completed: '0.00', pending: '0.00' },
+    contributionBreakdown: {
+      mandatoryPlanned: '0.00',
+      mandatoryCompleted: '0.00',
+      additionalPlanned: '0.00',
+      additionalCompleted: '0.00',
+      oneTimePlanned: '0.00',
+      oneTimeCompleted: '0.00',
+    },
+    savingPlans: [],
     items: [],
   },
   spendingGuidance: {

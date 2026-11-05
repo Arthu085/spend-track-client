@@ -25,6 +25,7 @@ import {
 import { MoneyText } from '@/shared/money/money-text';
 import {
   isCardRecurrence,
+  isContributionRecurrence,
   type Recurrence,
   type RecurrenceOccurrence,
 } from '../../domain/recurrence.schema';
@@ -44,6 +45,16 @@ interface RecurrenceOccurrencesModalProps {
 }
 
 const noFilters = {};
+
+const hintKey = (recurrence?: Recurrence) => {
+  if (recurrence && isContributionRecurrence(recurrence)) {
+    return 'recurrences.occurrences.contributionHint';
+  }
+
+  return recurrence && isCardRecurrence(recurrence)
+    ? 'recurrences.occurrences.cardHint'
+    : 'recurrences.occurrences.accountHint';
+};
 
 const useLocalListParams = (): ListParams<typeof noFilters> => {
   const [{ page, limit }, setPagination] = useState({
@@ -225,11 +236,9 @@ export const RecurrenceOccurrencesModal = ({
     >
       <Flex vertical gap="small">
         <Typography.Paragraph type="secondary">
-          {t(
-            recurrence && isCardRecurrence(recurrence)
-              ? 'recurrences.occurrences.cardHint'
-              : 'recurrences.occurrences.accountHint',
-          )}
+          {t(hintKey(recurrence), {
+            investment: recurrence?.investment?.name,
+          })}
         </Typography.Paragraph>
         {recurrence && <OccurrencesTable recurrence={recurrence} />}
       </Flex>

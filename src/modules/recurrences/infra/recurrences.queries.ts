@@ -8,9 +8,11 @@ import type { ApiResponse } from '@/core/http/api-envelope';
 import { accountsKey } from '@/modules/accounts/infra/accounts.queries';
 import { creditCardsKey } from '@/modules/credit-cards/infra/credit-cards.keys';
 import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
+import { investmentsKey } from '@/modules/investments/infra/investments.keys';
 import { transactionsKey } from '@/modules/transactions/infra/transactions.keys';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
 import {
+  acceptAdditionalContribution,
   cancelRecurrenceOccurrence,
   confirmRecurrenceOccurrence,
   createRecurrence,
@@ -60,6 +62,7 @@ const useRecurrenceMutation = <TVariables, TData>(
           creditCardsKey,
           dashboardKey,
           accountsKey,
+          investmentsKey,
         ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       );
     },
@@ -85,3 +88,6 @@ export const useConfirmRecurrenceOccurrence = () =>
 
 export const useCancelRecurrenceOccurrence = () =>
   useRecurrenceMutation(cancelRecurrenceOccurrence);
+
+export const useAcceptAdditionalContribution = () =>
+  useRecurrenceMutation(acceptAdditionalContribution);

@@ -2,7 +2,6 @@ import { Alert, Col, DatePicker, Form, Input, Radio, Row, Select } from 'antd';
 import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/modules/accounts/infra/accounts.queries';
-import { useTransactionCategories } from '@/modules/transaction-categories/infra/transaction-categories.queries';
 import { requiredUuidSchema } from '@/modules/transactions/domain/transaction-form.schemas';
 import { toReferenceOptions } from '@/modules/transactions/presentation/components/reference-options';
 import { dateInputFormat, todayDateOnly } from '@/shared/date/date-only';
@@ -19,8 +18,13 @@ import {
   recurrenceUpdateScopeSchema,
   toUpdateRecurrencePayload,
 } from '../../domain/recurrence-form.schemas';
-import type { Recurrence } from '../../domain/recurrence.schema';
+import {
+  isContributionRecurrence,
+  type Recurrence,
+} from '../../domain/recurrence.schema';
 import { useUpdateRecurrence } from '../../infra/recurrences.queries';
+import { RecurrenceCategoryField } from './recurrence-category-field';
+import { SavingStrategyFields } from './saving-strategy-fields';
 
 interface EditRecurrenceModalProps {
   open: boolean;
@@ -30,6 +34,7 @@ interface EditRecurrenceModalProps {
 
 const HALF_WIDTH = { xs: 24, sm: 12 } as const;
 const MODAL_WIDTH = 720;
+const INVESTMENT_INPUT_ID = 'recurrence-investment';
 
 const initialValuesOf = (
   recurrence?: Recurrence,
@@ -39,7 +44,10 @@ const initialValuesOf = (
   description: recurrence?.description,
   amount: recurrence?.amount,
   accountUuid: recurrence?.account?.uuid,
-  categoryUuid: recurrence?.category.uuid,
+  categoryUuid: recurrence?.category?.uuid,
+  useSavingStrategy: Boolean(recurrence?.savingStrategy),
+  minimumRetainedBalance: recurrence?.savingStrategy?.minimumRetainedBalance,
+  additionalContribution: recurrence?.savingStrategy?.additionalContribution,
   notes: recurrence?.notes ?? undefined,
 });
 
@@ -47,11 +55,6 @@ const EditRecurrenceFields = ({ recurrence }: { recurrence: Recurrence }) => {
   const { t, i18n } = useTranslation();
   const scope = Form.useWatch<RecurrenceUpdateScope | undefined>('scope');
   const { data: accounts } = useAccounts({
-    status: 'ACTIVE',
-    limit: MAX_PAGE_SIZE,
-  });
-  const { data: categories } = useTransactionCategories({
-    kind: recurrence.type,
     status: 'ACTIVE',
     limit: MAX_PAGE_SIZE,
   });
@@ -107,25 +110,33 @@ const EditRecurrenceFields = ({ recurrence }: { recurrence: Recurrence }) => {
           </Form.Item>
         </Col>
         <Col {...HALF_WIDTH}>
-          <Form.Item
-            name="categoryUuid"
-            label={t('recurrences.fields.category')}
-            rules={[zodRule(shape.categoryUuid)]}
-          >
-            <Select
-              showSearch={{ optionFilterProp: 'label' }}
-              options={toReferenceOptions(
-                categories?.data ?? [],
-                recurrence.category,
-              )}
+          {recurrence.type === 'INVESTMENT_CONTRIBUTION' ? (
+            <Form.Item
+              label={t('recurrences.fields.investment')}
+              htmlFor={INVESTMENT_INPUT_ID}
+            >
+              <Input
+                id={INVESTMENT_INPUT_ID}
+                value={recurrence.investment?.name}
+                disabled
+              />
+            </Form.Item>
+          ) : (
+            <RecurrenceCategoryField
+              kind={recurrence.type}
+              retained={recurrence.category ?? undefined}
             />
-          </Form.Item>
+          )}
         </Col>
       </Row>
       {recurrence.account && (
         <Form.Item
           name="accountUuid"
-          label={t(`transactions.accountLabels.${recurrence.type}`)}
+          label={
+            recurrence.type === 'INVESTMENT_CONTRIBUTION'
+              ? t('recurrences.fields.sourceAccount')
+              : t(`transactions.accountLabels.${recurrence.type}`)
+          }
           rules={[zodRule(requiredUuidSchema)]}
         >
           <Select
@@ -137,6 +148,8 @@ const EditRecurrenceFields = ({ recurrence }: { recurrence: Recurrence }) => {
           />
         </Form.Item>
       )}
+      {isContributionRecurrence(recurrence) &&
+        recurrence.frequency === 'MONTHLY' && <SavingStrategyFields />}
       <Form.Item
         name="notes"
         label={t('recurrences.fields.notes')}

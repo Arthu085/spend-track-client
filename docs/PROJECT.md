@@ -34,7 +34,8 @@ ability change them. The `home` module's page at `/home` links to every page the
 financial foundation covers the `dashboard` module at `/`, the default page after sign-in (monthly
 balances with month navigation and the spending perspective), the `transactions` module at
 `/transactions` (planned and completed income, expenses, and transfers), the `recurrences` module
-at `/recurrences` (recurring income, expenses, and card charges with their occurrences), the
+at `/recurrences` (recurring income, expenses, card charges, and investment contributions with
+their occurrences), the
 `budgets` module at `/budgets` (monthly overall and category limits), the `investments` module at `/investments` (investments, reserves, and goals with contributions, withdrawals, and valuations), the `accounts` module at `/accounts`, the `credit-cards` module at `/credit-cards` and `/credit-card-purchases` (cards,
 invoices, installment purchases, refunds, and invoice payments), and financial settings at `/settings` (the `preferences` module with the personal transaction categories of the
 `transaction-categories` module). The production build is an installable progressive web app (see
@@ -363,6 +364,19 @@ Transaction indicators, each with its own empty state:
   contributions and withdrawals (with the planned amount when there is one), and each active
   investment with its value and target progress (see [Investments](#investments)). It links to the
   investments page. Contributions and withdrawals never count as income or expenses.
+- **Contributions by kind:** when the month has any, the investments card separates mandatory,
+  optional additional, and one-time contributions, each with confirmed and planned amounts.
+- **Saving plans:** each monthly contribution with a saving strategy shows the balance before the
+  contribution, the mandatory amount, the suggested additional amount (or the accepted one), the
+  resulting total, and the retained balance, all taken from `investments.savingPlans` for the
+  month. A shortfall is a clear alert and never lowers the mandatory target. A note says that all
+  card bills count against this account, because cards are not linked to accounts. Suggestions are
+  shown per plan and never added: plans sharing an account get a warning that they draw on the same
+  money until one is accepted. A row confirms a planned mandatory occurrence and records an
+  additional contribution; nothing is created without that action. The modal prefills the suggestion,
+  warns when the amount exceeds it, keeps the date inside the month, and offers only the planned
+  state for a date after today, which is the default for future months. An accepted contribution
+  links to the investment's movements, where canceling it frees the month.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -496,6 +510,14 @@ operation changes.
   that occurrence only), or skipped after a warning, which keeps them listed as canceled. The
   scheduled date never changes. The expected date cannot move past the recurrence's end date, while
   the confirmation date records when it actually happened and may be later.
+- **Investment contributions:** a recurrence of this type needs an investment, which never changes
+  afterward, and a source account, and has no category or card. Lists, the occurrences modal, and
+  the edit modal show the investment and tolerate the missing category. Occurrences are planned
+  mandatory contributions, confirmed like any occurrence. Editing a contribution sends the amount
+  only when it changed, so a change made to a single occurrence survives.
+- **Saving strategy:** a monthly contribution can keep a minimum balance in the account and suggest
+  what is left of the month as an additional contribution. Turning the switch off on edit sends
+  `savingStrategy: null`, which clears it without changing existing movements.
 - **Freshness:** every recurrence mutation shows the API message and invalidates the recurrence,
   transactions, credit card, dashboard, and accounts queries, because occurrences are planned
   transactions or card charges, and confirming changes balances and invoices.
@@ -541,6 +563,9 @@ API derives from its movements: contributions minus withdrawals plus valuation a
   by default, or planned). A contribution moves money from the account into the investment and a
   withdrawal moves it back; neither is income or an expense, and the API refuses a withdrawal larger
   than the current value.
+- **Recurring contributions:** the investments page links to the recurrences page filtered to
+  investment contributions, where they are configured (see [Recurrences](#recurrences)). The history
+  tags every contribution as one-time, mandatory, or additional.
 - **From the dashboard:** the investments card opens a one-time contribution form with the same
   fields and rules plus the investment (`InvestmentContributionModal`), offering only active
   investments and active accounts; each row's action preselects its investment.

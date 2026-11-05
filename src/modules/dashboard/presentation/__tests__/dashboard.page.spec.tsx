@@ -487,6 +487,9 @@ describe('DashboardPage', () => {
             pending: '200.00',
           },
           withdrawals: { total: '0.00', completed: '0.00', pending: '0.00' },
+          contributionBreakdown:
+            buildDashboard().investments.contributionBreakdown,
+          savingPlans: [],
           items: [
             {
               uuid: '7a1b2c3d-7777-4c3e-9f1a-1a2b3c4d5e6f',

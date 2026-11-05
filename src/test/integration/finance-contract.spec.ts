@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { beforeAll, beforeEach, describe, expect, inject, it } from 'vitest';
 import { getHttpStatus } from '@/core/http/api-error';
 import { httpClient } from '@/core/http/http-client';
@@ -28,6 +29,7 @@ import {
   fetchCreditCardPurchases,
   fetchCreditCards,
   payCreditCardInvoice,
+  recordHistoricalSettlement,
   updateCreditCardStatus,
 } from '@/modules/credit-cards/infra/credit-cards.api';
 import {
@@ -39,15 +41,19 @@ import {
   updateInvestmentStatus,
 } from '@/modules/investments/infra/investments.api';
 import {
+  acceptAdditionalContribution,
   confirmRecurrenceOccurrence,
   createRecurrence,
   fetchRecurrenceOccurrences,
+  updateRecurrence,
 } from '@/modules/recurrences/infra/recurrences.api';
-import { todayDateOnly } from '@/shared/date/date-only';
+import { DATE_ONLY_FORMAT, todayDateOnly } from '@/shared/date/date-only';
 import { fetchDashboard } from '@/modules/dashboard/infra/dashboard.api';
 import {
+  confirmTransactionsInChunks,
   createTransaction,
   deleteTransaction,
+  fetchPendingConfirmations,
   fetchTransaction,
   fetchTransactions,
   updateTransaction,
@@ -64,6 +70,21 @@ const expectStatus = async (request: Promise<unknown>, status: number) => {
     (error: unknown) => getHttpStatus(error) === status,
   );
 };
+
+const today = () => dayjs(todayDateOnly());
+const daysFromToday = (days: number) =>
+  today().add(days, 'day').format(DATE_ONLY_FORMAT);
+
+const newAccount = async (name: string, openingBalanceDate = '2025-01-01') =>
+  (
+    await createAccount({
+      name,
+      type: 'CHECKING',
+      openingBalance: '5000.00',
+      openingBalanceDate,
+      isDefault: false,
+    })
+  ).data;
 
 describe('real backend finance contracts', () => {
   const backend = inject('backend');
@@ -614,5 +635,218 @@ describe('real backend finance contracts', () => {
       count: 0,
       total: '0.00',
     });
+  });
+
+  it('settles an invoice before the opening date without moving the balance', async () => {
+    const account = await newAccount('Contract settlement', todayDateOnly());
+    const category = (
+      await fetchTransactionCategories({ kind: 'EXPENSE', limit: 1 })
+    ).data[0];
+    const card = await createCreditCard({
+      name: 'Contract settlement card',
+      creditLimit: '5000.00',
+      closingDay: 5,
+      dueDay: 12,
+      isDefault: false,
+    });
+    const purchase = await createCreditCardPurchase({
+      cardUuid: card.data.uuid,
+      categoryUuid: category.uuid,
+      description: 'Contract old purchase',
+      amount: '100.00',
+      purchaseDate: daysFromToday(-90),
+      installmentCount: 1,
+    });
+    const invoiceUuid = purchase.data.installments[0].invoice.uuid;
+    const settlement = {
+      invoiceUuid,
+      accountUuid: account.uuid,
+      amount: '100.00',
+      paidOn: daysFromToday(-30),
+    };
+
+    const payment = await recordHistoricalSettlement(settlement);
+
+    expect(payment.data.source).toBe('HISTORICAL_SETTLEMENT');
+    expect((await fetchCreditCardInvoice(invoiceUuid)).historicalPaid).toBe(
+      '100.00',
+    );
+    await expectStatus(recordHistoricalSettlement(settlement), 422);
+    expect(
+      (
+        await fetchDashboard({
+          year: today().year(),
+          month: today().month() + 1,
+        })
+      ).accounts.find(({ uuid }) => uuid === account.uuid)?.actualBalance,
+    ).toBe('5000.00');
+
+    await cancelCreditCardPayment({
+      invoiceUuid,
+      paymentUuid: payment.data.uuid,
+    });
+
+    expect((await fetchCreditCardInvoice(invoiceUuid)).historicalPaid).toBe(
+      '0.00',
+    );
+  });
+
+  it('lists pending confirmations and reports each outcome of a bulk confirmation', async () => {
+    const account = await newAccount('Contract bulk');
+    const category = (
+      await fetchTransactionCategories({ kind: 'EXPENSE', limit: 1 })
+    ).data[0];
+    const planned = async (description: string, date: string) =>
+      (
+        await createTransaction({
+          type: 'EXPENSE',
+          description,
+          amount: '10.00',
+          date,
+          state: 'PLANNED',
+          accountUuid: account.uuid,
+          categoryUuid: category.uuid,
+        })
+      ).data;
+    const overdue = await planned('Contract overdue', daysFromToday(-3));
+    const future = await planned('Contract future', daysFromToday(3));
+
+    const { items } = await fetchPendingConfirmations(daysFromToday(10));
+    const itemOf = (uuid: string) => items.find((item) => item.uuid === uuid);
+
+    expect(itemOf(overdue.uuid)).toMatchObject({
+      overdue: true,
+      future: false,
+      confirmable: true,
+      blockedReason: null,
+      earliestCompletedOn: '2025-01-01',
+    });
+    expect(itemOf(future.uuid)).toMatchObject({ overdue: false, future: true });
+
+    const missing = '00000000-0000-4000-8000-000000000000';
+    const results = await confirmTransactionsInChunks([
+      { uuid: overdue.uuid, completedOn: todayDateOnly() },
+      { uuid: missing, completedOn: todayDateOnly() },
+    ]);
+
+    expect(results.map(({ uuid, outcome }) => [uuid, outcome])).toEqual([
+      [overdue.uuid, 'CONFIRMED'],
+      [missing, 'FAILED'],
+    ]);
+    expect(results[1]).toMatchObject({
+      message: expect.any(String) as string,
+      transaction: null,
+    });
+    expect(
+      await confirmTransactionsInChunks([
+        { uuid: overdue.uuid, completedOn: todayDateOnly() },
+      ]),
+    ).toMatchObject([{ outcome: 'ALREADY_COMPLETED' }]);
+  });
+
+  it('plans a recurring contribution and records an additional one only when accepted', async () => {
+    const account = await newAccount('Contract saving');
+    const investment = (
+      await createInvestment({
+        name: 'Contract saving reserve',
+        type: 'RESERVE',
+        targetAmount: null,
+      })
+    ).data;
+    const recurrence = await createRecurrence({
+      type: 'INVESTMENT_CONTRIBUTION',
+      description: 'Contract monthly reserve',
+      amount: '70.00',
+      frequency: 'MONTHLY',
+      startDate: todayDateOnly(),
+      accountUuid: account.uuid,
+      investmentUuid: investment.uuid,
+      savingStrategy: {
+        minimumRetainedBalance: '200.00',
+        additionalContribution: 'REMAINING_SURPLUS',
+      },
+    });
+
+    expect(recurrence.data).toMatchObject({
+      category: null,
+      investment: { uuid: investment.uuid },
+      savingStrategy: { additionalContribution: 'REMAINING_SURPLUS' },
+    });
+    expect(
+      (await fetchRecurrenceOccurrences(recurrence.data.uuid)).data[0]
+        .movementUuid,
+    ).toEqual(expect.any(String));
+
+    const month = { year: today().year(), month: today().month() + 1 };
+    const planOf = async () =>
+      (await fetchDashboard(month)).investments.savingPlans.find(
+        (plan) => plan.recurrence.uuid === recurrence.data.uuid,
+      );
+
+    expect(await planOf()).toMatchObject({
+      account: { uuid: account.uuid },
+      additional: null,
+      canAcceptAdditional: true,
+    });
+
+    const nextMonth = today().add(1, 'month').startOf('month');
+    const additional = {
+      recurrenceUuid: recurrence.data.uuid,
+      amount: '50.00',
+    };
+
+    await expectStatus(
+      acceptAdditionalContribution({
+        ...additional,
+        year: nextMonth.year(),
+        month: nextMonth.month() + 1,
+        date: nextMonth.format(DATE_ONLY_FORMAT),
+        state: 'COMPLETED',
+      }),
+      422,
+    );
+
+    const accepted = await acceptAdditionalContribution({
+      ...additional,
+      ...month,
+      date: todayDateOnly(),
+      state: 'PLANNED',
+    });
+
+    expect(accepted.data).toMatchObject({
+      contributionKind: 'ADDITIONAL',
+      state: 'PLANNED',
+    });
+    expect(await planOf()).toMatchObject({
+      additional: { movementUuid: accepted.data.uuid, amount: '50.00' },
+      canAcceptAdditional: false,
+    });
+    expect(
+      (await fetchInvestmentMovements(investment.uuid, { limit: 50 })).data.map(
+        ({ contributionKind }) => contributionKind,
+      ),
+    ).toContain('MANDATORY');
+
+    await updateInvestmentMovementState({
+      investmentUuid: investment.uuid,
+      movementUuid: accepted.data.uuid,
+      state: 'CANCELED',
+    });
+
+    expect(await planOf()).toMatchObject({
+      additional: null,
+      canAcceptAdditional: true,
+    });
+
+    const cleared = await updateRecurrence({
+      uuid: recurrence.data.uuid,
+      scope: 'FUTURE',
+      description: 'Contract monthly reserve',
+      savingStrategy: null,
+      notes: null,
+    });
+
+    expect(cleared.data.savingStrategy).toBeNull();
+    expect(await planOf()).toBeUndefined();
   });
 });

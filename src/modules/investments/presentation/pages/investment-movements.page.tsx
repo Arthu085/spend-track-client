@@ -34,6 +34,12 @@ const stateColors = {
   CANCELED: 'default',
 } as const;
 
+const kindColors = {
+  ONE_TIME: 'default',
+  MANDATORY: 'blue',
+  ADDITIONAL: 'purple',
+} as const;
+
 const signedAmount = ({ type, amount }: InvestmentMovement) =>
   type === 'WITHDRAWAL' ? `-${amount}` : amount;
 
@@ -65,6 +71,19 @@ export const InvestmentMovementsPage = () => {
     {
       title: t('investments.fields.movementType'),
       dataIndex: 'typeLabel',
+      render: (
+        _,
+        { type, typeLabel, contributionKind, contributionKindLabel },
+      ) => (
+        <Space size="small" wrap>
+          {typeLabel}
+          {type === 'CONTRIBUTION' && (
+            <Tag color={kindColors[contributionKind]}>
+              {contributionKindLabel}
+            </Tag>
+          )}
+        </Space>
+      ),
     },
     {
       title: t('investments.fields.account'),

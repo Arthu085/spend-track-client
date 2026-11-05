@@ -59,6 +59,19 @@ describe('InvestmentsPage', () => {
     vi.useRealTimers();
   });
 
+  it('links to the recurring contributions', async () => {
+    renderInvestments();
+
+    expect(
+      await screen.findByRole('link', {
+        name: new RegExp(i18n.t('investments.recurringContributions')),
+      }),
+    ).toHaveAttribute(
+      'href',
+      `${AppRoutes.RECURRENCES}?type=INVESTMENT_CONTRIBUTION`,
+    );
+  });
+
   it('lists active investments with their value and target progress', async () => {
     const { sent } = renderInvestments();
 

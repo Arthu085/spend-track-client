@@ -122,11 +122,38 @@
       "withdrawals": "Resgatado no mês:",
       "pending": "(+{{amount}} previsto)",
       "empty": "Nenhum investimento, reserva ou meta ativa.",
-      "contribute": "Aportar"
+      "contribute": "Aportar",
+      "breakdown": {
+        "label": "Aportes por tipo",
+        "mandatory": "Obrigatório",
+        "additional": "Adicional opcional",
+        "oneTime": "Avulso",
+        "amounts": "{{completed}} confirmado · {{planned}} planejado"
+      }
     },
     "perspective": {
       "PURCHASE_DATE": "Os gastos no cartão contam no mês da compra. Saldos e faturas não mudam.",
       "INVOICE_MONTH": "Os gastos no cartão contam no mês da fatura. Saldos e faturas não mudam."
+    },
+    "savingPlans": {
+      "title": "Planos de poupança",
+      "hint": "As sugestões não alteram nenhum saldo, e nada é criado até você aceitar uma.",
+      "balanceBefore": "Saldo antes do aporte",
+      "mandatory": "Obrigatório",
+      "mandatoryDetail": "{{planned}} planejado · {{completed}} confirmado",
+      "suggested": "Adicional sugerido",
+      "additional": "Adicional",
+      "additionalOf": "Sugerido ao aceitar: {{amount}}",
+      "total": "Total resultante",
+      "retained": "Saldo mantido",
+      "retainedMinimum": "Mínimo a manter: {{amount}}",
+      "cardNote": "Todas as faturas de cartão ({{amount}}) contam contra {{account}}, pois cartões não são vinculados a contas. É uma estimativa conservadora.",
+      "shortfall": "O aporte obrigatório está {{amount}} acima do que {{account}} pode ceder neste mês. A meta continua a mesma.",
+      "overlap": "As sugestões em {{account}} usam o mesmo dinheiro, então se sobrepõem até uma ser aceita. Não as some.",
+      "confirmOccurrence": "Confirmar {{amount}} de {{date}}",
+      "accept": "Registrar aporte adicional",
+      "viewMovements": "Ver movimentações",
+      "route": "{{account}} → {{investment}}"
     }
   },
   "month": {
@@ -458,7 +485,12 @@
       "endFrom": "Nenhuma ocorrência a partir de",
       "endFromInvoiceMonth": "Nenhuma cobrança a partir da fatura de",
       "date": "Data",
-      "expectedDate": "Data prevista"
+      "expectedDate": "Data prevista",
+      "investment": "Investimento",
+      "sourceAccount": "Conta de origem",
+      "savingStrategy": "Usar a sobra do mês",
+      "minimumRetainedBalance": "Saldo a manter na conta",
+      "additionalContribution": "Aporte adicional"
     },
     "targets": {
       "ACCOUNT": "Conta",
@@ -496,7 +528,10 @@
       "editLocked": "As alterações valem só para ocorrências previstas; as realizadas e canceladas nunca mudam. Tipo, frequência, datas e cartão são fixos: para mudá-los, encerre esta recorrência e crie uma nova.",
       "endFrom": "Ocorrências previstas nesta data ou depois são removidas.",
       "endFromInvoiceMonth": "Cobranças previstas nesta fatura e nas seguintes são removidas. As faturas anteriores continuam como estão.",
-      "endEntire": "A recorrência termina hoje. As ocorrências previstas até hoje são mantidas, e as posteriores são removidas."
+      "endEntire": "A recorrência termina hoje. As ocorrências previstas até hoje são mantidas, e as posteriores são removidas.",
+      "investmentFixed": "O investimento não pode ser alterado depois.",
+      "savingStrategy": "Apenas mensal. O valor acima continua obrigatório, e o painel sugere o que sobrar do mês. Nada é criado até você aceitar.",
+      "minimumRetainedBalance": "Mantido na conta antes de qualquer sugestão."
     },
     "validation": {
       "endBeforeStart": "Escolha uma data de término igual ou posterior à data de início.",
@@ -527,13 +562,15 @@
       "empty": "Nenhuma ocorrência ainda.",
       "scheduledFor": "Agendada para {{date}}",
       "accountHint": "Cada ocorrência é uma transação prevista até você confirmá-la.",
-      "cardHint": "As cobranças previstas mostram a fatura em que devem entrar e só entram nela depois de confirmadas."
+      "cardHint": "As cobranças previstas mostram a fatura em que devem entrar e só entram nela depois de confirmadas.",
+      "contributionHint": "Cada ocorrência é um aporte planejado em {{investment}}. O dinheiro só sai da conta depois de confirmado."
     },
     "confirm": {
       "title": "Confirmar ocorrência",
       "accountDescription": "Informe o valor e a data em que {{description}} foi efetivamente pago ou recebido. Os saldos só mudam depois desta etapa.",
       "cardDescription": "Informe o valor e a data da compra de {{description}}. Ao confirmar, a cobrança entra na fatura correspondente.",
-      "dateHint": "Esta é a data em que realmente aconteceu, por isso pode ser depois do fim da recorrência. A data agendada não muda."
+      "dateHint": "Esta é a data em que realmente aconteceu, por isso pode ser depois do fim da recorrência. A data agendada não muda.",
+      "contributionDescription": "Confirme o valor e a data do aporte {{description}}. O dinheiro só sai da conta depois desta etapa."
     },
     "editOccurrence": {
       "title": "Editar ocorrência",
@@ -544,6 +581,32 @@
       "title": "Pular ocorrência",
       "description": "Pular a ocorrência de {{date}}? Ela fica listada como cancelada e o restante da recorrência não muda. Esta ação não pode ser desfeita.",
       "confirm": "Pular ocorrência"
+    },
+    "types": {
+      "INCOME": "Receita",
+      "EXPENSE": "Despesa",
+      "INVESTMENT_CONTRIBUTION": "Aporte em investimento"
+    },
+    "additionalContributions": {
+      "NONE": "Não sugerir",
+      "REMAINING_SURPLUS": "Sugerir o que sobrar"
+    },
+    "strategySummary": "{{strategy}} · mantém {{amount}}",
+    "additional": {
+      "title": "Registrar aporte adicional",
+      "description": "Isto registra um aporte adicional de {{description}} em {{investment}} neste mês, além do obrigatório. Nada mais muda.",
+      "suggested": "Sugerido para este mês: {{amount}}. É apenas uma sugestão, então você pode alterá-la.",
+      "noSuggestion": "Não há sugestão para este mês, então verifique se a conta cobre este valor.",
+      "exceedsSuggestion": "Este valor é maior que os {{amount}} sugeridos, então pode consumir o saldo que você escolheu manter.",
+      "amount": "Valor",
+      "date": "Data",
+      "state": "Situação",
+      "states": {
+        "COMPLETED": "Realizado agora, o dinheiro sai da conta",
+        "PLANNED": "Planejado, apenas reduz a projeção"
+      },
+      "dateOutsideMonth": "Escolha uma data dentro deste mês.",
+      "futureOnlyPlanned": "Uma data depois de hoje só pode ser planejada."
     }
   },
   "budgets": {
@@ -675,7 +738,8 @@
       "description": "Aportes, resgates e atualizações de valor, dos mais recentes aos mais antigos.",
       "empty": "Nenhuma movimentação registrada."
     },
-    "empty": "Nenhum investimento encontrado."
+    "empty": "Nenhum investimento encontrado.",
+    "recurringContributions": "Aportes recorrentes"
   },
   "transactionCategories": {
     "title": "Categorias",
