@@ -151,6 +151,13 @@ describe('InvestmentsPage', () => {
           ),
         ).toBeInTheDocument();
 
+        expect(
+          within(dialog).getByText(i18n.t('investments.archive.keepHint')),
+        ).toBeInTheDocument();
+        expect(
+          within(dialog).getByText(i18n.t('investments.archive.cancelHint')),
+        ).toBeInTheDocument();
+
         fireEvent.click(
           within(dialog).getByRole('button', { name: i18n.t(label) }),
         );

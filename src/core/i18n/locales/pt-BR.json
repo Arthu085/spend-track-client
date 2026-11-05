@@ -598,6 +598,8 @@
       "description": "Isto registra um aporte adicional de {{description}} em {{investment}} neste mês, além do obrigatório. Nada mais muda.",
       "suggested": "Sugerido para este mês: {{amount}}. É apenas uma sugestão, então você pode alterá-la.",
       "noSuggestion": "Não há sugestão para este mês, então verifique se a conta cobre este valor.",
+      "allowExceedingSuggestion": "Quero aportar mais que a sugestão disponível.",
+      "overrideRequired": "Confirme que deseja ultrapassar a sugestão disponível.",
       "exceedsSuggestion": "Este valor é maior que os {{amount}} sugeridos, então pode consumir o saldo que você escolheu manter.",
       "amount": "Valor",
       "date": "Data",
@@ -723,8 +725,8 @@
     },
     "archive": {
       "description": "São aportes e resgates previstos. O total soma todos eles, portanto não é o impacto líquido no saldo. Movimentações efetivadas nunca mudam.",
-      "keepHint": "Manter: eles continuam contando nos saldos projetados, e cada um pode ser confirmado depois no histórico.",
-      "cancelHint": "Cancelar: eles ficam no histórico como cancelados e deixam de contar nos saldos projetados."
+      "keepHint": "Manter: os movimentos previstos continuam nas projeções. As recorrências de aporte são pausadas. Reativar o investimento não as retoma; retome cada recorrência explicitamente.",
+      "cancelHint": "Cancelar: os movimentos previstos ficam no histórico como cancelados e saem das projeções. As recorrências de aporte são encerradas e não reiniciam ao reativar o investimento."
     },
     "confirm": {
       "title": "Confirmar movimentação",

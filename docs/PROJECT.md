@@ -375,9 +375,13 @@ Transaction indicators, each with its own empty state:
   shown per plan and never added: plans sharing an account get a warning that they draw on the same
   money until one is accepted. A row confirms a planned mandatory occurrence and records an
   additional contribution; nothing is created without that action. The modal prefills the suggestion,
-  warns when the amount exceeds it, keeps the date inside the month, and offers only the planned
+  warns when the amount exceeds it (including a zero suggestion) and requires explicit override
+  acknowledgement, keeps the date inside the month, and offers only the planned
   state for a date after today, which is the default for future months. An accepted contribution
-  links to the investment's movements, where canceling it frees the month.
+  links to the investment's movements, where canceling it frees the month. Acceptance refreshes all
+  plans and balances before closing. A stale amount above the current server suggestion is rejected
+  unless explicitly acknowledged; a rejection refreshes the open form's suggestion and requires fresh
+  acknowledgement after an amount or suggestion change.
 - **Add transaction:** a header action opens the transactions form modal.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
@@ -557,8 +561,11 @@ API derives from its movements: contributions minus withdrawals plus valuation a
   bar stops at 100% while the label shows the real percentage.
 - **Edit:** a form modal creates or edits the name, type, and target; a cleared target is sent as
   `null`. The status switch archives or restores an investment, and delete works only while it has
-  no movements (the API explains otherwise). Archiving one with planned movements first opens a
-  dialog with their count and total, where the user keeps or cancels them.
+  no movements and no active or paused recurrence (the API explains otherwise and asks the user to
+  end the recurrence first). Archiving one with planned movements first opens a dialog with their
+  count and total. Keeping movements pauses contribution recurrences; canceling movements ends them.
+  Reactivating an investment never restarts its recurrences. A paused recurrence must be resumed
+  explicitly; an ended recurrence remains ended. Completed history and canceled dates are preserved.
 - **Contribute and withdraw:** a form modal posts `POST /investments/:uuid/movements` with the
   account (the default account preselected), amount, date (today by default), and state (completed
   by default, or planned). A contribution moves money from the account into the investment and a

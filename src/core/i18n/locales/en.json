@@ -598,6 +598,8 @@
       "description": "This records one additional contribution of {{description}} to {{investment}} for this month, on top of the mandatory one. Nothing else changes.",
       "suggested": "Suggested for this month: {{amount}}. It is only a suggestion, so you can change it.",
       "noSuggestion": "Nothing is suggested for this month, so check that the account can cover this amount.",
+      "allowExceedingSuggestion": "I want to contribute more than the available suggestion.",
+      "overrideRequired": "Confirm that you want to exceed the available suggestion.",
       "exceedsSuggestion": "This is more than the {{amount}} suggested, so it can eat into the balance you chose to keep.",
       "amount": "Amount",
       "date": "Date",
@@ -723,8 +725,8 @@
     },
     "archive": {
       "description": "They are planned contributions and withdrawals. The total adds them all together, so it is not the net impact on the balance. Completed movements never change.",
-      "keepHint": "Keep: they still count in projected balances, and each one can be confirmed later from the history.",
-      "cancelHint": "Cancel: they stay in the history as canceled and stop counting in projected balances."
+      "keepHint": "Keep: planned movements still count in projected balances. Contribution recurrences are paused. Reactivating the investment does not resume them; resume each recurrence explicitly.",
+      "cancelHint": "Cancel: planned movements remain in history as canceled and stop counting in projections. Contribution recurrences are ended and do not restart when the investment is reactivated."
     },
     "confirm": {
       "title": "Confirm movement",

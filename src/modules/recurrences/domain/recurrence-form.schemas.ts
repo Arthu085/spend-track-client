@@ -106,6 +106,7 @@ export const additionalContributionFormSchema = z.object({
   amount: positiveMoneyInputSchema,
   date: requiredDateSchema,
   state: z.enum(['COMPLETED', 'PLANNED'], { error: required }),
+  allowExceedingSuggestion: z.boolean().optional(),
 });
 
 export const recurrenceFiltersShape = {
@@ -171,6 +172,7 @@ export interface AdditionalContributionPayload {
   amount: string;
   date: string;
   state: AdditionalContributionForm['state'];
+  allowExceedingSuggestion?: boolean;
 }
 
 const formatDate = (date: Dayjs) => date.format(DATE_ONLY_FORMAT);
@@ -322,4 +324,5 @@ export const toAdditionalContributionPayload = (
   amount: form.amount,
   date: formatDate(form.date),
   state: form.state,
+  ...(form.allowExceedingSuggestion ? { allowExceedingSuggestion: true } : {}),
 });

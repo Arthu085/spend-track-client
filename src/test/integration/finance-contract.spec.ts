@@ -35,6 +35,7 @@ import {
 import {
   createInvestment,
   createInvestmentMovement,
+  deleteInvestment,
   fetchInvestmentMovements,
   fetchInvestmentPendingOperations,
   updateInvestmentMovementState,
@@ -44,9 +45,13 @@ import {
   acceptAdditionalContribution,
   confirmRecurrenceOccurrence,
   createRecurrence,
+  endRecurrence,
+  fetchRecurrences,
   fetchRecurrenceOccurrences,
   updateRecurrence,
+  updateRecurrenceState,
 } from '@/modules/recurrences/infra/recurrences.api';
+import { centsToMoney, moneyToCents } from '@/shared/money/money';
 import { DATE_ONLY_FORMAT, todayDateOnly } from '@/shared/date/date-only';
 import { fetchDashboard } from '@/modules/dashboard/infra/dashboard.api';
 import {
@@ -848,5 +853,160 @@ describe('real backend finance contracts', () => {
 
     expect(cleared.data.savingStrategy).toBeNull();
     expect(await planOf()).toBeUndefined();
+  });
+  it('recalculates shared-account suggestions and rejects stale acceptance unless explicitly overridden', async () => {
+    const account = await newAccount('Shared saving source');
+    const investment = (
+      await createInvestment({
+        name: 'Shared savings',
+        type: 'RESERVE',
+        targetAmount: null,
+      })
+    ).data;
+    const createPlan = (description: string) =>
+      createRecurrence({
+        type: 'INVESTMENT_CONTRIBUTION',
+        description,
+        amount: '70.00',
+        frequency: 'MONTHLY',
+        startDate: todayDateOnly(),
+        accountUuid: account.uuid,
+        investmentUuid: investment.uuid,
+        savingStrategy: {
+          minimumRetainedBalance: '200.00',
+          additionalContribution: 'REMAINING_SURPLUS',
+        },
+      });
+    const first = (await createPlan('First shared plan')).data;
+    const second = (await createPlan('Second shared plan')).data;
+    const month = { year: today().year(), month: today().month() + 1 };
+    const plans = async () =>
+      (await fetchDashboard(month)).investments.savingPlans;
+    const before = await plans();
+    const firstSuggestion = before.find(
+      (plan) => plan.recurrence.uuid === first.uuid,
+    )?.suggestedAdditional;
+    const secondSuggestion = before.find(
+      (plan) => plan.recurrence.uuid === second.uuid,
+    )?.suggestedAdditional;
+    expect(firstSuggestion).toBeDefined();
+    expect(secondSuggestion).toBeDefined();
+    if (!firstSuggestion || !secondSuggestion)
+      throw new Error('Missing saving plan');
+    const firstAmount = centsToMoney(
+      Math.min(10000, moneyToCents(firstSuggestion)),
+    );
+    const payload = {
+      ...month,
+      date: todayDateOnly(),
+      state: 'PLANNED' as const,
+    };
+    await acceptAdditionalContribution({
+      ...payload,
+      recurrenceUuid: first.uuid,
+      amount: firstAmount,
+    });
+    const updated = (await plans()).find(
+      (plan) => plan.recurrence.uuid === second.uuid,
+    );
+    expect(updated?.suggestedAdditional).toBe(
+      centsToMoney(moneyToCents(secondSuggestion) - moneyToCents(firstAmount)),
+    );
+    await expectStatus(
+      acceptAdditionalContribution({
+        ...payload,
+        recurrenceUuid: second.uuid,
+        amount: secondSuggestion,
+      }),
+      409,
+    );
+    expect(
+      (await plans()).find((plan) => plan.recurrence.uuid === second.uuid)
+        ?.additional,
+    ).toBeNull();
+    const override = await acceptAdditionalContribution({
+      ...payload,
+      recurrenceUuid: second.uuid,
+      amount: secondSuggestion,
+      allowExceedingSuggestion: true,
+    });
+    expect(override.data).toMatchObject({
+      amount: secondSuggestion,
+      contributionKind: 'ADDITIONAL',
+      state: 'PLANNED',
+    });
+  });
+
+  it('blocks deleting paused recurrence targets without movements until the recurrence is ended', async () => {
+    const account = await newAccount('Paused plan source');
+    const investment = (
+      await createInvestment({
+        name: 'Paused plan target',
+        type: 'RESERVE',
+        targetAmount: null,
+      })
+    ).data;
+    const recurrence = (
+      await createRecurrence({
+        type: 'INVESTMENT_CONTRIBUTION',
+        description: 'Future paused plan',
+        amount: '70.00',
+        frequency: 'MONTHLY',
+        startDate: today().add(2, 'year').format(DATE_ONLY_FORMAT),
+        accountUuid: account.uuid,
+        investmentUuid: investment.uuid,
+      })
+    ).data;
+    await updateRecurrenceState({ uuid: recurrence.uuid, state: 'PAUSED' });
+    expect(
+      (await fetchRecurrenceOccurrences(recurrence.uuid)).data,
+    ).toHaveLength(0);
+    await expectStatus(deleteAccount(account.uuid), 409);
+    await expectStatus(deleteInvestment(investment.uuid), 409);
+    await endRecurrence({ uuid: recurrence.uuid, payload: {} });
+    expect((await deleteInvestment(investment.uuid)).data).toBeNull();
+    expect((await deleteAccount(account.uuid)).data).toBeNull();
+  });
+
+  it('keeps canceled contribution history and ended recurrence state after investment reactivation', async () => {
+    const account = await newAccount('Archived plan source');
+    const investment = (
+      await createInvestment({
+        name: 'Archived plan target',
+        type: 'RESERVE',
+        targetAmount: null,
+      })
+    ).data;
+    const recurrence = (
+      await createRecurrence({
+        type: 'INVESTMENT_CONTRIBUTION',
+        description: 'Archived contribution plan',
+        amount: '70.00',
+        frequency: 'MONTHLY',
+        startDate: todayDateOnly(),
+        accountUuid: account.uuid,
+        investmentUuid: investment.uuid,
+      })
+    ).data;
+    const before = (
+      await fetchRecurrenceOccurrences(recurrence.uuid, { limit: 50 })
+    ).data;
+    await updateInvestmentStatus({
+      uuid: investment.uuid,
+      status: 'INACTIVE',
+      pendingOperations: 'CANCEL',
+    });
+    await updateInvestmentStatus({ uuid: investment.uuid, status: 'ACTIVE' });
+    const after = (
+      await fetchRecurrenceOccurrences(recurrence.uuid, { limit: 50 })
+    ).data;
+    expect(after.map(({ uuid }) => uuid)).toEqual(
+      before.map(({ uuid }) => uuid),
+    );
+    expect(after.every(({ state }) => state === 'CANCELED')).toBe(true);
+    expect(
+      (await fetchRecurrences({ description: 'Archived contribution plan' }))
+        .data[0],
+    ).toMatchObject({ uuid: recurrence.uuid, state: 'ENDED' });
   });
 });

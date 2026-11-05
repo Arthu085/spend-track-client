@@ -1,4 +1,5 @@
-import { Alert, DatePicker, Form, Radio, Typography } from 'antd';
+import { Alert, Checkbox, DatePicker, Form, Radio, Typography } from 'antd';
+import { useEffect } from 'react';
 import dayjs, { type Dayjs } from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import {
@@ -67,11 +68,14 @@ const AdditionalContributionFields = ({ plan }: { plan: SavingPlan }) => {
   const suggestedLabel = formatMoney(suggested, i18n.language);
   const hasSuggestion = isPositiveMoney(suggested);
   const exceedsSuggestion =
-    hasSuggestion &&
     amount !== undefined &&
     MONEY_DECIMAL_PATTERN.test(amount) &&
     moneyToCents(amount) > moneyToCents(suggested);
   const onlyPlanned = dayjs.isDayjs(date) && isAfterToday(date);
+
+  useEffect(() => {
+    form.setFieldValue('allowExceedingSuggestion', false);
+  }, [amount, suggested, plan.recurrence.uuid, form]);
 
   return (
     <>
@@ -99,14 +103,34 @@ const AdditionalContributionFields = ({ plan }: { plan: SavingPlan }) => {
         <MoneyInput />
       </Form.Item>
       {exceedsSuggestion && (
-        <Alert
-          type="warning"
-          showIcon
-          title={t('recurrences.additional.exceedsSuggestion', {
-            amount: suggestedLabel,
-          })}
-          style={{ marginBottom: 16 }}
-        />
+        <>
+          <Alert
+            type="warning"
+            showIcon
+            title={t('recurrences.additional.exceedsSuggestion', {
+              amount: suggestedLabel,
+            })}
+            style={{ marginBottom: 16 }}
+          />
+          <Form.Item
+            name="allowExceedingSuggestion"
+            valuePropName="checked"
+            rules={[
+              {
+                validator: (_rule, value: unknown) =>
+                  value === true
+                    ? Promise.resolve()
+                    : Promise.reject(
+                        new Error(t('recurrences.additional.overrideRequired')),
+                      ),
+              },
+            ]}
+          >
+            <Checkbox>
+              {t('recurrences.additional.allowExceedingSuggestion')}
+            </Checkbox>
+          </Form.Item>
+        </>
       )}
       <Form.Item
         name="date"

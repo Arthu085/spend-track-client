@@ -199,7 +199,10 @@ const contributionOf = (recurrence?: SavingPlan['recurrence']) => ({
 export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
   const { t } = useTranslation();
   const confirming = useModalTarget<ConfirmingTarget>();
-  const accepting = useModalTarget<SavingPlan>();
+  const accepting = useModalTarget<string>();
+  const acceptingPlan = plans.find(
+    (plan) => plan.recurrence.uuid === accepting.target,
+  );
 
   if (plans.length === 0) {
     return null;
@@ -228,7 +231,7 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
           onConfirm={(target, occurrence) => {
             confirming.show({ plan: target, occurrence });
           }}
-          onAccept={accepting.show}
+          onAccept={(plan) => accepting.show(plan.recurrence.uuid)}
         />
       ))}
       <OccurrenceFormModal
@@ -244,7 +247,7 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
       />
       <AcceptAdditionalContributionModal
         open={accepting.open}
-        plan={accepting.target}
+        plan={acceptingPlan}
         onClose={accepting.close}
       />
     </Flex>

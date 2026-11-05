@@ -351,9 +351,23 @@ describe('Saving plans on the dashboard', () => {
 
     save(dialog);
 
+    expect(
+      await within(dialog).findByText(
+        i18n.t('recurrences.additional.overrideRequired'),
+      ),
+    ).toBeInTheDocument();
+    expect(sent(acceptPath(plan))).toHaveLength(0);
+    fireEvent.click(
+      within(dialog).getByRole('checkbox', {
+        name: i18n.t('recurrences.additional.allowExceedingSuggestion'),
+      }),
+    );
+    save(dialog);
+
     expect(await screen.findByText('Aporte registrado')).toBeInTheDocument();
     expect(requestBody(sent(acceptPath(plan))[0])).toMatchObject({
       amount: expect.stringMatching(/^650(\.00?)?$/) as unknown,
+      allowExceedingSuggestion: true,
     });
   });
 
@@ -368,6 +382,142 @@ describe('Saving plans on the dashboard', () => {
     expect(
       within(dialog).getByLabelText(i18n.t('recurrences.additional.amount')),
     ).toHaveValue('');
+  });
+
+  it('requires a fresh override acknowledgement after the amount changes, including a zero suggestion', async () => {
+    const plan = buildSavingPlan({ suggestedAdditional: '0.00' });
+    const { dialog, sent } = await openAccept(plan, {
+      [acceptPath(plan)]: envelope(buildInvestmentMovement()),
+    });
+    const input = within(dialog).getByLabelText(
+      i18n.t('recurrences.additional.amount'),
+    );
+    fireEvent.change(input, { target: { value: '10.00' } });
+    expect(
+      await within(dialog).findByText(
+        i18n.t('recurrences.additional.exceedsSuggestion', {
+          amount: money('0.00'),
+        }),
+      ),
+    ).toBeInTheDocument();
+    const checkbox = within(dialog).getByRole('checkbox', {
+      name: i18n.t('recurrences.additional.allowExceedingSuggestion'),
+    });
+    fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+    fireEvent.change(input, { target: { value: '20.00' } });
+    await waitFor(() => expect(checkbox).not.toBeChecked());
+    save(dialog);
+    expect(
+      await within(dialog).findByText(
+        i18n.t('recurrences.additional.overrideRequired'),
+      ),
+    ).toBeInTheDocument();
+    expect(sent(acceptPath(plan))).toHaveLength(0);
+  });
+
+  it('refreshes shared-account suggestions after acceptance before another plan is accepted', async () => {
+    const first = buildSavingPlan();
+    const second = buildSavingPlan({
+      recurrence: {
+        ...first.recurrence,
+        uuid: 'second-plan',
+        description: 'Travel savings',
+      },
+    });
+    let accepted = false;
+    const dashboard = () =>
+      envelope(
+        buildDashboard({
+          investments: investmentsWith({
+            savingPlans: accepted
+              ? [
+                  buildSavingPlan({
+                    canAcceptAdditional: false,
+                    suggestedAdditional: '0.00',
+                    additional: {
+                      movementUuid: 'additional',
+                      amount: '600.00',
+                      state: 'COMPLETED',
+                      stateLabel: 'Completed',
+                      suggestedAmount: '600.00',
+                    },
+                  }),
+                  {
+                    ...second,
+                    suggestedAdditional: '0.00',
+                    balanceBeforeContribution: '900.00',
+                  },
+                ]
+              : [first, second],
+          }),
+        }),
+      );
+    const { sent } = renderPlans([first, second], {
+      'GET /dashboard': dashboard,
+      [acceptPath(first)]: () => {
+        accepted = true;
+        return envelope(buildInvestmentMovement());
+      },
+    });
+    const group = await planGroup(first.recurrence.description);
+    fireEvent.click(
+      within(group).getByRole('button', {
+        name: i18n.t('dashboard.savingPlans.accept'),
+      }),
+    );
+    const dialog = await findDialog(i18n.t('recurrences.additional.title'));
+    save(dialog);
+    const other = await planGroup(second.recurrence.description);
+    await waitFor(() =>
+      expect(
+        amountOf(other, i18n.t('dashboard.savingPlans.suggested')),
+      ).toHaveTextContent(money('0.00')),
+    );
+    expect(
+      within(other).getByRole('button', {
+        name: i18n.t('dashboard.savingPlans.accept'),
+      }),
+    ).toBeEnabled();
+    expect(sent(acceptPath(second))).toHaveLength(0);
+  });
+
+  it('refreshes a stale open modal after rejection and requires explicit override consent', async () => {
+    const plan = buildSavingPlan();
+    let stale = false;
+    const { dialog, sent } = await openAccept(plan, {
+      'GET /dashboard': () =>
+        envelope(
+          buildDashboard({
+            investments: investmentsWith({
+              savingPlans: [
+                { ...plan, suggestedAdditional: stale ? '0.00' : '600.00' },
+              ],
+            }),
+          }),
+        ),
+      [acceptPath(plan)]: () => {
+        stale = true;
+        return { status: 409, data: { message: 'Suggestion changed' } };
+      },
+    });
+    save(dialog);
+    expect(await screen.findByText('Suggestion changed')).toBeInTheDocument();
+    expect(
+      await within(dialog).findByText(
+        i18n.t('recurrences.additional.exceedsSuggestion', {
+          amount: money('0.00'),
+        }),
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByRole('checkbox', {
+        name: i18n.t('recurrences.additional.allowExceedingSuggestion'),
+      }),
+    ).not.toBeChecked();
+    expect(requestBody(sent(acceptPath(plan))[0])).not.toHaveProperty(
+      'allowExceedingSuggestion',
+    );
   });
 
   it('offers only a planned state in a future month and surfaces the API error', async () => {

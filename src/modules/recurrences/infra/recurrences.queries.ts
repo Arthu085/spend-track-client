@@ -47,24 +47,33 @@ export const useRecurrenceOccurrences = (
 
 const useRecurrenceMutation = <TVariables, TData>(
   mutationFn: (variables: TVariables) => Promise<ApiResponse<TData>>,
+  refreshOnError = false,
 ) => {
   const queryClient = useQueryClient();
   const showSuccessMessage = useApiSuccessMessage();
+
+  const refresh = () =>
+    Promise.all(
+      [
+        recurrencesKey,
+        transactionsKey,
+        creditCardsKey,
+        dashboardKey,
+        accountsKey,
+        investmentsKey,
+      ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+    );
 
   return useMutation({
     mutationFn,
     onSuccess: async (response) => {
       showSuccessMessage(response);
-      await Promise.all(
-        [
-          recurrencesKey,
-          transactionsKey,
-          creditCardsKey,
-          dashboardKey,
-          accountsKey,
-          investmentsKey,
-        ].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
-      );
+      await refresh();
+    },
+    onError: async () => {
+      if (refreshOnError) {
+        await refresh();
+      }
     },
   });
 };
@@ -90,4 +99,4 @@ export const useCancelRecurrenceOccurrence = () =>
   useRecurrenceMutation(cancelRecurrenceOccurrence);
 
 export const useAcceptAdditionalContribution = () =>
-  useRecurrenceMutation(acceptAdditionalContribution);
+  useRecurrenceMutation(acceptAdditionalContribution, true);
