@@ -1,7 +1,6 @@
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
-  Button,
   Flex,
   Popconfirm,
   Space,
@@ -11,6 +10,7 @@ import {
   Typography,
 } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
@@ -118,10 +118,10 @@ export const AccountsTable = ({
       key: 'actions',
       render: (_, account) => (
         <Space>
-          <Button
+          <IconActionButton
             size="small"
             icon={<EditOutlined />}
-            aria-label={t('accounts.actions.edit', { name: account.name })}
+            label={t('accounts.actions.edit', { name: account.name })}
             disabled={account.status === 'INACTIVE'}
             onClick={() => onEdit(account)}
           />
@@ -135,11 +135,11 @@ export const AccountsTable = ({
             okButtonProps={{ danger: true }}
             onConfirm={() => removeAccount(account.uuid)}
           >
-            <Button
+            <IconActionButton
               size="small"
               danger
               icon={<DeleteOutlined />}
-              aria-label={t('accounts.actions.delete', { name: account.name })}
+              label={t('accounts.actions.delete', { name: account.name })}
               loading={
                 deleteMutation.isPending &&
                 deleteMutation.variables === account.uuid

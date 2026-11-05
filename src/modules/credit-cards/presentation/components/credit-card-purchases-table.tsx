@@ -6,7 +6,6 @@ import {
 import type { UseQueryResult } from '@tanstack/react-query';
 import {
   Badge,
-  Button,
   Flex,
   Popconfirm,
   Space,
@@ -16,6 +15,7 @@ import {
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
@@ -127,11 +127,11 @@ export const CreditCardPurchasesTable = ({
             );
           }}
         >
-          <Button
+          <IconActionButton
             size="small"
             danger
             icon={<DeleteOutlined />}
-            aria-label={t('creditCards.actions.deleteRefund', {
+            label={t('creditCards.actions.deleteRefund', {
               date: formatDate(refund.date),
             })}
             loading={
@@ -216,19 +216,19 @@ export const CreditCardPurchasesTable = ({
 
         return (
           <Space>
-            <Button
+            <IconActionButton
               size="small"
               icon={<EditOutlined />}
-              aria-label={t('creditCards.actions.editPurchase', {
+              label={t('creditCards.actions.editPurchase', {
                 description,
               })}
               onClick={() => onEdit(purchase)}
             />
             {isPositiveMoney(purchase.refundableAmount) && (
-              <Button
+              <IconActionButton
                 size="small"
                 icon={<RollbackOutlined />}
-                aria-label={t('creditCards.actions.refund', { description })}
+                label={t('creditCards.actions.refund', { description })}
                 onClick={() => onRefund(purchase)}
               />
             )}
@@ -243,11 +243,11 @@ export const CreditCardPurchasesTable = ({
                 okButtonProps={{ danger: true }}
                 onConfirm={() => removePurchase(uuid)}
               >
-                <Button
+                <IconActionButton
                   size="small"
                   danger
                   icon={<DeleteOutlined />}
-                  aria-label={t('creditCards.actions.deletePurchase', {
+                  label={t('creditCards.actions.deletePurchase', {
                     description,
                   })}
                   loading={

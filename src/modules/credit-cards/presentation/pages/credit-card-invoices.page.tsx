@@ -1,8 +1,9 @@
 import { ArrowLeftOutlined, EyeOutlined } from '@ant-design/icons';
-import { Button, Flex, Space, type TableColumnsType, Typography } from 'antd';
+import { Flex, Space, type TableColumnsType, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { PaginatedTable } from '@/shared/list/paginated-table';
@@ -70,10 +71,10 @@ export const CreditCardInvoicesPage = () => {
       title: t('creditCards.fields.actions'),
       key: 'actions',
       render: (_, { uuid: invoiceUuid, referenceMonth }) => (
-        <Button
+        <IconActionButton
           size="small"
           icon={<EyeOutlined />}
-          aria-label={t('creditCards.actions.viewInvoice', {
+          label={t('creditCards.actions.viewInvoice', {
             month: formatInvoiceMonth(referenceMonth, i18n.language),
           })}
           onClick={() => viewing.show(invoiceUuid)}

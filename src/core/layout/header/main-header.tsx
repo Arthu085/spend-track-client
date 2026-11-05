@@ -1,7 +1,8 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Button, Layout, theme } from 'antd';
+import { Layout, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { LanguageSwitcher } from '@/core/i18n/language-switcher';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { UserMenu } from './user-menu';
 
 type MainHeaderProps = {
@@ -32,10 +33,10 @@ export const MainHeader = ({
         borderBottom: `1px solid ${token.colorBorderSecondary}`,
       }}
     >
-      <Button
+      <IconActionButton
         type="text"
         icon={sidebarExpanded ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />}
-        aria-label={t('layout.toggleSidebar')}
+        label={t('layout.toggleSidebar')}
         aria-expanded={sidebarExpanded}
         aria-controls={sidebarId}
         onClick={onToggleSidebar}

@@ -8,17 +8,11 @@ import {
   WalletOutlined,
 } from '@ant-design/icons';
 import type { UseQueryResult } from '@tanstack/react-query';
-import {
-  Badge,
-  Button,
-  Flex,
-  Space,
-  type TableColumnsType,
-  Typography,
-} from 'antd';
+import { Badge, Flex, Space, type TableColumnsType, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { PaginatedResponse } from '@/core/http/api-envelope';
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
@@ -152,48 +146,48 @@ export const RecurrencesTable = ({
 
         return (
           <Space>
-            <Button
+            <IconActionButton
               size="small"
               icon={<UnorderedListOutlined />}
-              aria-label={t('recurrences.actions.occurrences', {
+              label={t('recurrences.actions.occurrences', {
                 description,
               })}
               onClick={() => onShowOccurrences(recurrence)}
             />
             {!isRecurrenceEnded(recurrence) && (
               <>
-                <Button
+                <IconActionButton
                   size="small"
                   icon={<EditOutlined />}
-                  aria-label={t('recurrences.actions.edit', { description })}
+                  label={t('recurrences.actions.edit', { description })}
                   onClick={() => onEdit(recurrence)}
                 />
                 {state === 'PAUSED' ? (
-                  <Button
+                  <IconActionButton
                     size="small"
                     icon={<PlayCircleOutlined />}
-                    aria-label={t('recurrences.actions.resume', {
+                    label={t('recurrences.actions.resume', {
                       description,
                     })}
                     loading={isChangingState}
                     onClick={() => resume(recurrence)}
                   />
                 ) : (
-                  <Button
+                  <IconActionButton
                     size="small"
                     icon={<PauseCircleOutlined />}
-                    aria-label={t('recurrences.actions.pause', {
+                    label={t('recurrences.actions.pause', {
                       description,
                     })}
                     loading={isChangingState}
                     onClick={() => pause(recurrence)}
                   />
                 )}
-                <Button
+                <IconActionButton
                   size="small"
                   danger
                   icon={<StopOutlined />}
-                  aria-label={t('recurrences.actions.end', { description })}
+                  label={t('recurrences.actions.end', { description })}
                   onClick={() => onEnd(recurrence)}
                 />
               </>

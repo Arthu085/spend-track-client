@@ -25,6 +25,9 @@ Rules for every change to this repository. Project scope and layout are in
 - Use semantic HTML, associated form labels, accessible names, and keyboard-operable controls.
   Navigate with links, not buttons.
 - Build UI with Ant Design components and theme tokens before writing custom CSS.
+- Actions shown only as an icon use `IconActionButton` or `IconActionLink`
+  (`src/shared/components/`): the label is the accessible name and the tooltip on hover and keyboard
+  focus, also while disabled.
 - Write code, identifiers, documentation, and commit messages in English. Preserve API field names
   and enum values exactly as published.
 - Production code should explain itself through clear names and small functions. Add comments only

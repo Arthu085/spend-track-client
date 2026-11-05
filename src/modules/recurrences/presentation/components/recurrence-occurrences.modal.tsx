@@ -1,6 +1,5 @@
 import { CheckOutlined, EditOutlined, StopOutlined } from '@ant-design/icons';
 import {
-  Button,
   Flex,
   Modal,
   Space,
@@ -13,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { formatInvoiceMonth } from '@/modules/credit-cards/presentation/components/invoice-month';
 import { isOverdue } from '@/modules/transactions/domain/transaction.schema';
 import { TransactionStateTag } from '@/modules/transactions/presentation/components/transaction-state-tag';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly, todayDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
@@ -156,22 +156,22 @@ const OccurrencesTable = ({ recurrence }: { recurrence: Recurrence }) => {
 
         return (
           <Space>
-            <Button
+            <IconActionButton
               size="small"
               icon={<CheckOutlined />}
-              aria-label={t('recurrences.actions.confirmOccurrence', { date })}
+              label={t('recurrences.actions.confirmOccurrence', { date })}
               onClick={() => editing.show({ action: 'confirm', occurrence })}
             />
-            <Button
+            <IconActionButton
               size="small"
               icon={<EditOutlined />}
-              aria-label={t('recurrences.actions.editOccurrence', { date })}
+              label={t('recurrences.actions.editOccurrence', { date })}
               onClick={() => editing.show({ action: 'edit', occurrence })}
             />
-            <Button
+            <IconActionButton
               size="small"
               icon={<StopOutlined />}
-              aria-label={t('recurrences.actions.skipOccurrence', { date })}
+              label={t('recurrences.actions.skipOccurrence', { date })}
               loading={
                 cancelMutation.isPending &&
                 cancelMutation.variables.occurrenceUuid === occurrence.uuid

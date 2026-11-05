@@ -1,7 +1,6 @@
 import { CheckOutlined } from '@ant-design/icons';
 import {
   Badge,
-  Button,
   Empty,
   Flex,
   Space,
@@ -19,6 +18,7 @@ import {
 } from '@/modules/transactions/presentation/components/complete-transaction.modal';
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
 import { EqualHeightCard } from '@/shared/components/equal-height-card';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import type {
@@ -89,10 +89,10 @@ export const UpcomingTransactionsCard = ({
       title: t('transactions.fields.actions'),
       key: 'actions',
       render: (_, { uuid, description }) => (
-        <Button
+        <IconActionButton
           size="small"
           icon={<CheckOutlined />}
-          aria-label={t('transactions.actions.complete', { description })}
+          label={t('transactions.actions.complete', { description })}
           onClick={() => completing.show({ uuid, description })}
         />
       ),

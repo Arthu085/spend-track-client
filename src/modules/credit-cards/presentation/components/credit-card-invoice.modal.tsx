@@ -14,6 +14,7 @@ import {
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { getApiErrorMessage } from '@/core/http/api-error';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
@@ -152,10 +153,10 @@ export const CreditCardInvoiceModal = ({
       key: 'actions',
       render: (_, payment) =>
         payment.canceledAt === null && (
-          <Button
+          <IconActionButton
             size="small"
             icon={<StopOutlined />}
-            aria-label={t('creditCards.actions.cancelPayment', {
+            label={t('creditCards.actions.cancelPayment', {
               amount: payment.amount,
             })}
             loading={

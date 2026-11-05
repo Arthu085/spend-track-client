@@ -1,6 +1,5 @@
 import { EyeOutlined } from '@ant-design/icons';
 import {
-  Button,
   Card,
   Empty,
   Flex,
@@ -17,6 +16,7 @@ import type { CreditCardInvoice } from '@/modules/credit-cards/domain/credit-car
 import { CreditCardInvoiceModal } from '@/modules/credit-cards/presentation/components/credit-card-invoice.modal';
 import { formatInvoiceMonth } from '@/modules/credit-cards/presentation/components/invoice-month';
 import { InvoiceStatusTag } from '@/modules/credit-cards/presentation/components/invoice-status-tag';
+import { IconActionButton } from '@/shared/components/icon-action-button';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
@@ -69,10 +69,10 @@ export const CreditCardInvoicesCard = ({
       title: t('creditCards.fields.actions'),
       key: 'actions',
       render: (_, { uuid, card, referenceMonth }) => (
-        <Button
+        <IconActionButton
           size="small"
           icon={<EyeOutlined />}
-          aria-label={t('creditCards.actions.viewInvoiceOf', {
+          label={t('creditCards.actions.viewInvoiceOf', {
             card: card.name,
             month: formatInvoiceMonth(referenceMonth, i18n.language),
           })}
