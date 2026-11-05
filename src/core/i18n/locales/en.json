@@ -430,6 +430,7 @@
       "defaultDate": "Effective date for all",
       "rowDate": "Effective date of {{description}}",
       "dateBeforeOpening": "Use {{date}} or later, the account's opening date.",
+      "dateInFuture": "The date cannot be after today.",
       "selectRow": "Select {{description}}",
       "selectDue": "Select everything due",
       "clear": "Clear selection",

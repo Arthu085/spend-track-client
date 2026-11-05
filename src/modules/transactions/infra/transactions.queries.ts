@@ -78,12 +78,10 @@ export const useConfirmPendingTransactions = () => {
 
   return useMutation({
     mutationFn: confirmTransactionsInChunks,
-    onSuccess: async () => {
-      await Promise.all(
-        affectedQueryKeys.map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey }),
-        ),
-      );
+    onSuccess: () => {
+      for (const queryKey of affectedQueryKeys) {
+        void queryClient.invalidateQueries({ queryKey });
+      }
     },
   });
 };

@@ -72,9 +72,14 @@ const EffectiveDatePicker = ({
       format={dateInputFormat(i18n.language)}
       status={invalid ? 'error' : undefined}
       value={dayjs(value)}
-      disabledDate={(date) =>
-        earliest !== undefined && date.format(DATE_ONLY_FORMAT) < earliest
-      }
+      disabledDate={(date) => {
+        const candidate = date.format(DATE_ONLY_FORMAT);
+
+        return (
+          candidate > todayDateOnly() ||
+          (earliest !== undefined && candidate < earliest)
+        );
+      }}
       onChange={(date: Dayjs | null) => {
         if (date) {
           onChange(date.format(DATE_ONLY_FORMAT));
@@ -147,8 +152,7 @@ const PendingConfirmationReview = ({
 }: PendingConfirmationReviewProps) => {
   const { t, i18n } = useTranslation();
   const { message } = App.useApp();
-  const [allRows] = useState(items);
-  const dueUuids = allRows.filter(isSelectedByDefault).map(({ uuid }) => uuid);
+  const dueUuids = items.filter(isSelectedByDefault).map(({ uuid }) => uuid);
   const [selectedUuids, setSelectedUuids] = useState(new Set(dueUuids));
   const [defaultDate, setDefaultDate] = useState(todayDateOnly);
   const [dateOverrides, setDateOverrides] = useState<Record<string, string>>(
@@ -160,12 +164,27 @@ const PendingConfirmationReview = ({
 
   const retrying = failures.size > 0;
   const rows = retrying
-    ? allRows.filter(({ uuid }) => failures.has(uuid))
-    : allRows;
+    ? items.filter(({ uuid }) => failures.has(uuid))
+    : items;
   const selectedRows = rows.filter(({ uuid }) => selectedUuids.has(uuid));
   const effectiveDate = (uuid: string) => dateOverrides[uuid] ?? defaultDate;
-  const isDateInvalid = ({ uuid, earliestCompletedOn }: PendingConfirmation) =>
-    effectiveDate(uuid) < earliestCompletedOn;
+  const today = todayDateOnly();
+  const dateProblemOf = ({
+    uuid,
+    earliestCompletedOn,
+  }: PendingConfirmation) => {
+    const date = effectiveDate(uuid);
+
+    if (date > today) {
+      return t('transactions.confirmPending.dateInFuture');
+    }
+
+    return date < earliestCompletedOn
+      ? t('transactions.confirmPending.dateBeforeOpening', {
+          date: formatDateOnly(earliestCompletedOn, i18n.language),
+        })
+      : null;
+  };
 
   const submit = () => {
     if (submitting.current) {
@@ -282,7 +301,7 @@ const PendingConfirmationReview = ({
       title: t('transactions.confirmPending.effectiveDate'),
       key: 'effectiveDate',
       render: (_, row) => {
-        const invalid = row.confirmable && isDateInvalid(row);
+        const dateProblem = row.confirmable ? dateProblemOf(row) : null;
 
         return (
           <Flex vertical gap={4}>
@@ -293,7 +312,7 @@ const PendingConfirmationReview = ({
               value={effectiveDate(row.uuid)}
               disabled={!row.confirmable}
               earliest={row.earliestCompletedOn}
-              invalid={invalid}
+              invalid={dateProblem !== null}
               onChange={(date) => {
                 setDateOverrides((current) => ({
                   ...current,
@@ -301,12 +320,8 @@ const PendingConfirmationReview = ({
                 }));
               }}
             />
-            {invalid && (
-              <Typography.Text type="danger">
-                {t('transactions.confirmPending.dateBeforeOpening', {
-                  date: formatDateOnly(row.earliestCompletedOn, i18n.language),
-                })}
-              </Typography.Text>
+            {dateProblem && (
+              <Typography.Text type="danger">{dateProblem}</Typography.Text>
             )}
           </Flex>
         );
@@ -320,7 +335,7 @@ const PendingConfirmationReview = ({
     },
   ];
 
-  const blockedByDate = selectedRows.some(isDateInvalid);
+  const blockedByDate = selectedRows.some((row) => dateProblemOf(row) !== null);
 
   return (
     <Flex vertical gap="middle">
@@ -431,6 +446,24 @@ const PendingConfirmationContent = ({
   Pick<PendingConfirmationReviewProps, 'mutation'>) => {
   const { t } = useTranslation();
   const query = usePendingConfirmations(until);
+  const [reviewItems, setReviewItems] = useState<PendingConfirmation[]>();
+  const loadedItems = query.data?.items;
+
+  if (!reviewItems && loadedItems?.length) {
+    setReviewItems(loadedItems);
+
+    return null;
+  }
+
+  if (reviewItems) {
+    return (
+      <PendingConfirmationReview
+        items={reviewItems}
+        mutation={mutation}
+        onClose={onClose}
+      />
+    );
+  }
 
   if (query.isPending) {
     return (
@@ -446,20 +479,10 @@ const PendingConfirmationContent = ({
     );
   }
 
-  if (query.data.items.length === 0) {
-    return (
-      <Empty
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-        description={t('transactions.confirmPending.empty')}
-      />
-    );
-  }
-
   return (
-    <PendingConfirmationReview
-      items={query.data.items}
-      mutation={mutation}
-      onClose={onClose}
+    <Empty
+      image={Empty.PRESENTED_IMAGE_SIMPLE}
+      description={t('transactions.confirmPending.empty')}
     />
   );
 };

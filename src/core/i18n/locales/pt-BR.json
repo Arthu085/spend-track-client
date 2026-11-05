@@ -430,6 +430,7 @@
       "defaultDate": "Data efetiva de todas",
       "rowDate": "Data efetiva de {{description}}",
       "dateBeforeOpening": "Use {{date}} ou depois, a data de abertura da conta.",
+      "dateInFuture": "A data não pode ser posterior a hoje.",
       "selectRow": "Selecionar {{description}}",
       "selectDue": "Selecionar tudo que já venceu",
       "clear": "Limpar seleção",

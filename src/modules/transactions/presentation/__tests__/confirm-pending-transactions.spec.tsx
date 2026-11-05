@@ -394,6 +394,155 @@ describe('Confirm pending transactions', () => {
     });
   });
 
+  describe('when the pending list refetches after a partial failure', () => {
+    const partialFailure = bulkResponse([
+      result(rent.uuid),
+      result(salary.uuid, 'FAILED', 'Conta arquivada'),
+    ]);
+    const expectFailureKept = async (dialog: HTMLElement) => {
+      expect(
+        await within(dialog).findByText('Conta arquivada'),
+      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          within(dialog).getByRole('button', {
+            name: i18n.t('transactions.confirmPending.retry', { count: 1 }),
+          }),
+        ).toBeEnabled();
+      });
+      expect(
+        within(dialog).getByText(
+          i18n.t('transactions.confirmPending.partial', {
+            confirmed: 1,
+            alreadyCompleted: 0,
+            failed: 1,
+          }),
+        ),
+      ).toBeInTheDocument();
+    };
+
+    it('keeps the failures and Retry when the refetch errors', async () => {
+      const responses = [pendingResponse([rent, salary])];
+      const { dialog, sent } = await openModal([], {
+        [pendingPath]: () =>
+          responses.shift() ?? { status: 403, data: { message: 'Sem acesso' } },
+        [bulkPath]: partialFailure,
+      });
+
+      await checkbox(dialog, rent.description);
+      fireEvent.click(submitButton(dialog, 2));
+
+      await expectFailureKept(dialog);
+      await waitFor(() => {
+        expect(sent(pendingPath)).toHaveLength(2);
+      });
+      await expectFailureKept(dialog);
+      expect(within(dialog).queryByText('Sem acesso')).not.toBeInTheDocument();
+    });
+
+    it('shows the results without waiting for a refetch that keeps retrying', async () => {
+      const responses = [pendingResponse([rent, salary])];
+      const { dialog, sent } = await openModal([], {
+        [pendingPath]: () =>
+          responses.shift() ?? { status: 500, data: { message: 'Falha' } },
+        [bulkPath]: partialFailure,
+      });
+
+      await checkbox(dialog, rent.description);
+      fireEvent.click(submitButton(dialog, 2));
+
+      await expectFailureKept(dialog);
+      expect(sent(pendingPath).length).toBeLessThan(4);
+    });
+
+    it('keeps the failures and Retry when the refetch returns no items', async () => {
+      const responses = [pendingResponse([rent, salary])];
+      const { dialog, sent } = await openModal([], {
+        [pendingPath]: () => responses.shift() ?? pendingResponse([]),
+        [bulkPath]: partialFailure,
+      });
+
+      await checkbox(dialog, rent.description);
+      fireEvent.click(submitButton(dialog, 2));
+
+      await expectFailureKept(dialog);
+      await waitFor(() => {
+        expect(sent(pendingPath)).toHaveLength(2);
+      });
+      await expectFailureKept(dialog);
+      expect(
+        within(dialog).queryByText(i18n.t('transactions.confirmPending.empty')),
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not flash the empty state after a full success', async () => {
+      const responses = [pendingResponse([rent])];
+      const { dialog, sent } = await openModal([], {
+        [pendingPath]: () => responses.shift() ?? pendingResponse([]),
+        [bulkPath]: bulkResponse([result(rent.uuid)]),
+      });
+
+      await checkbox(dialog, rent.description);
+      fireEvent.click(submitButton(dialog, 1));
+
+      await waitFor(() => {
+        expect(sent(pendingPath)).toHaveLength(2);
+      });
+      expect(
+        within(dialog).queryByText(i18n.t('transactions.confirmPending.empty')),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('still shows the error of a failed first load', async () => {
+    const { dialog } = await openModal([], {
+      [pendingPath]: { status: 403, data: { message: 'Sem acesso' } },
+    });
+
+    expect(await within(dialog).findByText('Sem acesso')).toBeInTheDocument();
+  });
+
+  it('refuses a typed date after today on the default and row pickers', async () => {
+    const { dialog, sent } = await openModal([rent], {
+      [bulkPath]: bulkResponse([result(rent.uuid)]),
+    });
+
+    await checkbox(dialog, rent.description);
+    setDate(
+      dialog,
+      i18n.t('transactions.confirmPending.defaultDate'),
+      '2026-10-30',
+    );
+    setDate(dialog, rowDateLabel(rent.description), '2026-11-15');
+    fireEvent.click(submitButton(dialog, 1));
+
+    await waitFor(() => {
+      expect(sent(bulkPath)).toHaveLength(1);
+    });
+    expect(requestBody(sent(bulkPath)[0])).toEqual({
+      items: [{ uuid: rent.uuid, completedOn: '2026-10-29' }],
+    });
+  });
+
+  it('blocks the submit when the chosen date is later than today', async () => {
+    const { dialog, sent } = await openModal([rent]);
+
+    await checkbox(dialog, rent.description);
+
+    // The default date was chosen on the 29th; the clock moving back makes it a future date.
+    vi.setSystemTime(new Date('2026-10-28T15:00:00Z'));
+    fireEvent.click(await checkbox(dialog, rent.description));
+    fireEvent.click(await checkbox(dialog, rent.description));
+
+    expect(
+      await within(dialog).findByText(
+        i18n.t('transactions.confirmPending.dateInFuture'),
+      ),
+    ).toBeInTheDocument();
+    expect(submitButton(dialog, 1)).toBeDisabled();
+    expect(sent(bulkPath)).toHaveLength(0);
+  });
+
   it('sends a single request when the submit button is clicked twice', async () => {
     const { dialog, sent } = await openModal([rent], {
       [bulkPath]: bulkResponse([result(rent.uuid)]),
