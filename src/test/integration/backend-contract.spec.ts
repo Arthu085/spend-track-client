@@ -211,6 +211,66 @@ describe('real backend API contracts', () => {
     await expectApiError(fetchUser(created.data.uuid), 404);
   });
 
+  it('sorts users before pagination and sorts the role listing', async () => {
+    const roles = await fetchRoles();
+    const userRole = roles.find(({ role }) => role === 'USER');
+
+    if (!userRole) {
+      throw new Error('The backend did not seed the USER role.');
+    }
+
+    const createdUuids: string[] = [];
+
+    try {
+      for (const name of ['Sorting Zulu', 'Sorting Alpha']) {
+        const created = await createUser({
+          name,
+          email: `${name.toLowerCase().replace(' ', '-')}@example.com`,
+          password: 'Sorting-contract-password1!',
+          roleUuids: [userRole.uuid],
+        });
+
+        createdUuids.push(created.data.uuid);
+      }
+
+      for (const sortOrder of ['ASC', 'DESC'] as const) {
+        const first = await fetchUsers({
+          page: 1,
+          limit: 1,
+          name: 'Sorting ',
+          sortBy: 'name',
+          sortOrder,
+        });
+        const second = await fetchUsers({
+          page: 2,
+          limit: 1,
+          name: 'Sorting ',
+          sortBy: 'name',
+          sortOrder,
+        });
+
+        expect(first.meta.total).toBe(2);
+        expect(second.meta.total).toBe(2);
+        expect([...first.data, ...second.data].map(({ name }) => name)).toEqual(
+          sortOrder === 'ASC'
+            ? ['Sorting Alpha', 'Sorting Zulu']
+            : ['Sorting Zulu', 'Sorting Alpha'],
+        );
+
+        const sortedRoles = await fetchRoles({ sortBy: 'role', sortOrder });
+        const expectedRoles = roles.map(({ role }) => role).sort();
+
+        expect(sortedRoles.map(({ role }) => role)).toEqual(
+          sortOrder === 'ASC' ? expectedRoles : expectedRoles.reverse(),
+        );
+      }
+    } finally {
+      for (const uuid of createdUuids) {
+        await deleteUser(uuid);
+      }
+    }
+  });
+
   it('reads the catalog, replaces role grants, and enforces the effective permissions', async () => {
     const catalog = await fetchAbilityCatalog();
     const ownAbilities = await fetchOwnAbilities();

@@ -21,8 +21,14 @@ import { IconActionButton } from '@/shared/components/icon-action-button';
 import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import { PaginatedTable } from '@/shared/list/paginated-table';
 import type { ListParams } from '@/shared/list/use-list-params';
+import type { ListSorting } from '@/shared/list/use-list-sorting';
+import type { z } from 'zod';
 import type { userFiltersShape } from '../../domain/user-form.schemas';
-import type { UserDetail, UserListItem } from '../../domain/user.schema';
+import type {
+  UserDetail,
+  UserListItem,
+  userSortBySchema,
+} from '../../domain/user.schema';
 import {
   useDeleteUser,
   userQuery,
@@ -37,6 +43,7 @@ interface LoadingUser {
 interface UsersTableProps {
   query: UseQueryResult<PaginatedResponse<UserListItem>>;
   listParams: ListParams<typeof userFiltersShape>;
+  listSorting: ListSorting<z.infer<typeof userSortBySchema>>;
   onView: (user: UserDetail) => void;
   onEdit: (user: UserDetail) => void;
 }
@@ -44,6 +51,7 @@ interface UsersTableProps {
 export const UsersTable = ({
   query,
   listParams,
+  listSorting,
   onView,
   onEdit,
 }: UsersTableProps) => {
@@ -92,6 +100,7 @@ export const UsersTable = ({
     {
       title: t('users.fields.name'),
       dataIndex: 'name',
+      ...listSorting.columnSorting('name'),
       render: (_, { uuid, name }) => (
         <Space size="small">
           {name}
@@ -111,6 +120,7 @@ export const UsersTable = ({
     {
       title: t('users.fields.status'),
       dataIndex: 'status',
+      ...listSorting.columnSorting('status'),
       render: (_, { uuid, name, status, statusLabel }) => (
         <Space>
           {canManageUsers('UPDATE') && (
@@ -188,6 +198,11 @@ export const UsersTable = ({
       listParams={listParams}
       rowKey="uuid"
       columns={columns}
+      onChange={(_pagination, _filters, sorter, extra) => {
+        if (extra.action === 'sort' && !Array.isArray(sorter)) {
+          listSorting.setSorting(sorter.columnKey, sorter.order);
+        }
+      }}
     />
   );
 };

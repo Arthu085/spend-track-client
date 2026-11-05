@@ -238,6 +238,12 @@ Shared building blocks for feature pages:
   out of the URL too; clearing a filter that has a default restores it. Applying filters trims
   them and returns to the first page. Include `page`, `limit`, and the filters in
   the list query's key.
+- **Sorting:** `useListSorting(sortBySchema)` keeps optional `sortBy` and `sortOrder`
+  (`ASC` or `DESC`) in the URL and supplies controlled table column sort indicators. Column
+  clicks cycle ascending, descending, and the original server order. Sorting resets the page
+  while preserving filters, page size, and other query parameters. Invalid fields, directions,
+  and repeated sorting parameters are ignored; a field without a direction uses `ASC`.
+  Include sorting in API requests and query keys. Filtering and pagination preserve sorting.
 - **Tables:** `PaginatedTable` renders a list query's `PaginatedResponse` in an Ant Design table
   whose pagination reads and writes the list parameters, with the total count and an error alert.
   Wide tables scroll horizontally inside their own container (`scroll={{ x: 'max-content' }}`
@@ -607,6 +613,8 @@ Users menu entry needs the same ability.
 
 - **List:** a paginated table of name, roles, and status, filtered by name, email, role, and status
   through the URL. The API's list items have no `email`, so email is a filter but not a column.
+  Name and status columns support optional server sorting before pagination. The API also accepts
+  `email` and `createdAt` as sort fields through URL parameters.
   The signed-in user's row is marked by comparing its uuid with the session user's. The status
   filter defaults to `ACTIVE` and cannot be emptied. The role filter is shown only with
   `READ` on `ROLE`.
@@ -694,6 +702,9 @@ account page read the same query for the pending count.
 `/roles` lists the roles' labels and statuses from `GET /roles`, behind `AbilityGuard` with `READ`
 on `ROLE`; the Roles menu entry needs the same ability. Roles and abilities are a fixed catalog in
 the API, so there is no create or delete, and the list is not paginated.
+The role and status columns support optional server sorting using the API's `role` and `status`
+fields; `createdAt` is also accepted through URL parameters. Sorted role queries have separate cache
+entries so selectors keep the default role order. Role updates invalidate every list variant.
 
 - **Grid:** opening a role shows a modal with a subjects × actions grid of checkboxes, grouped like
   `AbilitySummary`; labels use the API when supplied and otherwise the same fallback labels.

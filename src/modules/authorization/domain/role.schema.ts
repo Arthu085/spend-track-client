@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { recordStatusSchema } from '@/shared/domain/record-status.schema';
 import { abilitySchema } from './ability.schema';
 
+export const roleSortBySchema = z.enum(['role', 'status', 'createdAt']);
+
 export const roleSchema = z.object({
   uuid: z.string(),
   role: z.enum(['ADMIN', 'USER']),

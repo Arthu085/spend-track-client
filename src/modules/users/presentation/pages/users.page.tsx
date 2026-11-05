@@ -5,11 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { hasAbility } from '@/modules/authorization/domain/ability.schema';
 import { useAbilities } from '@/modules/authorization/infra/abilities.queries';
 import { useListParams } from '@/shared/list/use-list-params';
+import { useListSorting } from '@/shared/list/use-list-sorting';
 import {
   defaultUserFilters,
   userFiltersShape,
 } from '../../domain/user-form.schemas';
-import type { UserDetail } from '../../domain/user.schema';
+import { type UserDetail, userSortBySchema } from '../../domain/user.schema';
 import { useUsers } from '../../infra/users.queries';
 import { CreateUserModal } from '../components/create-user.modal';
 import { EditUserModal } from '../components/edit-user.modal';
@@ -21,8 +22,14 @@ export const UsersPage = () => {
   const { t } = useTranslation();
   const { data: abilities = [] } = useAbilities();
   const listParams = useListParams(userFiltersShape, defaultUserFilters);
+  const listSorting = useListSorting(userSortBySchema);
   const { page, limit, filters } = listParams;
-  const usersQuery = useUsers({ page, limit, ...filters });
+  const usersQuery = useUsers({
+    page,
+    limit,
+    ...filters,
+    ...listSorting.sorting,
+  });
   const [creating, setCreating] = useState(false);
   const [viewingUser, setViewingUser] = useState<UserDetail | null>(null);
   const [editingUser, setEditingUser] = useState<UserDetail | null>(null);
@@ -52,6 +59,7 @@ export const UsersPage = () => {
       <UsersTable
         query={usersQuery}
         listParams={listParams}
+        listSorting={listSorting}
         onView={setViewingUser}
         onEdit={setEditingUser}
       />

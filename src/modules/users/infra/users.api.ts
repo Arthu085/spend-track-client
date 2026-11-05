@@ -8,6 +8,7 @@ import {
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
 import type { ListFilters } from '@/shared/list/use-list-params';
+import type { ListSortParams } from '@/shared/list/use-list-sorting';
 import type { RecordStatus } from '@/shared/domain/record-status.schema';
 import {
   type ChangeOwnPasswordForm,
@@ -21,12 +22,14 @@ import {
   userDetailSchema,
   type UserListItem,
   userListItemSchema,
+  userSortBySchema,
 } from '../domain/user.schema';
 
 export type UserListParams = {
   page: number;
   limit: number;
-} & ListFilters<typeof userFiltersShape>;
+} & ListFilters<typeof userFiltersShape> &
+  ListSortParams<z.infer<typeof userSortBySchema>>;
 
 export interface UpdateUserPayload extends Omit<UpdateUserForm, 'roleUuids'> {
   roleUuids?: string[];

@@ -5,12 +5,14 @@ import {
   parseApiResponse,
 } from '@/core/http/api-envelope';
 import { httpClient } from '@/core/http/http-client';
+import type { ListSortParams } from '@/shared/list/use-list-sorting';
 import type { Ability } from '../domain/ability.schema';
 import {
   type Role,
   type RoleDetail,
   roleDetailSchema,
   roleSchema,
+  roleSortBySchema,
 } from '../domain/role.schema';
 
 export interface UpdateRoleAbilitiesPayload {
@@ -18,8 +20,10 @@ export interface UpdateRoleAbilitiesPayload {
   abilities: Ability[];
 }
 
-export const fetchRoles = async (): Promise<Role[]> => {
-  const response = await httpClient.get<unknown>('/roles');
+export type RoleListParams = ListSortParams<z.infer<typeof roleSortBySchema>>;
+
+export const fetchRoles = async (params?: RoleListParams): Promise<Role[]> => {
+  const response = await httpClient.get<unknown>('/roles', { params });
 
   return parseApiData(z.array(roleSchema), response.data);
 };
