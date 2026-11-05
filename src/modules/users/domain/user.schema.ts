@@ -2,6 +2,13 @@ import { z } from 'zod';
 import { roleSchema } from '@/modules/authorization/domain/role.schema';
 import { recordStatusSchema } from '@/shared/domain/record-status.schema';
 
+export const userSortBySchema = z.enum([
+  'name',
+  'email',
+  'status',
+  'createdAt',
+]);
+
 export const userListItemSchema = z.object({
   uuid: z.string(),
   name: z.string(),

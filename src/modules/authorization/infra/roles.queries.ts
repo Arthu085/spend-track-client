@@ -7,13 +7,18 @@ import {
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
 import { abilitiesQuery } from './abilities.queries';
-import { fetchRole, fetchRoles, updateRoleAbilities } from './roles.api';
+import {
+  fetchRole,
+  fetchRoles,
+  type RoleListParams,
+  updateRoleAbilities,
+} from './roles.api';
 
 const rolesKey = ['authorization', 'roles'] as const;
 
 export const rolesQuery = queryOptions({
   queryKey: rolesKey,
-  queryFn: fetchRoles,
+  queryFn: () => fetchRoles(),
 });
 
 export const roleQuery = (uuid: string) =>
@@ -23,8 +28,15 @@ export const roleQuery = (uuid: string) =>
     staleTime: 0,
   });
 
-export const useRoles = ({ enabled = true }: { enabled?: boolean } = {}) =>
-  useQuery({ ...rolesQuery, enabled });
+export const useRoles = ({
+  enabled = true,
+  ...params
+}: RoleListParams & { enabled?: boolean } = {}) =>
+  useQuery({
+    queryKey: params.sortBy ? [...rolesKey, 'list', params] : rolesKey,
+    queryFn: () => fetchRoles(params.sortBy ? params : undefined),
+    enabled,
+  });
 
 export const useRole = (uuid: string) => useQuery(roleQuery(uuid));
 

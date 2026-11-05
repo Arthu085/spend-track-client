@@ -113,8 +113,26 @@ incompatibility fails CI on either side. The job uses the API branch with the sa
 branch when one exists, and `main` otherwise, so a coordinated contract change uses one branch name in
 both repositories.
 
-To run it locally, with Docker running and both repositories checked out, install each repository's
-dependencies and run the suite from the frontend:
+### CI credentials
+
+The job reads the API repository with its `github.token`, which is enough while that repository is
+public. If it becomes private, create a fine-grained personal access token or a GitHub App
+installation token limited to both repositories with read-only Contents access (read-only Metadata is
+implied), store it in each one as the `CROSS_REPO_TOKEN` Actions secret, and rotate it before it
+expires:
+
+```sh
+gh secret set CROSS_REPO_TOKEN --repo <owner>/<repo>
+```
+
+Missing or insufficient credentials fail the job with an explicit error rather than skip it, so a
+contract break cannot pass silently. The token is only available to the steps that read the other
+repository, never to dependency installation or test code.
+
+### Running locally
+
+With Docker running and both repositories checked out, install each repository's dependencies and run
+the suite from the frontend:
 
 ```sh
 npm ci
@@ -126,7 +144,9 @@ SPEND_TRACK_API_PATH=../spend-track-api npm run test:integration
 `../spend-track-api`. That checkout must include `test/frontend/server.ts`. The suite starts an
 ephemeral PostgreSQL Testcontainer, applies the backend's migrations and seeds, and listens on an
 available localhost port. It closes the API and container after the run, using no developer database
-or running API. Both repositories keep their existing validation gates.
+or running API. Both repositories keep their existing validation gates. The access-token lifetime
+comes from the backend fixture (5 seconds by default); on a slow machine, raise it by setting
+`FRONTEND_FIXTURE_ACCESS_TOKEN_TTL_SECONDS` for this command, which the fixture inherits.
 
 These tests call the frontend's API functions and Zod parsers through real Axios XHR requests in
 jsdom, including credentialed cookies and CORS. They cover login, automatic refresh and rotation,

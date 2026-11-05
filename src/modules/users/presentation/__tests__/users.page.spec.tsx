@@ -133,6 +133,94 @@ const graceRow = () => findRow(grace.uuid);
 const findErrorDialog = () => findDialog(i18n.t('feedback.error'));
 
 describe('UsersPage', () => {
+  it('sorts on the server, resets the page, and restores sorting through history', async () => {
+    const { router, sent } = renderUsers(
+      `${AppRoutes.USERS}?page=3&limit=10&name=grace&extra=keep`,
+      { 'GET /users': usersPage([grace], 3, 45) },
+    );
+    await graceRow();
+    const nameHeader = screen.getByRole('columnheader', {
+      name: new RegExp(i18n.t('users.fields.name')),
+    });
+
+    fireEvent.click(nameHeader);
+    await waitFor(() => {
+      expect(sent('GET /users').at(-1)?.params).toEqual({
+        page: 1,
+        limit: 10,
+        name: 'grace',
+        status: 'ACTIVE',
+        sortBy: 'name',
+        sortOrder: 'ASC',
+      });
+    });
+    expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
+    expect(router.state.location.search).toBe(
+      '?limit=10&name=grace&extra=keep&sortBy=name&sortOrder=ASC',
+    );
+
+    fireEvent.click(nameHeader);
+    await waitFor(() => {
+      expect(sent('GET /users').at(-1)?.params).toMatchObject({
+        sortBy: 'name',
+        sortOrder: 'DESC',
+      });
+    });
+    expect(nameHeader).toHaveAttribute('aria-sort', 'descending');
+
+    fireEvent.click(nameHeader);
+    await waitFor(() => {
+      expect(router.state.location.search).toBe(
+        '?limit=10&name=grace&extra=keep',
+      );
+      expect(sent('GET /users').at(-1)?.params).not.toHaveProperty('sortBy');
+    });
+    expect(nameHeader).not.toHaveAttribute('aria-sort');
+
+    await router.navigate(-1);
+    await waitFor(() => {
+      expect(nameHeader).toHaveAttribute('aria-sort', 'descending');
+    });
+  });
+
+  it('preserves sorting while changing pages and applying filters', async () => {
+    const { router, sent } = renderUsers(
+      `${AppRoutes.USERS}?sortBy=status&sortOrder=DESC`,
+      { 'GET /users': usersPage([grace], 1, 45) },
+    );
+    await graceRow();
+    const statusHeader = screen.getByRole('columnheader', {
+      name: new RegExp(i18n.t('users.fields.status')),
+    });
+    expect(statusHeader).toHaveAttribute('aria-sort', 'descending');
+
+    fireEvent.click(screen.getByTitle('2'));
+    await waitFor(() => {
+      expect(sent('GET /users').at(-1)?.params).toMatchObject({
+        page: 2,
+        sortBy: 'status',
+        sortOrder: 'DESC',
+      });
+    });
+    fireEvent.change(
+      screen.getByRole('textbox', { name: i18n.t('users.fields.name') }),
+      {
+        target: { value: 'ada' },
+      },
+    );
+    await waitFor(() => {
+      expect(sent('GET /users').at(-1)?.params).toMatchObject({
+        page: 1,
+        name: 'ada',
+        sortBy: 'status',
+        sortOrder: 'DESC',
+      });
+    });
+    expect(router.state.location.search).toBe(
+      '?sortBy=status&sortOrder=DESC&name=ada',
+    );
+  });
+
   it('lists users with the filters from the URL and no email column', async () => {
     const { sent } = renderUsers(
       `${AppRoutes.USERS}?name=grace&email=grace%40example.com&status=ACTIVE`,
@@ -173,9 +261,12 @@ describe('UsersPage', () => {
     ).toBeInTheDocument();
     expect(search.querySelector('.ant-select-clear')).toBeNull();
 
-    fireEvent.change(screen.getByLabelText(i18n.t('users.fields.name')), {
-      target: { value: 'grace' },
-    });
+    fireEvent.change(
+      screen.getByRole('textbox', { name: i18n.t('users.fields.name') }),
+      {
+        target: { value: 'grace' },
+      },
+    );
 
     await waitFor(() => {
       expect(router.state.location.search).toBe('?name=grace');
@@ -196,7 +287,9 @@ describe('UsersPage', () => {
     await waitFor(() => {
       expect(router.state.location.search).toBe('');
     });
-    expect(screen.getByLabelText(i18n.t('users.fields.name'))).toHaveValue('');
+    expect(
+      screen.getByRole('textbox', { name: i18n.t('users.fields.name') }),
+    ).toHaveValue('');
     expect(
       within(search).getByTitle(i18n.t('recordStatus.ACTIVE')),
     ).toBeInTheDocument();

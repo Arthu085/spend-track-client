@@ -84,10 +84,12 @@ const renderRoles = ({
   roles = [adminRole],
   abilities = abilityCatalog,
   routes = {},
+  path = AppRoutes.ROLES,
 }: {
   roles?: Role[];
   abilities?: Ability[];
   routes?: Record<string, StubResponse>;
+  path?: string;
 } = {}) => {
   const requests = stubHttpRoutes(httpClient, {
     'GET /auth/csrf': csrfResponse('csrf-token'),
@@ -100,7 +102,7 @@ const renderRoles = ({
     [`GET /roles/${userRole.uuid}`]: envelope(userDetail),
     ...routes,
   });
-  const rendered = renderRoute(AppRoutes.ROLES);
+  const rendered = renderRoute(path);
   const sent = (key: string) =>
     requests.filter((request) => requestKey(request) === key);
 
@@ -142,6 +144,89 @@ const saveButton = (dialog: HTMLElement) =>
   within(dialog).getByRole('button', { name: i18n.t('common.save') });
 
 describe('RolesPage', () => {
+  it('maps role and status column sorting to separate server queries and clears sorting', async () => {
+    const { router, sent, queryClient } = renderRoles();
+    await findRow(userRole.uuid);
+    expect(sent('GET /roles').at(-1)?.params).toBeUndefined();
+    const roleHeader = screen.getByRole('columnheader', {
+      name: new RegExp(i18n.t('roles.fields.role')),
+    });
+    const statusHeader = screen.getByRole('columnheader', {
+      name: new RegExp(i18n.t('roles.fields.status')),
+    });
+
+    fireEvent.click(roleHeader);
+    await waitFor(() => {
+      expect(sent('GET /roles').at(-1)?.params).toEqual({
+        sortBy: 'role',
+        sortOrder: 'ASC',
+      });
+    });
+    expect(roleHeader).toHaveAttribute('aria-sort', 'ascending');
+    fireEvent.click(roleHeader);
+    await waitFor(() => {
+      expect(sent('GET /roles').at(-1)?.params).toEqual({
+        sortBy: 'role',
+        sortOrder: 'DESC',
+      });
+    });
+    expect(queryClient.getQueryData(['authorization', 'roles'])).toEqual([
+      adminRole,
+      userRole,
+    ]);
+    expect(
+      queryClient.getQueryData([
+        'authorization',
+        'roles',
+        'list',
+        { sortBy: 'role', sortOrder: 'DESC' },
+      ]),
+    ).toEqual([adminRole, userRole]);
+
+    fireEvent.click(roleHeader);
+    await waitFor(() => expect(router.state.location.search).toBe(''));
+    expect(roleHeader).not.toHaveAttribute('aria-sort');
+    fireEvent.click(statusHeader);
+    await waitFor(() => {
+      expect(sent('GET /roles').at(-1)?.params).toEqual({
+        sortBy: 'status',
+        sortOrder: 'ASC',
+      });
+    });
+  });
+
+  it('restores a role sort from the URL and invalidates every role list after editing', async () => {
+    const { sent, queryClient } = renderRoles({
+      path: `${AppRoutes.ROLES}?sortBy=role&sortOrder=DESC`,
+      routes: {
+        [`PATCH /roles/${userRole.uuid}/abilities`]: envelope(userDetail),
+      },
+    });
+    queryClient.setQueryData(['authorization', 'roles'], [adminRole, userRole]);
+    const dialog = await openRole(userRole);
+    expect(sent('GET /roles').at(-1)?.params).toEqual({
+      sortBy: 'role',
+      sortOrder: 'DESC',
+    });
+    expect(
+      screen.getByRole('columnheader', {
+        name: new RegExp(i18n.t('roles.fields.role')),
+      }),
+    ).toHaveAttribute('aria-sort', 'descending');
+    fireEvent.click(await cell(dialog, { action: 'CREATE', subject: 'ROLE' }));
+    fireEvent.click(saveButton(dialog));
+    await waitFor(() => {
+      expect(sent('GET /roles')).toHaveLength(2);
+    });
+    expect(
+      queryClient.getQueryState(['authorization', 'roles'])?.isInvalidated,
+    ).toBe(true);
+    expect(sent('GET /roles').at(-1)?.params).toEqual({
+      sortBy: 'role',
+      sortOrder: 'DESC',
+    });
+  });
+
   it('lists roles with their status and a menu entry', async () => {
     renderRoles();
 

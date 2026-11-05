@@ -10,6 +10,7 @@ export const backendFixtureSchema = z.object({
   baseURL: z.url(),
   admin: credentialsSchema,
   user: credentialsSchema,
+  accessTokenTtlMs: z.number().int().positive(),
 });
 
 type BackendFixture = z.infer<typeof backendFixtureSchema>;
