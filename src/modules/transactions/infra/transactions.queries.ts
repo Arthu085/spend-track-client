@@ -10,8 +10,10 @@ import { dashboardKey } from '@/modules/dashboard/infra/dashboard.queries';
 import { recurrencesKey } from '@/modules/recurrences/infra/recurrences.keys';
 import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message';
 import {
+  confirmTransactionsInChunks,
   createTransaction,
   deleteTransaction,
+  fetchPendingConfirmations,
   fetchTransactions,
   type TransactionListParams,
   updateTransaction,
@@ -26,6 +28,20 @@ export const useTransactions = (params: TransactionListParams = {}) =>
     placeholderData: keepPreviousData,
   });
 
+export const usePendingConfirmations = (until: string) =>
+  useQuery({
+    queryKey: [...transactionsKey, 'pending-confirmations', until],
+    queryFn: () => fetchPendingConfirmations(until),
+    gcTime: 0,
+  });
+
+const affectedQueryKeys = [
+  transactionsKey,
+  dashboardKey,
+  accountsKey,
+  recurrencesKey,
+];
+
 const useTransactionMutation = <TVariables, TData>(
   mutationFn: (variables: TVariables) => Promise<ApiResponse<TData>>,
 ) => {
@@ -37,8 +53,8 @@ const useTransactionMutation = <TVariables, TData>(
     onSuccess: async (response) => {
       showSuccessMessage(response);
       await Promise.all(
-        [transactionsKey, dashboardKey, accountsKey, recurrencesKey].map(
-          (queryKey) => queryClient.invalidateQueries({ queryKey }),
+        affectedQueryKeys.map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
         ),
       );
     },
@@ -56,3 +72,18 @@ export const useUpdateTransactionState = () =>
 
 export const useDeleteTransaction = () =>
   useTransactionMutation(deleteTransaction);
+
+export const useConfirmPendingTransactions = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: confirmTransactionsInChunks,
+    onSuccess: async () => {
+      await Promise.all(
+        affectedQueryKeys.map((queryKey) =>
+          queryClient.invalidateQueries({ queryKey }),
+        ),
+      );
+    },
+  });
+};

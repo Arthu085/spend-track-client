@@ -392,7 +392,41 @@
       "description": "Delete {{description}}? Only planned transactions can be deleted. This cannot be undone."
     },
     "empty": "No transactions in this month.",
-    "recurring": "Recurring"
+    "recurring": "Recurring",
+    "confirmPending": {
+      "open": "Confirm pending transactions",
+      "title": "Confirm pending transactions",
+      "hint": "Nothing changes until you confirm here. Review the selection and the effective date, since balances move on that date.",
+      "excluded": "Credit card charges and investment contributions are not included. They are confirmed from their own screens.",
+      "empty": "No planned transactions up to the end of this month.",
+      "effectiveDate": "Effective date",
+      "defaultDate": "Effective date for all",
+      "rowDate": "Effective date of {{description}}",
+      "dateBeforeOpening": "Use {{date}} or later, the account's opening date.",
+      "selectRow": "Select {{description}}",
+      "selectDue": "Select everything due",
+      "clear": "Clear selection",
+      "future": "Future",
+      "futureHint": "Dated after today. Select it only if it has already happened.",
+      "status": "Status",
+      "blocked": {
+        "INACTIVE_ACCOUNT": "An account is archived. Reactivate it to confirm this transaction.",
+        "BEFORE_ACCOUNT_OPENING": "Dated before the opening date of an account, so it cannot be confirmed."
+      },
+      "summary": {
+        "label": "Selection totals",
+        "selected": "Selected",
+        "selectedCount": "{{selected}} of {{total}}",
+        "income": "Income",
+        "expenses": "Expenses",
+        "transfers": "Transfers"
+      },
+      "submit": "Confirm selected ({{count}})",
+      "retry": "Retry failed ({{count}})",
+      "partial": "Confirmed: {{confirmed}}. Already completed: {{alreadyCompleted}}. Failed: {{failed}}. Only the failed ones are listed below.",
+      "failedFallback": "This transaction could not be confirmed.",
+      "success": "Confirmed: {{confirmed}}. Already completed: {{alreadyCompleted}}."
+    }
   },
   "recurrences": {
     "title": "Recurrences",

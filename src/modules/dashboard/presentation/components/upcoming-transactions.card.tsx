@@ -1,6 +1,7 @@
 import { CheckOutlined } from '@ant-design/icons';
 import {
   Badge,
+  Button,
   Empty,
   Flex,
   Space,
@@ -9,6 +10,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -16,6 +18,7 @@ import {
   type CompletableTransaction,
   CompleteTransactionModal,
 } from '@/modules/transactions/presentation/components/complete-transaction.modal';
+import { ConfirmPendingTransactionsModal } from '@/modules/transactions/presentation/components/confirm-pending-transactions.modal';
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
 import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { IconActionButton } from '@/shared/components/icon-action-button';
@@ -45,6 +48,7 @@ export const UpcomingTransactionsCard = ({
 }: UpcomingTransactionsCardProps) => {
   const { t, i18n } = useTranslation();
   const completing = useModalTarget<CompletableTransaction>();
+  const [confirmingPending, setConfirmingPending] = useState(false);
 
   const columns: TableColumnsType<DashboardUpcoming> = [
     {
@@ -115,9 +119,19 @@ export const UpcomingTransactionsCard = ({
         />
       ) : (
         <Flex vertical gap="small">
-          <Typography.Text type="secondary">
-            {t('dashboard.upcoming.hint')}
-          </Typography.Text>
+          <Flex justify="space-between" align="center" gap="small" wrap>
+            <Typography.Text type="secondary">
+              {t('dashboard.upcoming.hint')}
+            </Typography.Text>
+            <Button
+              icon={<CheckOutlined />}
+              onClick={() => {
+                setConfirmingPending(true);
+              }}
+            >
+              {t('transactions.confirmPending.open')}
+            </Button>
+          </Flex>
           <Table
             rowKey="uuid"
             size="small"
@@ -140,6 +154,13 @@ export const UpcomingTransactionsCard = ({
         open={completing.open}
         transaction={completing.target}
         onClose={completing.close}
+      />
+      <ConfirmPendingTransactionsModal
+        open={confirmingPending}
+        until={period.endDate}
+        onClose={() => {
+          setConfirmingPending(false);
+        }}
       />
     </EqualHeightCard>
   );

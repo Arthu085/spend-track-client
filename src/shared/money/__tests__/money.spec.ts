@@ -6,6 +6,7 @@ import {
   moneyInputSchema,
   moneySchema,
   positiveMoneyInputSchema,
+  sumMoney,
 } from '../money';
 
 describe('money', () => {
@@ -45,5 +46,15 @@ describe('money', () => {
   ])('tells whether %s is positive', (amount, positive) => {
     expect(isPositiveMoney(amount)).toBe(positive);
     expect(positiveMoneyInputSchema.safeParse(amount).success).toBe(positive);
+  });
+});
+
+describe('sumMoney', () => {
+  it('adds decimal amounts without binary rounding errors', () => {
+    expect(sumMoney(['0.10', '0.20', '1000000.01'])).toBe('1000000.31');
+  });
+
+  it('answers zero for no amounts', () => {
+    expect(sumMoney([])).toBe('0.00');
   });
 });

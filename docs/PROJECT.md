@@ -334,6 +334,15 @@ Transaction indicators, each with its own empty state:
   an overdue tag, the category or transfer route, and a quick action that marks one as completed
   (asking for the effective date, today by default). When more exist, the card says how many and
   links to the month on the transactions page.
+- **Confirm pending transactions:** a labeled button on the upcoming card opens a review of every
+  planned income, expense, and transfer up to the end of the month, not just the ten shown on the
+  card. Nothing changes before confirming there. Rows that are due start selected, rows dated after
+  today stay visible but unselected until chosen, and rows that cannot be confirmed are disabled
+  with the reason. One effective date (today by default) applies to all rows, each row can override
+  it, and a date before the account's opening date blocks the submit. The modal totals the selection
+  by type and says that card charges and investment contributions are not included. Selections over
+  200 go out sequentially in chunks of 200 and their results are aggregated. After a partial failure
+  the modal lists only the failed rows with their reasons and retries only those.
 - **Expenses by category:** each category's total with a bar for its share of the month's expenses
   (in the category color) and its paid and pending amounts.
 - **Credit card invoices:** the month's card spending, what is still due on every invoice, and the

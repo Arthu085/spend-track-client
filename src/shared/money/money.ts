@@ -32,3 +32,13 @@ export const formatMoney = (amount: string, language: string): string =>
     style: 'currency',
     currency: CURRENCY,
   }).format(Number(amount));
+
+export const moneyToCents = (amount: string): number =>
+  Math.round(Number(amount) * 100);
+
+export const centsToMoney = (cents: number): string => (cents / 100).toFixed(2);
+
+export const sumMoney = (amounts: readonly string[]): string =>
+  centsToMoney(
+    amounts.reduce((total, amount) => total + moneyToCents(amount), 0),
+  );

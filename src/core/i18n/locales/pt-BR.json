@@ -392,7 +392,41 @@
       "description": "Excluir {{description}}? Apenas transações previstas podem ser excluídas. A exclusão não pode ser desfeita."
     },
     "empty": "Nenhuma transação neste mês.",
-    "recurring": "Recorrente"
+    "recurring": "Recorrente",
+    "confirmPending": {
+      "open": "Confirmar transações pendentes",
+      "title": "Confirmar transações pendentes",
+      "hint": "Nada muda até você confirmar aqui. Revise a seleção e a data efetiva, pois os saldos mudam nessa data.",
+      "excluded": "Cobranças de cartão de crédito e aportes em investimentos não entram aqui. Eles são confirmados nas próprias telas.",
+      "empty": "Nenhuma transação planejada até o fim deste mês.",
+      "effectiveDate": "Data efetiva",
+      "defaultDate": "Data efetiva de todas",
+      "rowDate": "Data efetiva de {{description}}",
+      "dateBeforeOpening": "Use {{date}} ou depois, a data de abertura da conta.",
+      "selectRow": "Selecionar {{description}}",
+      "selectDue": "Selecionar tudo que já venceu",
+      "clear": "Limpar seleção",
+      "future": "Futura",
+      "futureHint": "Data posterior a hoje. Selecione apenas se já aconteceu.",
+      "status": "Situação",
+      "blocked": {
+        "INACTIVE_ACCOUNT": "Uma conta está arquivada. Reative-a para confirmar esta transação.",
+        "BEFORE_ACCOUNT_OPENING": "Data anterior à abertura de uma conta, portanto não pode ser confirmada."
+      },
+      "summary": {
+        "label": "Totais da seleção",
+        "selected": "Selecionadas",
+        "selectedCount": "{{selected}} de {{total}}",
+        "income": "Receitas",
+        "expenses": "Despesas",
+        "transfers": "Transferências"
+      },
+      "submit": "Confirmar selecionadas ({{count}})",
+      "retry": "Tentar novamente as que falharam ({{count}})",
+      "partial": "Confirmadas: {{confirmed}}. Já realizadas: {{alreadyCompleted}}. Com falha: {{failed}}. Apenas as que falharam estão listadas abaixo.",
+      "failedFallback": "Não foi possível confirmar esta transação.",
+      "success": "Confirmadas: {{confirmed}}. Já realizadas: {{alreadyCompleted}}."
+    }
   },
   "recurrences": {
     "title": "Recorrências",
