@@ -121,7 +121,8 @@
       "contributions": "Aportado no mês:",
       "withdrawals": "Resgatado no mês:",
       "pending": "(+{{amount}} previsto)",
-      "empty": "Nenhum investimento, reserva ou meta ativa."
+      "empty": "Nenhum investimento, reserva ou meta ativa.",
+      "contribute": "Aportar"
     },
     "perspective": {
       "PURCHASE_DATE": "Os gastos no cartão contam no mês da compra. Saldos e faturas não mudam.",
@@ -551,7 +552,8 @@
       "status": "Situação",
       "actions": "Ações",
       "account": "Conta",
-      "movementType": "Movimentação"
+      "movementType": "Movimentação",
+      "investment": "Investimento"
     },
     "types": {
       "INVESTMENT": "Investimento",
@@ -579,6 +581,10 @@
         "CONTRIBUTION": "Conta de origem",
         "WITHDRAWAL": "Conta de destino"
       }
+    },
+    "contribution": {
+      "title": "Aporte único",
+      "hint": "Registra um único aporte, sem criar uma recorrência. O valor sai da conta e entra no investimento. Não conta como despesa."
     },
     "valuation": {
       "title": "Atualizar valor de {{name}}",

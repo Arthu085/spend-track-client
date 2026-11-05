@@ -121,7 +121,8 @@
       "contributions": "Contributed this month:",
       "withdrawals": "Withdrawn this month:",
       "pending": "(+{{amount}} planned)",
-      "empty": "No active investments, reserves, or goals."
+      "empty": "No active investments, reserves, or goals.",
+      "contribute": "Contribute"
     },
     "perspective": {
       "PURCHASE_DATE": "Card spending counts in the month of the purchase. Balances and invoices stay the same.",
@@ -551,7 +552,8 @@
       "status": "Status",
       "actions": "Actions",
       "account": "Account",
-      "movementType": "Movement"
+      "movementType": "Movement",
+      "investment": "Investment"
     },
     "types": {
       "INVESTMENT": "Investment",
@@ -579,6 +581,10 @@
         "CONTRIBUTION": "From account",
         "WITHDRAWAL": "To account"
       }
+    },
+    "contribution": {
+      "title": "One-time contribution",
+      "hint": "Records a single contribution, without creating a recurring one. The amount leaves the account and is added to the investment. It does not count as an expense."
     },
     "valuation": {
       "title": "Update value of {{name}}",

@@ -525,6 +525,9 @@ API derives from its movements: contributions minus withdrawals plus valuation a
   by default, or planned). A contribution moves money from the account into the investment and a
   withdrawal moves it back; neither is income or an expense, and the API refuses a withdrawal larger
   than the current value.
+- **From the dashboard:** the investments card opens a one-time contribution form with the same
+  fields and rules plus the investment (`InvestmentContributionModal`), offering only active
+  investments and active accounts; each row's action preselects its investment.
 - **Update value:** a form modal posts `POST /investments/:uuid/valuations` with the new market value;
   only the investment changes, never an account balance.
 - **History:** `/investments/:uuid/movements` lists every movement, newest first, with the signed

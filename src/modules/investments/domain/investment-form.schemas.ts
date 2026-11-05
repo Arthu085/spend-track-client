@@ -47,6 +47,11 @@ export const investmentMovementFormSchema = z.object({
   state: z.enum(creatableTransactionStateSchema.options, { error: required }),
 });
 
+export const investmentContributionFormSchema =
+  investmentMovementFormSchema.extend({
+    investmentUuid: requiredUuidSchema,
+  });
+
 export const investmentValuationFormSchema = z.object({
   value: nonNegativeMoneyInputSchema,
   date: requiredDate,
@@ -64,6 +69,9 @@ export const defaultInvestmentFilters: ListFilters<
 export type InvestmentForm = z.infer<typeof investmentFormSchema>;
 export type InvestmentMovementForm = z.infer<
   typeof investmentMovementFormSchema
+>;
+export type InvestmentContributionForm = z.infer<
+  typeof investmentContributionFormSchema
 >;
 export type InvestmentValuationForm = z.infer<
   typeof investmentValuationFormSchema
