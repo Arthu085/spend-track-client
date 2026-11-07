@@ -42,6 +42,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_API_URL: https://app.example.com
+          VITE_APP_NAME: Spend Track
+          VITE_APP_MARK: ST
 
   api-integration:
     name: API integration tests

@@ -48,7 +48,8 @@ Rules for every change to this repository. Project scope and layout are in
   environment example and must contain placeholders or safe local defaults.
 - Vite exposes `VITE_*` values to the browser. Treat them as public configuration, never secrets.
 - When adding environment configuration, document it in `.env.example` and the README and add it
-  to the Zod schema in `src/core/config/env.config.ts`; read it only through `env`.
+  to the Zod schema in `src/core/config/env.schema.ts`; read it only through `env` from
+  `src/core/config/env.config.ts`.
 
 ## Formatting and validation
 

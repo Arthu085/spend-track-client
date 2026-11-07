@@ -58,15 +58,23 @@ origin in its `CORS_ORIGINS`, and `VITE_API_URL` must point to it.
 
 ## Environment
 
-Variables are documented in [`.env.example`](.env.example) and validated with Zod at startup in
-[`src/core/config/env.config.ts`](src/core/config/env.config.ts); the app fails fast on an invalid
-value. `VITE_*` values are embedded in the browser bundle, so they must never hold secrets.
+Variables are documented in [`.env.example`](.env.example) and validated with Zod at build time and
+startup through the shared schema in
+[`src/core/config/env.schema.ts`](src/core/config/env.schema.ts); an invalid value stops the build
+or the application. `VITE_*` values are embedded in the browser bundle, so they must never hold
+secrets.
 
 | Variable        | Required | Purpose                                          |
 | --------------- | -------- | ------------------------------------------------ |
-| `VITE_API_URL`  | Yes      | API base URL without the `/api` prefix           |
+| `VITE_API_URL`  | Yes      | API origin without a path                        |
 | `VITE_APP_NAME` | Yes      | Application name for the browser tab and layouts |
 | `VITE_APP_MARK` | Yes      | Short mark shown in the collapsed sidebar        |
+
+`VITE_API_URL` must be an origin without any path, including `/api`, and without credentials, a
+query, or a fragment; the HTTP client appends `/api` itself. Trailing slashes are accepted and
+normalized away. Public origins require HTTPS; HTTP is allowed only for `localhost`, `127.0.0.1`,
+and `[::1]`, with optional ports, for local development and testing. Vite reads these values when it
+starts or builds; restart the development server or rebuild after changing them.
 
 ## Commands
 
