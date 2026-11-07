@@ -11,6 +11,7 @@ import { useApiSuccessMessage } from '@/shared/feedback/use-api-success-message'
 import {
   changeOwnPassword,
   createUser,
+  confirmUserEmail,
   deleteUser,
   fetchUser,
   fetchUsers,
@@ -73,6 +74,8 @@ export const useUpdateUser = () => {
 };
 
 export const useUpdateUserStatus = () => useUserMutation(updateUserStatus);
+
+export const useConfirmUserEmail = () => useUserMutation(confirmUserEmail);
 
 export const useDeleteUser = () => useUserMutation(deleteUser);
 

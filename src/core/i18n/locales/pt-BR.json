@@ -935,7 +935,8 @@
       "details": "Ver detalhes de {{name}}",
       "edit": "Editar {{name}}",
       "delete": "Excluir {{name}}",
-      "toggleStatus": "Ativar ou desativar {{name}}"
+      "toggleStatus": "Ativar ou desativar {{name}}",
+      "confirmEmail": "Verificar e-mail de {{name}}"
     },
     "delete": {
       "title": "Excluir usuário",
@@ -946,6 +947,11 @@
       "offer": "Enviar estas alterações a {{name}} como uma solicitação de alteração? Elas só serão aplicadas após a aprovação e substituem qualquer solicitação pendente.",
       "send": "Enviar solicitação",
       "sent": "Solicitação de alteração enviada. As alterações serão aplicadas quando {{name}} aprovar."
+    },
+    "confirmEmail": {
+      "title": "Verificar e-mail",
+      "description": "Verificar {{email}} de {{name}}? Isso permite que o usuário entre sem o link de confirmação.",
+      "submit": "Verificar e-mail"
     }
   },
   "account": {

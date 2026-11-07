@@ -634,6 +634,12 @@ Users menu entry needs the same ability.
   partial body to `POST /users/:uuid/change-requests` (`UPDATE` + `READ` on `USER`, like edit),
   closes the edit modal, and confirms with a success message; cancelling returns to the edit
   modal with the typed values. Any other error opens the error dialog.
+- **Manual email verification:** with `READ` and `UPDATE` on `USER`, active users whose
+  `emailConfirmedAt` is null have a verification button. Admin targets also require an active
+  `ADMIN` role on the signed-in user. The button loads current details and asks the operator to
+  confirm the displayed address before calling `PUT /users/:uuid/email-confirmation` with
+  `{ email }`. The API rejects a changed address with `409`, so the operator must review it again.
+  Success shows the API message and refreshes users queries; failures open the error dialog.
 - **Status and delete:** a switch activates or deactivates a user, and delete asks for
   confirmation. A delete that empties the last page moves to the previous one.
 - **Feedback:** every mutation shows the API's success message and refetches the users queries;

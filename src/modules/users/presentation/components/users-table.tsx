@@ -1,4 +1,9 @@
-import { DeleteOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons';
+import {
+  CheckCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  EyeOutlined,
+} from '@ant-design/icons';
 import { type UseQueryResult, useQueryClient } from '@tanstack/react-query';
 import {
   Popconfirm,
@@ -31,13 +36,14 @@ import type {
 } from '../../domain/user.schema';
 import {
   useDeleteUser,
+  useConfirmUserEmail,
   userQuery,
   useUpdateUserStatus,
 } from '../../infra/users.queries';
 
 interface LoadingUser {
   uuid: string;
-  purpose: 'details' | 'edit';
+  purpose: 'details' | 'edit' | 'confirmEmail';
 }
 
 interface UsersTableProps {
@@ -56,13 +62,14 @@ export const UsersTable = ({
   onEdit,
 }: UsersTableProps) => {
   const { t } = useTranslation();
-  const { showError } = useFeedbackModal();
+  const { showError, confirmWarning } = useFeedbackModal();
   const queryClient = useQueryClient();
   const { data: sessionUser } = useSession();
   const { data: abilities = [] } = useAbilities();
   const { page, limit, setPagination } = listParams;
   const statusMutation = useUpdateUserStatus();
   const deleteMutation = useDeleteUser();
+  const confirmEmailMutation = useConfirmUserEmail();
   const [loadingUser, setLoadingUser] = useState<LoadingUser>();
 
   const canManageUsers = (action: Ability['action']) =>
@@ -82,6 +89,23 @@ export const UsersTable = ({
 
   const isLoadingUser = (uuid: string, purpose: LoadingUser['purpose']) =>
     loadingUser?.uuid === uuid && loadingUser.purpose === purpose;
+
+  const confirmEmail = (user: UserDetail) => {
+    confirmWarning({
+      title: t('users.confirmEmail.title'),
+      content: t('users.confirmEmail.description', {
+        name: user.name,
+        email: user.email,
+      }),
+      okText: t('users.confirmEmail.submit'),
+      onOk: () => {
+        confirmEmailMutation.mutate(
+          { uuid: user.uuid, email: user.email },
+          { onError: showError },
+        );
+      },
+    });
+  };
 
   const removeUser = (uuid: string) => {
     const isLastRowOfPage = query.data?.data.length === 1 && page > 1;
@@ -147,7 +171,7 @@ export const UsersTable = ({
     {
       title: t('users.fields.actions'),
       key: 'actions',
-      render: (_, { uuid, name, status }) => (
+      render: (_, { uuid, name, status, emailConfirmedAt, roles }) => (
         <Space>
           <IconActionButton
             size="small"
@@ -167,6 +191,31 @@ export const UsersTable = ({
               onClick={() => openWithCurrentUser(uuid, 'edit', onEdit)}
             />
           )}
+          {canManageUsers('UPDATE') &&
+            canManageUsers('READ') &&
+            status === 'ACTIVE' &&
+            emailConfirmedAt === null &&
+            (!roles.some((role) => role.role === 'ADMIN') ||
+              sessionUser?.roles.some(
+                (role) => role.role === 'ADMIN' && role.status === 'ACTIVE',
+              )) && (
+              <IconActionButton
+                size="small"
+                icon={<CheckCircleOutlined />}
+                label={t('users.actions.confirmEmail', { name })}
+                disabled={
+                  confirmEmailMutation.isPending || loadingUser !== undefined
+                }
+                loading={
+                  isLoadingUser(uuid, 'confirmEmail') ||
+                  (confirmEmailMutation.isPending &&
+                    confirmEmailMutation.variables.uuid === uuid)
+                }
+                onClick={() =>
+                  openWithCurrentUser(uuid, 'confirmEmail', confirmEmail)
+                }
+              />
+            )}
           {canManageUsers('DELETE') && (
             <Popconfirm
               title={t('users.delete.title')}

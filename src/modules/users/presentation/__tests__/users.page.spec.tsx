@@ -51,6 +51,7 @@ const sessionUser: UserDetail = {
 const grace: UserListItem = {
   uuid: '9b2d3c4e-1f0a-4b5c-8d7e-6f5a4b3c2d1e',
   name: 'Grace Hopper',
+  emailConfirmedAt: null,
   status: 'ACTIVE',
   statusLabel: 'Ativo',
   roles: [userRole],
@@ -133,6 +134,135 @@ const graceRow = () => findRow(grace.uuid);
 const findErrorDialog = () => findDialog(i18n.t('feedback.error'));
 
 describe('UsersPage', () => {
+  describe('manual email verification', () => {
+    const actionName = () =>
+      i18n.t('users.actions.confirmEmail', { name: grace.name });
+    const openConfirmation = async () => {
+      fireEvent.click(
+        within(await graceRow()).getByRole('button', { name: actionName() }),
+      );
+      return findDialog(i18n.t('users.confirmEmail.title'));
+    };
+
+    it('shows the current address, verifies only after confirmation, and refreshes the list', async () => {
+      let confirmed = false;
+      const timestamp = '2026-03-01T00:00:00.000Z';
+      const { sent } = renderUsers(AppRoutes.USERS, {
+        'GET /users': () =>
+          usersPage([
+            { ...grace, emailConfirmedAt: confirmed ? timestamp : null },
+          ]),
+        [`GET /users/${grace.uuid}`]: envelope(graceDetail),
+        [`PUT /users/${grace.uuid}/email-confirmation`]: () => {
+          confirmed = true;
+          return envelope(
+            { ...graceDetail, emailConfirmedAt: timestamp },
+            'Email verified',
+          );
+        },
+      });
+      const dialog = await openConfirmation();
+      expect(dialog).toHaveTextContent(graceDetail.email);
+      expect(sent(`PUT /users/${grace.uuid}/email-confirmation`)).toHaveLength(
+        0,
+      );
+      fireEvent.click(
+        within(dialog).getByRole('button', {
+          name: i18n.t('users.confirmEmail.submit'),
+        }),
+      );
+
+      expect(await screen.findByText('Email verified')).toBeInTheDocument();
+      expect(
+        requestBody(sent(`PUT /users/${grace.uuid}/email-confirmation`)[0]),
+      ).toEqual({ email: graceDetail.email });
+      await waitFor(() => expect(sent('GET /users')).toHaveLength(2));
+      await waitFor(() =>
+        expect(
+          screen.queryByRole('button', { name: actionName() }),
+        ).not.toBeInTheDocument(),
+      );
+    });
+
+    it('cancels without sending verification', async () => {
+      const { sent } = renderUsers(AppRoutes.USERS, {
+        [`GET /users/${grace.uuid}`]: envelope(graceDetail),
+      });
+      const dialog = await openConfirmation();
+      fireEvent.click(
+        within(dialog).getByRole('button', { name: i18n.t('common.cancel') }),
+      );
+      expect(sent(`PUT /users/${grace.uuid}/email-confirmation`)).toHaveLength(
+        0,
+      );
+    });
+
+    it('shows an API failure without a success message', async () => {
+      renderUsers(AppRoutes.USERS, {
+        [`GET /users/${grace.uuid}`]: envelope(graceDetail),
+        [`PUT /users/${grace.uuid}/email-confirmation`]: {
+          status: 409,
+          data: { message: 'The email changed. Review it again.' },
+        },
+      });
+      const dialog = await openConfirmation();
+      fireEvent.click(
+        within(dialog).getByRole('button', {
+          name: i18n.t('users.confirmEmail.submit'),
+        }),
+      );
+      expect(await findErrorDialog()).toHaveTextContent(
+        'The email changed. Review it again.',
+      );
+    });
+
+    it('shows detail-load errors before asking for verification', async () => {
+      const { sent } = renderUsers(AppRoutes.USERS, {
+        [`GET /users/${grace.uuid}`]: {
+          status: 409,
+          data: { message: 'User inactive' },
+        },
+      });
+      fireEvent.click(
+        within(await graceRow()).getByRole('button', { name: actionName() }),
+      );
+      expect(await findErrorDialog()).toHaveTextContent('User inactive');
+      expect(sent(`PUT /users/${grace.uuid}/email-confirmation`)).toHaveLength(
+        0,
+      );
+    });
+
+    it.each([
+      {
+        label: 'confirmed',
+        user: { ...grace, emailConfirmedAt: '2026-01-01T00:00:00.000Z' },
+      },
+      { label: 'inactive', user: { ...grace, status: 'INACTIVE' as const } },
+    ])('hides verification for a $label user', async ({ user }) => {
+      renderUsers(AppRoutes.USERS, { 'GET /users': usersPage([user]) });
+      expect(
+        within(await graceRow()).queryByRole('button', { name: actionName() }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides verification without UPDATE permission', async () => {
+      renderUsers(AppRoutes.USERS, {}, [{ action: 'READ', subject: 'USER' }]);
+      expect(
+        within(await graceRow()).queryByRole('button', { name: actionName() }),
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides admin verification from a non-admin with UPDATE permission', async () => {
+      renderUsers(AppRoutes.USERS, {
+        'GET /users/me': envelope({ ...sessionUser, roles: [userRole] }),
+        'GET /users': usersPage([{ ...grace, roles: [adminRole] }]),
+      });
+      expect(
+        within(await graceRow()).queryByRole('button', { name: actionName() }),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('sorts on the server, resets the page, and restores sorting through history', async () => {
     const { router, sent } = renderUsers(
       `${AppRoutes.USERS}?page=3&limit=10&name=grace&extra=keep`,
@@ -328,10 +458,11 @@ describe('UsersPage', () => {
   });
 
   it('marks the signed-in user in the list', async () => {
-    const { uuid, name, status, statusLabel, roles } = sessionUser;
+    const { uuid, name, status, statusLabel, roles, emailConfirmedAt } =
+      sessionUser;
     renderUsers(AppRoutes.USERS, {
       'GET /users': usersPage([
-        { uuid, name, status, statusLabel, roles },
+        { uuid, name, status, statusLabel, roles, emailConfirmedAt },
         grace,
       ]),
     });
