@@ -98,6 +98,12 @@ development service worker for trying installation and updates; offline loading 
 only from `localhost` or HTTPS. The icons are generated from
 [`public/favicon.svg`](public/favicon.svg); replace that file to change them.
 
+## Production deployment
+
+[`docs/deployment.md`](docs/deployment.md) covers release builds, same-origin HTTPS hosting, SPA
+fallback and cache rules, PWA checks, updates, and rollback. Serve the built `dist/` with a static
+web server; `npm run preview` is a local validation tool.
+
 ## Editor
 
 Install the recommended ESLint and Prettier VS Code extensions when prompted. The shared
