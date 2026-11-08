@@ -58,7 +58,8 @@ Rules for every change to this repository. Project scope and layout are in
 - ESLint uses flat configuration, type-aware TypeScript rules, React Hooks rules, React Refresh
   rules, and Prettier integration. `npm run lint` applies fixes; `npm run lint:check` fails on warnings.
 - Await promises or explicitly handle rejections. Do not silence floating promises with `void` alone.
-- Run the required gate before delivery; CI runs the same checks:
+- Select local validation according to [`AGENTS.md`](../AGENTS.md#gate). The full gate is below;
+  CI continues to run its configured checks:
 
 ```sh
 npm run format:check && npm run lint:check && npm run typecheck && npm test && npm run build
