@@ -151,17 +151,19 @@ describe('ChangeRequestsPage', () => {
       `${changed}${adminRole.roleLabel}${adminRole.roleLabel}${userRole.roleLabel}`,
     );
     const dateTimeFormat = new Intl.DateTimeFormat(i18n.language, {
-      dateStyle: 'short',
-      timeStyle: 'short',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
     });
-    expect(
-      within(card).getByText(
-        i18n.t('changeRequests.dates', {
-          createdAt: dateTimeFormat.format(new Date(changeRequest.createdAt)),
-          expiresAt: dateTimeFormat.format(new Date(changeRequest.expiresAt)),
-        }),
-      ),
-    ).toBeInTheDocument();
+    const dates = within(card).getByText(
+      i18n.t('changeRequests.dates', {
+        createdAt: dateTimeFormat.format(new Date(changeRequest.createdAt)),
+        expiresAt: dateTimeFormat.format(new Date(changeRequest.expiresAt)),
+      }),
+    );
+    expect(dates.textContent?.match(/\b2026\b/g)).toHaveLength(2);
   });
 
   it('says when nothing is pending', async () => {

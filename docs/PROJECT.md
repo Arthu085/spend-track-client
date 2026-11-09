@@ -691,8 +691,9 @@ account page read the same query for the pending count.
 
 - **Diff:** each request is a card with the requester (or "a removed user" when the API sends no
   name), the request and expiry dates, and a table of name, email, and roles with the values when
-  the request was made (`current`) next to the requested ones. Changed fields are tagged; emails
-  are compared like the account form, roles by uuid.
+  the request was made (`current`) next to the requested ones. Dates use the selected language's
+  numeric date format with a four-digit year and short time (hour and minute). Changed fields are
+  tagged; emails are compared like the account form, roles by uuid.
 - **Decisions:** approve and reject each ask for confirmation first.
   `POST /users/me/change-requests/:uuid/approve` applies the change and ends every session of the
   user, so on success the mutation drops the CSRF token and calls `clearSession`, and an
