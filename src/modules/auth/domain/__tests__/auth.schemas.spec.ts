@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import i18n from '@/core/i18n/i18n.config';
-import { loginFormSchema, newPasswordSchema } from '../auth.schemas';
+import {
+  emailSchema,
+  loginFormSchema,
+  newPasswordSchema,
+} from '../auth.schemas';
 
 const firstMessage = (value: string) =>
   newPasswordSchema.safeParse(value).error?.issues[0]?.message;
@@ -49,5 +53,20 @@ describe('loginFormSchema', () => {
         password: 'password',
       }).success,
     ).toBe(true);
+  });
+});
+
+describe('emailSchema', () => {
+  it('accepts a local part of 64 characters', () => {
+    expect(emailSchema.safeParse(`${'a'.repeat(64)}@example.com`).success).toBe(
+      true,
+    );
+  });
+
+  it('rejects a local part longer than 64 characters', () => {
+    expect(
+      emailSchema.safeParse(`${'a'.repeat(65)}@example.com`).error?.issues[0]
+        ?.message,
+    ).toBe(i18n.t('validation.email'));
   });
 });
