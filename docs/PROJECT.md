@@ -116,7 +116,8 @@ session's cookies with the previous session's tokens. Logout does not need it: i
 session anyway, and it needs a valid access token, so a `401` on it must be able to refresh.
 
 `getApiErrorMessage` returns the API's localized `message`, or a localized fallback for network,
-timeout, and unexpected errors. When an API error includes `auditId`, the message also displays
+timeout, and unexpected errors. DTO validation `400`s send `message` as an array of localized
+messages, which it joins with `; `. When an API error includes `auditId`, the message also displays
 a localized reference label with that value for support investigations.
 
 ### Server state

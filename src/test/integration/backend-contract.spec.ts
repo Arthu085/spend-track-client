@@ -102,6 +102,35 @@ describe('real backend API contracts', () => {
     );
   });
 
+  it('shows every server validation message from the standard error body', async () => {
+    try {
+      await fetchUsers({ page: 0, limit: 500 });
+    } catch (error) {
+      expect(getHttpStatus(error)).toBe(400);
+
+      if (!isAxiosError(error)) {
+        throw error;
+      }
+
+      const body = apiErrorSchema
+        .extend({ message: z.array(z.string().min(1)).nonempty() })
+        .parse(error.response?.data);
+
+      expect(body.statusCode).toBe(400);
+      expect(body.error).toBe('Bad Request');
+      expect(body.message).toEqual([
+        'The page field must not be less than 1',
+        'The limit field must not be greater than 50',
+      ]);
+      expect(body.path).toBe('/api/users?page=0&limit=500');
+      expect(getApiErrorMessage(error)).toBe(body.message.join('; '));
+
+      return;
+    }
+
+    throw new Error('Expected the API to reject invalid pagination.');
+  });
+
   it('refreshes an expired access cookie once and rotates refresh cookies sequentially', async () => {
     await new Promise((resolve) =>
       setTimeout(

@@ -308,6 +308,37 @@ describe('AccountsPage', () => {
     expect(sent(`PATCH /accounts/${checking.uuid}`)).toHaveLength(1);
   });
 
+  it('shows every validation message the API returns for a rejected form', async () => {
+    renderAccounts({
+      [`PATCH /accounts/${checking.uuid}`]: {
+        status: 400,
+        data: {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: [
+            'O campo openingBalance deve ser um valor monetário válido',
+            'O campo openingBalanceDate deve ser uma data válida',
+          ],
+        },
+      },
+    });
+
+    const row = await findRow(checking.uuid);
+    fireEvent.click(
+      within(row).getByRole('button', {
+        name: i18n.t('accounts.actions.edit', { name: checking.name }),
+      }),
+    );
+    const dialog = await findDialog(i18n.t('accounts.edit.title'));
+    fireEvent.click(
+      within(dialog).getByRole('button', { name: i18n.t('common.save') }),
+    );
+
+    expect(await findDialog(i18n.t('feedback.error'))).toHaveTextContent(
+      'O campo openingBalance deve ser um valor monetário válido; O campo openingBalanceDate deve ser uma data válida',
+    );
+  });
+
   it('shows the API error when an account cannot be found', async () => {
     renderAccounts({
       [`PUT /accounts/${checking.uuid}/status`]: {
