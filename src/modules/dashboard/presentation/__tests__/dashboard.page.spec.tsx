@@ -906,14 +906,45 @@ describe('DashboardPage', () => {
       ),
     ).toBeInTheDocument();
     expect(
-      within(page).getByLabelText(i18n.t('dashboard.investments.withdrawals')),
-    ).toHaveTextContent(money('0.00'));
+      within(page).getByRole('progressbar', {
+        name: i18n.t('dashboard.investments.contributionsShare'),
+      }),
+    ).toHaveAttribute('aria-valuenow', '71');
     expect(
-      within(page).getByText(
+      within(page).queryByLabelText(
+        i18n.t('dashboard.investments.withdrawals'),
+      ),
+    ).not.toBeInTheDocument();
+    const goals = within(page).getByRole('group', {
+      name: i18n.t('dashboard.investments.goals'),
+    });
+    expect(within(goals).getByText('Viagem')).toBeInTheDocument();
+    expect(
+      within(goals).getByText(
         i18n.t('investments.targetRemaining', {
           remaining: money('4500.00'),
           target: money('6000.00'),
         }),
+      ),
+    ).toBeInTheDocument();
+    const investmentRow =
+      'tr[data-row-key="7a1b2c3d-7777-4c3e-9f1a-1a2b3c4d5e6f"]';
+    expect(page.querySelector(investmentRow)).not.toBeInTheDocument();
+
+    const portfolio = await findSectionHeader(
+      i18n.t('dashboard.investments.portfolio'),
+      page,
+    );
+    expect(portfolio).toHaveAttribute('aria-expanded', 'false');
+    expect(portfolio).toHaveTextContent(
+      i18n.t('dashboard.investments.portfolioCount', { count: 1 }),
+    );
+
+    await expandSection(i18n.t('dashboard.investments.portfolio'), page);
+
+    expect(
+      within(page.querySelector<HTMLElement>(investmentRow)!).getByText(
+        'Viagem',
       ),
     ).toBeInTheDocument();
 
@@ -926,6 +957,55 @@ describe('DashboardPage', () => {
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(AppRoutes.INVESTMENTS);
     });
+  });
+
+  it('shows the month withdrawals only when there are any and limits the goals overview', async () => {
+    const goal = (index: number) => ({
+      uuid: `goal-${index}`,
+      name: `Meta ${index}`,
+      type: 'GOAL' as const,
+      typeLabel: 'Meta',
+      currentValue: '100.00',
+      targetAmount: '1000.00',
+      progress: { remaining: '900.00', percent: 10 },
+    });
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        investments: {
+          ...withAccounts.investments,
+          withdrawals: {
+            total: '300.00',
+            completed: '100.00',
+            pending: '200.00',
+          },
+          items: [1, 2, 3, 4].map(goal),
+        },
+      }),
+    });
+
+    const page = await main();
+    expect(
+      await within(page).findByLabelText(
+        i18n.t('dashboard.investments.withdrawals'),
+      ),
+    ).toHaveTextContent(money('100.00'));
+    expect(
+      within(page).queryByRole('progressbar', {
+        name: i18n.t('dashboard.investments.contributionsShare'),
+      }),
+    ).not.toBeInTheDocument();
+
+    const goals = within(page).getByRole('group', {
+      name: i18n.t('dashboard.investments.goals'),
+    });
+    expect(within(goals).getByText('Meta 3')).toBeInTheDocument();
+    expect(within(goals).queryByText('Meta 4')).not.toBeInTheDocument();
+    expect(
+      within(page).getByText(
+        i18n.t('dashboard.upcoming.partial', { shown: 3, count: 4 }),
+      ),
+    ).toBeInTheDocument();
   });
 
   describe('contribute from the investments card', () => {
@@ -1064,6 +1144,7 @@ describe('DashboardPage', () => {
         routes(movementPath(trip.uuid)),
       );
 
+      await expandSection(i18n.t('dashboard.investments.portfolio'));
       fireEvent.click(
         await screen.findByRole('button', {
           name: i18n.t('investments.actions.contribute', { name: trip.name }),
