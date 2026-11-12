@@ -1029,5 +1029,28 @@ describe('DashboardPage', () => {
         await findDialog(i18n.t('transactions.create.title')),
       ).toBeInTheDocument();
     });
+
+    it('opens the card purchase form from the quick action', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /credit-cards': {
+          status: 200,
+          data: { data: [], meta: { total: 0, page: 1, limit: 50 } },
+        },
+        'GET /transaction-categories': {
+          status: 200,
+          data: { data: [], meta: { total: 0, page: 1, limit: 50 } },
+        },
+      });
+
+      fireEvent.click(
+        await within(await main()).findByRole('button', {
+          name: new RegExp(i18n.t('dashboard.actions.addPurchase')),
+        }),
+      );
+
+      expect(
+        await findDialog(i18n.t('creditCards.purchases.create.title')),
+      ).toBeInTheDocument();
+    });
   });
 });

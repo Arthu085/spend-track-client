@@ -390,6 +390,7 @@ Transaction indicators, each with its own empty state:
   unless explicitly acknowledged; a rejection refreshes the open form's suggestion and requires fresh
   acknowledgement after an amount or suggestion change.
 - **Add transaction:** a header action opens the transactions form modal.
+- **Add card purchase:** a header action opens the credit card purchase form modal in create mode.
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
 comes from the API's decimal strings.
