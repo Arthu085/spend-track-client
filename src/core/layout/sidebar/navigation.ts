@@ -37,21 +37,32 @@ export const navigationSections: NavigationSection[] = [
     labelKey: 'navigationSections.general',
     items: [
       { path: AppRoutes.HOME, labelKey: 'navigation.home', icon: HomeOutlined },
+      { ...dashboardPage },
     ],
   },
   {
-    labelKey: 'navigationSections.finances',
+    labelKey: 'navigationSections.cashFlow',
     items: [
-      { ...dashboardPage },
       { ...transactionsPage },
       { ...recurrencesPage },
       { ...budgetsPage },
-      { ...investmentsPage },
+    ],
+  },
+  {
+    labelKey: 'navigationSections.accountsAndCards',
+    items: [
       { ...accountsPage },
       { ...creditCardsPage },
       { ...creditCardPurchasesPage },
-      { ...financialSettingsPage },
     ],
+  },
+  {
+    labelKey: 'navigationSections.investments',
+    items: [{ ...investmentsPage }],
+  },
+  {
+    labelKey: 'navigationSections.settings',
+    items: [{ ...financialSettingsPage }],
   },
   {
     labelKey: 'navigationSections.administration',

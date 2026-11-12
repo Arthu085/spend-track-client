@@ -1,8 +1,10 @@
 import { HomeOutlined } from '@ant-design/icons';
 import { describe, expect, it } from 'vitest';
+import { AppRoutes } from '@/core/router/app-routes';
 import {
   type NavigationItem,
   type NavigationSection,
+  navigationSections,
   visibleNavigationItems,
   visibleNavigationSections,
 } from '../navigation';
@@ -37,7 +39,7 @@ describe('visibleNavigationItems', () => {
 
 describe('visibleNavigationSections', () => {
   const sections: NavigationSection[] = [
-    { labelKey: 'navigationSections.finances', items: [items[0]] },
+    { labelKey: 'navigationSections.cashFlow', items: [items[0]] },
     { labelKey: 'navigationSections.administration', items: [items[1]] },
   ];
 
@@ -47,7 +49,7 @@ describe('visibleNavigationSections', () => {
         { action: 'READ', subject: 'USER' },
       ]).map(({ labelKey, items }) => [labelKey, items.length]),
     ).toEqual([
-      ['navigationSections.finances', 1],
+      ['navigationSections.cashFlow', 1],
       ['navigationSections.administration', 1],
     ]);
   });
@@ -55,6 +57,34 @@ describe('visibleNavigationSections', () => {
   it('hides sections whose items are all hidden', () => {
     expect(
       visibleNavigationSections(sections, []).map(({ labelKey }) => labelKey),
-    ).toEqual(['navigationSections.finances']);
+    ).toEqual(['navigationSections.cashFlow']);
+  });
+});
+
+describe('navigationSections', () => {
+  it('groups pages into task-oriented sections', () => {
+    expect(
+      navigationSections.map(({ labelKey, items }) => [
+        labelKey,
+        items.map(({ path }) => path),
+      ]),
+    ).toEqual([
+      ['navigationSections.general', [AppRoutes.HOME, AppRoutes.DASHBOARD]],
+      [
+        'navigationSections.cashFlow',
+        [AppRoutes.TRANSACTIONS, AppRoutes.RECURRENCES, AppRoutes.BUDGETS],
+      ],
+      [
+        'navigationSections.accountsAndCards',
+        [
+          AppRoutes.ACCOUNTS,
+          AppRoutes.CREDIT_CARDS,
+          AppRoutes.CREDIT_CARD_PURCHASES,
+        ],
+      ],
+      ['navigationSections.investments', [AppRoutes.INVESTMENTS]],
+      ['navigationSections.settings', [AppRoutes.FINANCIAL_SETTINGS]],
+      ['navigationSections.administration', [AppRoutes.USERS, AppRoutes.ROLES]],
+    ]);
   });
 });

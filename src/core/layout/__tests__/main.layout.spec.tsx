@@ -134,6 +134,7 @@ describe('MainLayout', () => {
     renderRoute(AppRoutes.DASHBOARD);
 
     const toggle = await sidebarToggle();
+    fireEvent.click(await sectionButton(i18n.t('navigationSections.settings')));
     const label = i18n.t('navigation.financialSettings');
     expect(await navigationLink(label)).toHaveAttribute('title', label);
 
@@ -248,8 +249,12 @@ describe('MainLayout', () => {
     expect(titleLink()).toHaveAttribute('href', AppRoutes.DASHBOARD);
     expect(titleLink()).toHaveTextContent(env.appMark);
     expect(
-      screen.queryByText(i18n.t('navigationSections.finances')),
+      screen.queryByText(i18n.t('navigationSections.cashFlow')),
     ).not.toBeInTheDocument();
+    const navigation = screen.getByRole('navigation', {
+      name: i18n.t('layout.navigation'),
+    });
+    expect(within(navigation).getAllByRole('separator')).toHaveLength(5);
 
     fireEvent.click(toggle);
 
