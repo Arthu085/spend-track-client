@@ -1,6 +1,6 @@
 import { Alert, Col, DatePicker, Form, Input, Radio, Row, Select } from 'antd';
 import dayjs from 'dayjs';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccounts } from '@/modules/accounts/infra/accounts.queries';
 import { useCreditCards } from '@/modules/credit-cards/infra/credit-cards.queries';
@@ -57,10 +57,25 @@ const useDefaultReference = (
 
 const InvestmentField = () => {
   const { t } = useTranslation();
+  const form = Form.useFormInstance<RecurrenceForm>();
+  const autoDescription = useRef<string>(undefined);
   const { data: investments } = useInvestments({
     status: 'ACTIVE',
     limit: MAX_PAGE_SIZE,
   });
+
+  const fillDescription = (investmentUuid: string) => {
+    const name = investments?.data.find(
+      ({ uuid }) => uuid === investmentUuid,
+    )?.name;
+    const description: unknown = form.getFieldValue('description');
+    const isBlank = typeof description !== 'string' || !description.trim();
+
+    if (name && (isBlank || description === autoDescription.current)) {
+      form.setFieldValue('description', name);
+      autoDescription.current = name;
+    }
+  };
 
   return (
     <Form.Item
@@ -72,6 +87,7 @@ const InvestmentField = () => {
       <Select
         showSearch={{ optionFilterProp: 'label' }}
         options={toReferenceOptions(investments?.data ?? [])}
+        onChange={fillDescription}
       />
     </Form.Item>
   );
@@ -151,6 +167,9 @@ const RecurrenceFields = () => {
       <Form.Item
         name="description"
         label={t('recurrences.fields.description')}
+        extra={
+          contributes ? t('recurrences.hints.descriptionFromInvestment') : null
+        }
         rules={[zodRule(shape.description)]}
       >
         <Input autoComplete="off" />

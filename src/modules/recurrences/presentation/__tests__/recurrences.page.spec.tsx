@@ -282,6 +282,101 @@ describe('RecurrencesPage', () => {
       });
     });
 
+    describe('description', () => {
+      const travel = buildInvestment({
+        uuid: '7a1b2c3d-8888-4c3e-9f1a-1a2b3c4d5e6f',
+      });
+
+      const openContributionForm = async () => {
+        await findRow(contribution.uuid);
+        fireEvent.click(
+          screen.getByRole('button', {
+            name: new RegExp(i18n.t('recurrences.create.title')),
+          }),
+        );
+        const dialog = await findDialog(i18n.t('recurrences.hints.planned'));
+        fireEvent.click(
+          within(dialog).getByRole('radio', {
+            name: i18n.t('recurrences.types.INVESTMENT_CONTRIBUTION'),
+          }),
+        );
+        await within(dialog).findByLabelText(
+          i18n.t('recurrences.fields.investment'),
+        );
+
+        return dialog;
+      };
+
+      const descriptionInput = (dialog: HTMLElement) =>
+        within(dialog).getByLabelText(i18n.t('recurrences.fields.description'));
+
+      it('takes the name of the chosen investment while left untouched', async () => {
+        const { sent } = renderContribution({
+          'GET /investments': listPage([reserve, travel]),
+          'POST /recurrences': envelope(contribution, 'Recorrência criada'),
+        });
+
+        const dialog = await openContributionForm();
+
+        expect(
+          within(dialog).getByText(
+            i18n.t('recurrences.hints.descriptionFromInvestment'),
+          ),
+        ).toBeInTheDocument();
+
+        await chooseOption(
+          dialog,
+          i18n.t('recurrences.fields.investment'),
+          reserve.name,
+        );
+
+        expect(descriptionInput(dialog)).toHaveValue(reserve.name);
+
+        await chooseOption(
+          dialog,
+          i18n.t('recurrences.fields.investment'),
+          travel.name,
+        );
+
+        expect(descriptionInput(dialog)).toHaveValue(travel.name);
+
+        fireEvent.change(
+          within(dialog).getByLabelText(i18n.t('recurrences.fields.amount')),
+          { target: { value: '700.00' } },
+        );
+        await waitFor(() => {
+          expect(within(dialog).getByTitle(nubank.name)).toBeInTheDocument();
+        });
+        save(dialog);
+
+        expect(
+          await screen.findByText('Recorrência criada'),
+        ).toBeInTheDocument();
+        expect(requestBody(sent('POST /recurrences')[0])).toMatchObject({
+          type: 'INVESTMENT_CONTRIBUTION',
+          description: travel.name,
+          investmentUuid: travel.uuid,
+        });
+      });
+
+      it('keeps a description the user typed', async () => {
+        renderContribution({ 'GET /investments': listPage([reserve, travel]) });
+
+        const dialog = await openContributionForm();
+
+        fireEvent.change(descriptionInput(dialog), {
+          target: { value: 'Reserva mensal' },
+        });
+        await chooseOption(
+          dialog,
+          i18n.t('recurrences.fields.investment'),
+          reserve.name,
+        );
+
+        expect(descriptionInput(dialog)).toHaveValue('Reserva mensal');
+      });
+    });
+
     it('offers no saving strategy for another frequency', async () => {
       renderContribution({ 'GET /investments': listPage([reserve]) });
 

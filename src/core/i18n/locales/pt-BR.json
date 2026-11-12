@@ -531,6 +531,7 @@
       "endFromInvoiceMonth": "Cobranças previstas nesta fatura e nas seguintes são removidas. As faturas anteriores continuam como estão.",
       "endEntire": "A recorrência termina hoje. As ocorrências previstas até hoje são mantidas, e as posteriores são removidas.",
       "investmentFixed": "O investimento não pode ser alterado depois.",
+      "descriptionFromInvestment": "Se ficar em branco, usa o nome do investimento.",
       "savingStrategy": "Apenas mensal. O valor acima continua obrigatório, e o painel sugere o que sobrar do mês. Nada é criado até você aceitar.",
       "minimumRetainedBalance": "Mantido na conta antes de qualquer sugestão."
     },
