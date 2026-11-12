@@ -4,10 +4,7 @@ import {
   Button,
   Empty,
   Flex,
-  Space,
-  Table,
   type TableColumnsType,
-  Tag,
   Typography,
 } from 'antd';
 import { useState } from 'react';
@@ -22,12 +19,13 @@ import { ConfirmPendingTransactionsModal } from '@/modules/transactions/presenta
 import { TransactionAmount } from '@/modules/transactions/presentation/components/transaction-amount';
 import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { IconActionButton } from '@/shared/components/icon-action-button';
-import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import type {
   DashboardPeriod,
   DashboardUpcoming,
 } from '../../domain/dashboard.schema';
+import { PlannedDate } from './planned-date';
+import { ResponsiveTable } from './responsive-table';
 
 interface UpcomingTransactionsCardProps {
   period: DashboardPeriod;
@@ -46,37 +44,50 @@ export const UpcomingTransactionsCard = ({
   upcoming,
   upcomingCount,
 }: UpcomingTransactionsCardProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const completing = useModalTarget<CompletableTransaction>();
   const [confirmingPending, setConfirmingPending] = useState(false);
+
+  const route = ({
+    category,
+    account,
+    destinationAccount,
+  }: DashboardUpcoming) =>
+    category ? (
+      <Badge color={category.color ?? undefined} text={category.name} />
+    ) : (
+      destinationAccount &&
+      t('transactions.transferRoute', {
+        from: account.name,
+        to: destinationAccount.name,
+      })
+    );
+
+  const completeAction = ({ uuid, description }: DashboardUpcoming) => (
+    <IconActionButton
+      size="small"
+      icon={<CheckOutlined />}
+      label={t('transactions.actions.complete', { description })}
+      onClick={() => completing.show({ uuid, description })}
+    />
+  );
 
   const columns: TableColumnsType<DashboardUpcoming> = [
     {
       title: t('transactions.fields.date'),
       dataIndex: 'date',
       render: (_, { date, overdue }) => (
-        <Space size="small" wrap>
-          {formatDateOnly(date, i18n.language)}
-          {overdue && <Tag color="error">{t('transactions.overdue')}</Tag>}
-        </Space>
+        <PlannedDate date={date} overdue={overdue} />
       ),
     },
     {
       title: t('transactions.fields.description'),
       dataIndex: 'description',
-      render: (_, { description, category, account, destinationAccount }) => (
+      render: (_, transaction) => (
         <Flex vertical>
-          {description}
+          {transaction.description}
           <Typography.Text type="secondary">
-            {category ? (
-              <Badge color={category.color ?? undefined} text={category.name} />
-            ) : (
-              destinationAccount &&
-              t('transactions.transferRoute', {
-                from: account.name,
-                to: destinationAccount.name,
-              })
-            )}
+            {route(transaction)}
           </Typography.Text>
         </Flex>
       ),
@@ -92,14 +103,7 @@ export const UpcomingTransactionsCard = ({
     {
       title: t('transactions.fields.actions'),
       key: 'actions',
-      render: (_, { uuid, description }) => (
-        <IconActionButton
-          size="small"
-          icon={<CheckOutlined />}
-          label={t('transactions.actions.complete', { description })}
-          onClick={() => completing.show({ uuid, description })}
-        />
-      ),
+      render: (_, transaction) => completeAction(transaction),
     },
   ];
 
@@ -132,13 +136,21 @@ export const UpcomingTransactionsCard = ({
               {t('transactions.confirmPending.open')}
             </Button>
           </Flex>
-          <Table
-            rowKey="uuid"
-            size="small"
-            pagination={false}
+          <ResponsiveTable
             columns={columns}
             dataSource={upcoming}
-            scroll={{ x: 'max-content' }}
+            compactRow={(transaction) => ({
+              title: transaction.description,
+              description: route(transaction),
+              amount: <TransactionAmount transaction={transaction} />,
+              action: completeAction(transaction),
+              extra: (
+                <PlannedDate
+                  date={transaction.date}
+                  overdue={transaction.overdue}
+                />
+              ),
+            })}
           />
           {upcomingCount > upcoming.length && (
             <Typography.Text type="secondary">

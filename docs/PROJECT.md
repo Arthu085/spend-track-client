@@ -396,6 +396,11 @@ Transaction indicators, each with its own empty state:
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
 comes from the API's decimal strings.
 
+Below the `md` breakpoint, the upcoming transactions, card invoices, planned card charges,
+investment portfolio, and account balances show compact rows instead of tables, so a phone never
+scrolls sideways: each row keeps the name and its secondary line, the amount, the date or due date
+with its tags, and the same row action as the table.
+
 ### Transactions
 
 `/transactions` lists the transactions of one month, with the month in the URL like the dashboard
