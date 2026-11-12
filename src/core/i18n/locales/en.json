@@ -30,12 +30,9 @@
     "greeting": "Hello, {{name}}",
     "description": "Track the month's balances, income, and expenses.",
     "actions": {
-      "addTransaction": "Add transaction",
-      "addPurchase": "Add card purchase",
-      "transactions": "Transactions",
-      "accounts": "Manage accounts",
-      "settings": "Financial settings",
-      "shortcuts": "Shortcuts"
+      "create": "New",
+      "transaction": "Transaction",
+      "purchase": "Card purchase"
     },
     "period": {
       "timing": {

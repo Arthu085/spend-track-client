@@ -24,6 +24,7 @@ import {
   type StubResponse,
   stubHttpRoutes,
 } from '@/test/http-stub';
+import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
 import { formatMoney } from '@/shared/money/money';
 import type { Transaction } from '@/modules/transactions/domain/transaction.schema';
@@ -993,31 +994,29 @@ describe('DashboardPage', () => {
       }
     });
 
-    it('groups page links in the shortcuts navigation, apart from the quick actions', async () => {
+    const openCreateMenu = async () => {
+      fireEvent.click(
+        await within(await main()).findByRole('button', {
+          name: new RegExp(i18n.t('dashboard.actions.create')),
+        }),
+      );
+    };
+
+    it('leaves page navigation to the sidebar', async () => {
       renderDashboard();
 
       const page = await main();
-      const shortcuts = await within(page).findByRole('navigation', {
-        name: i18n.t('dashboard.actions.shortcuts'),
-      });
+      await within(page).findByRole('heading', monthHeading(2026, 10));
 
-      for (const [labelKey, path] of [
-        ['dashboard.actions.transactions', AppRoutes.TRANSACTIONS],
-        ['navigation.recurrences', AppRoutes.RECURRENCES],
-        ['navigation.creditCardPurchases', AppRoutes.CREDIT_CARD_PURCHASES],
-        ['dashboard.actions.accounts', AppRoutes.ACCOUNTS],
-        ['dashboard.actions.settings', AppRoutes.FINANCIAL_SETTINGS],
-      ] as const) {
-        expect(
-          within(shortcuts).getByRole('link', {
-            name: new RegExp(i18n.t(labelKey)),
-          }),
-        ).toHaveAttribute('href', path);
-      }
-      expect(within(shortcuts).queryByRole('button')).not.toBeInTheDocument();
+      expect(within(page).queryByRole('navigation')).not.toBeInTheDocument();
+      expect(
+        within(page).queryByRole('link', {
+          name: new RegExp(i18n.t('navigation.recurrences')),
+        }),
+      ).not.toBeInTheDocument();
     });
 
-    it('opens the transaction form from the quick action', async () => {
+    it('opens the transaction form from the new menu', async () => {
       renderDashboard(AppRoutes.DASHBOARD, {
         'GET /accounts': {
           status: 200,
@@ -1029,9 +1028,10 @@ describe('DashboardPage', () => {
         },
       });
 
+      await openCreateMenu();
       fireEvent.click(
-        await within(await main()).findByRole('button', {
-          name: new RegExp(i18n.t('dashboard.actions.addTransaction')),
+        await screen.findByRole('menuitem', {
+          name: new RegExp(i18n.t('dashboard.actions.transaction')),
         }),
       );
 
@@ -1040,7 +1040,7 @@ describe('DashboardPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('opens the card purchase form from the quick action', async () => {
+    it('opens the card purchase form from the new menu', async () => {
       renderDashboard(AppRoutes.DASHBOARD, {
         'GET /credit-cards': {
           status: 200,
@@ -1052,15 +1052,48 @@ describe('DashboardPage', () => {
         },
       });
 
+      await openCreateMenu();
       fireEvent.click(
-        await within(await main()).findByRole('button', {
-          name: new RegExp(i18n.t('dashboard.actions.addPurchase')),
+        await screen.findByRole('menuitem', {
+          name: new RegExp(i18n.t('dashboard.actions.purchase')),
         }),
       );
 
       expect(
         await findDialog(i18n.t('creditCards.purchases.create.title')),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('on a narrow screen', () => {
+    beforeEach(() => {
+      vi.spyOn(window, 'matchMedia').mockImplementation(createMatchMedia(375));
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('stacks the header, the month, and the perspective vertically', async () => {
+      renderDashboard();
+
+      const page = await main();
+      const month = await within(page).findByRole(
+        'heading',
+        monthHeading(2026, 10),
+      );
+      const create = within(page).getByRole('button', {
+        name: new RegExp(i18n.t('dashboard.actions.create')),
+      });
+      const perspective = within(page).getByRole('radiogroup', {
+        name: i18n.t('preferences.fields.spendingPerspective'),
+      });
+
+      const periodRow = month.parentElement?.parentElement;
+
+      expect(create.parentElement).toHaveClass('ant-flex-vertical');
+      expect(periodRow).toHaveClass('ant-flex-vertical');
+      expect(periodRow).toContainElement(perspective);
     });
   });
 });

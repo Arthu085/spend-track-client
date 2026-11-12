@@ -318,8 +318,8 @@ abilities query settles, so late permission-based entries do not move existing s
 
 `/` is where sign-in lands unless the guards remembered another page (see
 [Authentication](#authentication)), and the not-found and forbidden pages link back to it. Its header
-adds a transaction and links to transactions, recurrences, card purchases, accounts, and financial
-settings. It greets the user and reads `GET /dashboard` for one month:
+greets the user, offers a single "New" menu for creating, and holds the month navigation and the
+perspective switch; page navigation stays in the sidebar. It reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
 and available balances, and the balance of each active account. A user without accounts sees the
 invitation to add one right below the month, and a negative available balance shows a warning with the amount missing. Previous and next buttons move through past and future months and keep the month in the URL
@@ -390,8 +390,8 @@ Transaction indicators, each with its own empty state:
   plans and balances before closing. A stale amount above the current server suggestion is rejected
   unless explicitly acknowledged; a rejection refreshes the open form's suggestion and requires fresh
   acknowledgement after an amount or suggestion change.
-- **Add transaction:** a header action opens the transactions form modal.
-- **Add card purchase:** a header action opens the credit card purchase form modal in create mode.
+- **New:** a header menu opens the transactions form modal (Transaction) or the credit card
+  purchase form modal in create mode (Card purchase).
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
 comes from the API's decimal strings.

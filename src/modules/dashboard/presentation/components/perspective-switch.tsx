@@ -1,4 +1,4 @@
-import { Flex, Radio, Typography } from 'antd';
+import { Flex, Grid, Radio, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
   type SpendingPerspective,
@@ -13,6 +13,7 @@ interface PerspectiveSwitchProps {
 
 export const PerspectiveSwitch = ({ value }: PerspectiveSwitchProps) => {
   const { t } = useTranslation();
+  const { md } = Grid.useBreakpoint();
   const { showError } = useFeedbackModal();
   const mutation = useUpdatePreferences();
 
@@ -21,7 +22,7 @@ export const PerspectiveSwitch = ({ value }: PerspectiveSwitchProps) => {
     value;
 
   return (
-    <Flex vertical gap="small" align="end">
+    <Flex vertical gap="small" align={md ? 'end' : 'start'}>
       <Radio.Group
         aria-label={t('preferences.fields.spendingPerspective')}
         optionType="button"
