@@ -31,6 +31,7 @@
     "description": "Track the month's balances, income, and expenses.",
     "actions": {
       "addTransaction": "Add transaction",
+      "addPurchase": "Add card purchase",
       "transactions": "Transactions",
       "accounts": "Manage accounts",
       "settings": "Financial settings"

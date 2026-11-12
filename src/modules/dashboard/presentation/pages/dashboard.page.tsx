@@ -1,4 +1,5 @@
 import {
+  CreditCardOutlined,
   PlusOutlined,
   SettingOutlined,
   TransactionOutlined,
@@ -24,6 +25,7 @@ import {
   recurrencesPage,
 } from '@/core/router/page-metadata';
 import { useSession } from '@/modules/auth/infra/auth.queries';
+import { CreditCardPurchaseFormModal } from '@/modules/credit-cards/presentation/components/credit-card-purchase-form.modal';
 import { TransactionFormModal } from '@/modules/transactions/presentation/components/transaction-form.modal';
 import { useMonthParam } from '@/shared/date/use-month-param';
 import type { DashboardPeriod } from '../../domain/dashboard.schema';
@@ -53,6 +55,7 @@ export const DashboardPage = () => {
   const [month, changeMonth] = useMonthParam();
   const { data: dashboard, error, isPending } = useDashboard(month);
   const [creatingTransaction, setCreatingTransaction] = useState(false);
+  const [creatingPurchase, setCreatingPurchase] = useState(false);
 
   return (
     <Flex vertical gap="large">
@@ -72,6 +75,12 @@ export const DashboardPage = () => {
             onClick={() => setCreatingTransaction(true)}
           >
             {t('dashboard.actions.addTransaction')}
+          </Button>
+          <Button
+            icon={<CreditCardOutlined />}
+            onClick={() => setCreatingPurchase(true)}
+          >
+            {t('dashboard.actions.addPurchase')}
           </Button>
           <Link to={AppRoutes.TRANSACTIONS}>
             <TransactionOutlined /> {t('dashboard.actions.transactions')}
@@ -146,6 +155,10 @@ export const DashboardPage = () => {
       <TransactionFormModal
         open={creatingTransaction}
         onClose={() => setCreatingTransaction(false)}
+      />
+      <CreditCardPurchaseFormModal
+        open={creatingPurchase}
+        onClose={() => setCreatingPurchase(false)}
       />
     </Flex>
   );

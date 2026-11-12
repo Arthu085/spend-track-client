@@ -31,6 +31,7 @@
     "description": "Acompanhe os saldos, as receitas e as despesas do mês.",
     "actions": {
       "addTransaction": "Adicionar transação",
+      "addPurchase": "Adicionar compra no cartão",
       "transactions": "Transações",
       "accounts": "Gerenciar contas",
       "settings": "Configurações financeiras"
