@@ -846,7 +846,10 @@
   },
   "navigationSections": {
     "general": "Geral",
-    "finances": "Finanças",
+    "cashFlow": "Fluxo de caixa",
+    "accountsAndCards": "Contas e cartões",
+    "investments": "Investimentos",
+    "settings": "Configurações",
     "administration": "Administração"
   },
   "pendingOperations": {

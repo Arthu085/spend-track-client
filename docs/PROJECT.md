@@ -216,8 +216,9 @@ user menu also links to the change requests page, and a dot on the user's name a
 change requests. Menu
 entries are declared in `sidebar/navigation.ts` as titled sections (`navigationSections`), with shared user
 and the user, role, and finance page metadata in `core/router/page-metadata.ts` also used by home
-shortcuts. General holds Home; Finances lists the dashboard, transactions, recurrences, budgets, investments, accounts, credit
-cards, card purchases, and financial settings for every signed-in user; Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
+shortcuts. For every signed-in user, General holds Home and the dashboard; Cash flow lists transactions, recurrences,
+and budgets; Accounts and cards lists accounts, credit cards, and card purchases; Investments and Settings hold the
+investments and financial settings pages. Administration lists the ability-filtered Users and Roles entries. An entry with an `ability` is shown only when the
 user has it, and while abilities load, only entries without one are shown; a section with no visible
 entry is hidden. In the expanded menu each section is a collapsible submenu: clicking its title
 shows or hides its entries, several sections can be open at once, and the section holding the
