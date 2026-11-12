@@ -297,7 +297,7 @@ preferences, and dashboard; the API enforces this and answers `404` for another 
 financial pages need no ability guard. Amounts travel as decimal strings in BRL (`"1020.80"`, up to
 two decimals) and stay strings in the client: `moneySchema` validates them (`positiveMoneyInputSchema`
 for amounts that must be greater than zero, `nonNegativeMoneyInputSchema` for zero or more), `MoneyText` formats them with `Intl.NumberFormat` and
-marks negative values, and `MoneyInput` edits them in string mode so
+marks negative values (`signed` also shows the sign and marks positive values), and `MoneyInput` edits them in string mode so
 they are never rounded through a JavaScript number. Calendar dates without a time travel as
 `YYYY-MM-DD`; `formatDateOnly` shows them without a time-zone shift, `dateInputFormat` gives the
 date picker the day order of the current language, and `todayDateOnly` gives today's date in
@@ -362,7 +362,9 @@ Transaction indicators, each with its own empty state:
 
 - **Income and expenses:** the month's total of each, split into completed (received or paid) and
   pending (planned), with a bar showing the completed share. Canceled transactions and transfers
-  never count.
+  never count. Next to them, the net result (income minus expenses) shows with its sign, in green
+  when positive and red when negative, with the savings rate (net result over income, a dash
+  without income) and the realized net result of completed transactions only.
 - **Upcoming:** up to ten planned transactions dated up to the end of the month, oldest first, with
   an overdue tag, the category or transfer route, and a quick action that marks one as completed
   (asking for the effective date, today by default). When more exist, the card says how many and

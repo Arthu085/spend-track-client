@@ -6,6 +6,7 @@ import {
   moneyInputSchema,
   moneySchema,
   positiveMoneyInputSchema,
+  subtractMoney,
   sumMoney,
 } from '../money';
 
@@ -26,6 +27,12 @@ describe('money', () => {
       '-R$ 1.234,50',
     );
     expect(formatMoney('1234.5', 'en')).toBe('R$1,234.50');
+  });
+
+  it('formats signed amounts with an explicit sign except for zero', () => {
+    expect(formatMoney('1234.5', 'en', 'exceptZero')).toBe('+R$1,234.50');
+    expect(formatMoney('-1234.5', 'en', 'exceptZero')).toBe('-R$1,234.50');
+    expect(formatMoney('0.00', 'en', 'exceptZero')).toBe('R$0.00');
   });
 
   it.each([
@@ -56,5 +63,16 @@ describe('sumMoney', () => {
 
   it('answers zero for no amounts', () => {
     expect(sumMoney([])).toBe('0.00');
+  });
+});
+
+describe('subtractMoney', () => {
+  it('subtracts decimal amounts without binary rounding errors', () => {
+    expect(subtractMoney('0.30', '0.10')).toBe('0.20');
+    expect(subtractMoney('1000.00', '1250.45')).toBe('-250.45');
+  });
+
+  it('answers zero for equal amounts', () => {
+    expect(subtractMoney('10.10', '10.10')).toBe('0.00');
   });
 });

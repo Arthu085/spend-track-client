@@ -75,6 +75,11 @@
       "completedShare": "Share of expenses paid",
       "empty": "No expenses recorded for this month."
     },
+    "net": {
+      "title": "Net result",
+      "savingsRate": "Savings rate",
+      "completed": "Realized"
+    },
     "expensesByCategory": {
       "title": "Expenses by category",
       "breakdown": "Paid {{completed}} · To pay {{pending}}",

@@ -27,10 +27,15 @@ export const nonNegativeMoneyInputSchema = moneyInputSchema.refine(
 export const isNegativeMoney = (amount: string): boolean =>
   amount.startsWith('-') && /[1-9]/.test(amount);
 
-export const formatMoney = (amount: string, language: string): string =>
+export const formatMoney = (
+  amount: string,
+  language: string,
+  signDisplay: 'auto' | 'exceptZero' = 'auto',
+): string =>
   new Intl.NumberFormat(language, {
     style: 'currency',
     currency: CURRENCY,
+    signDisplay,
   }).format(Number(amount));
 
 export const moneyToCents = (amount: string): number =>
@@ -42,3 +47,6 @@ export const sumMoney = (amounts: readonly string[]): string =>
   centsToMoney(
     amounts.reduce((total, amount) => total + moneyToCents(amount), 0),
   );
+
+export const subtractMoney = (minuend: string, subtrahend: string): string =>
+  centsToMoney(moneyToCents(minuend) - moneyToCents(subtrahend));
