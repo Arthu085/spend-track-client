@@ -27,6 +27,7 @@
     }
   },
   "dashboard": {
+    "loading": "Carregando o painel",
     "greeting": "Olá, {{name}}",
     "description": "Acompanhe os saldos, as receitas e as despesas do mês.",
     "actions": {

@@ -12,7 +12,6 @@ import {
   Grid,
   type MenuProps,
   Row,
-  Skeleton,
   Typography,
 } from 'antd';
 import { useState } from 'react';
@@ -30,6 +29,10 @@ import { BudgetCard } from '../components/budget.card';
 import { CashFlowSummary } from '../components/cash-flow-summary';
 import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
 import { DashboardHero } from '../components/dashboard-hero';
+import {
+  DashboardControlsSkeleton,
+  DashboardSkeleton,
+} from '../components/dashboard-skeleton';
 import { ExpensesByCategoryCard } from '../components/expenses-by-category.card';
 import { InvestmentsCard } from '../components/investments.card';
 import { budgetOfMonth } from '../components/month-links';
@@ -95,11 +98,12 @@ export const DashboardPage = () => {
             <PerspectiveSwitch value={dashboard.perspective} />
           </Flex>
         )}
+        {isPending && <DashboardControlsSkeleton />}
       </Flex>
       {error && !dashboard && (
         <Alert type="error" showIcon title={getApiErrorMessage(error)} />
       )}
-      {isPending && <Skeleton active />}
+      {isPending && <DashboardSkeleton />}
       {dashboard && (
         <>
           {dashboard.accounts.length === 0 && (

@@ -334,6 +334,9 @@ overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
 
+While the first month loads, a skeleton shaped like the header controls and the page's sections
+holds their place.
+
 The overview opens the page. Its dominant figures are the amount left to spend
 (`spendingGuidance.remaining`, the lower of what the overall limit leaves and the available
 balance) and the informational daily allowance (a dash once no days are left). Next to them, the

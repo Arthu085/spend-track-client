@@ -27,6 +27,7 @@
     }
   },
   "dashboard": {
+    "loading": "Loading the dashboard",
     "greeting": "Hello, {{name}}",
     "description": "Track the month's balances, income, and expenses.",
     "actions": {
