@@ -318,11 +318,11 @@ abilities query settles, so late permission-based entries do not move existing s
 
 `/` is where sign-in lands unless the guards remembered another page (see
 [Authentication](#authentication)), and the not-found and forbidden pages link back to it. Its header
-adds a transaction and links to transactions, recurrences, card purchases, accounts, and financial
-settings. It greets the user and reads `GET /dashboard` for one month:
+greets the user, offers a single "New" menu for creating, and holds the month navigation and the
+perspective switch; page navigation stays in the sidebar. It reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
 and available balances, and the balance of each active account. A user without accounts sees the
-invitation to add one right below the month, and a negative available balance shows a warning with the amount missing. Previous and next buttons move through past and future months and keep the month in the URL
+invitation to add one right below the month. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
 saves the preference with `PATCH /preferences` and reloads the dashboard, and a line below it says what the
 selected perspective changes: card spending moves between months, balances and invoices never do. Account, category,
@@ -333,6 +333,24 @@ transaction and planned investment contribution or withdrawal dated up to the en
 overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
+
+The overview opens the page. Its dominant figures are the amount left to spend
+(`spendingGuidance.remaining`, the lower of what the overall limit leaves and the available
+balance) and the informational daily allowance (a dash once no days are left). Next to them, the
+available balance leads, with the actual and projected balances smaller below it, each with its
+explanation. When the month has an overall limit, a pace line compares the share of the limit
+already used (paid and planned expenses) with the share of the month elapsed (the days
+already gone in the current month, all of a past month) and says whether spending is on
+track, faster than the month (more than 10 percentage points ahead), or over budget. A future
+month shows no pace.
+
+A compact "Needs attention" warning lists, only when present, a negative available balance
+(with the amount missing), overdue card invoices and closed invoices still awaiting payment (with
+the amount due), overdue planned transactions among those shown as upcoming, overdue planned
+card charges, and an overall or category budget limit exceeded. Each item links to the page that
+resolves it: accounts, credit cards, the month on the transactions or budgets page, or
+recurrences. Nothing is shown when no item applies; everything is derived from the dashboard
+response.
 
 Transaction indicators, each with its own empty state:
 
@@ -365,10 +383,9 @@ Transaction indicators, each with its own empty state:
   counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
   following the perspective, and counts planned recurring card charges as pending expenses; invoice
   payments are never expenses.
-- **Budget and spending guidance:** the amount left to spend, the lower of what the overall limit
-  leaves and the available balance, and the informational daily allowance, then the month's overall limit and each category limit with its paid and pending
+- **Budget limits:** the month's overall limit and each category limit with its paid and pending
   spending, what is left, and how much it is exceeded by (see [Budgets](#budgets)). It links to the
-  month on the budgets page.
+  month on the budgets page. The spending guidance lives in the overview above, not in this card.
 - **Investments and goals:** the total value of active investments, the month's completed
   contributions and withdrawals (with the planned amount when there is one), and each active
   investment with its value and target progress (see [Investments](#investments)). It links to the
@@ -390,8 +407,8 @@ Transaction indicators, each with its own empty state:
   plans and balances before closing. A stale amount above the current server suggestion is rejected
   unless explicitly acknowledged; a rejection refreshes the open form's suggestion and requires fresh
   acknowledgement after an amount or suggestion change.
-- **Add transaction:** a header action opens the transactions form modal.
-- **Add card purchase:** a header action opens the credit card purchase form modal in create mode.
+- **New:** a header menu opens the transactions form modal (Transaction) or the credit card
+  purchase form modal in create mode (Card purchase).
 
 Percentages for the bars are computed for display only (`displaySharePercent`); every amount shown
 comes from the API's decimal strings.

@@ -1,15 +1,15 @@
 import { WarningOutlined } from '@ant-design/icons';
-import { Badge, Card, Col, Empty, Flex, Progress, Row, Typography } from 'antd';
+import { Badge, Card, Empty, Flex, Progress, Row, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
-import { MoneyText } from '@/shared/money/money-text';
 import type {
   DashboardBudget,
   DashboardBudgetLimit,
   DashboardSpendingGuidance,
 } from '../../domain/dashboard.schema';
 import { displaySharePercent } from './share-percent';
+import { SpendingGuidanceFigures } from './spending-guidance-figures';
 
 interface LimitProgressProps {
   label: ReactNode;
@@ -66,55 +66,9 @@ const LimitProgress = ({ label, name, color, entry }: LimitProgressProps) => {
   );
 };
 
-interface SpendingGuidanceSummaryProps {
-  guidance: DashboardSpendingGuidance;
-}
-
-const SpendingGuidanceSummary = ({
-  guidance,
-}: SpendingGuidanceSummaryProps) => {
-  const { t } = useTranslation();
-  const remainingLabel = t(`dashboard.budget.guidance.${guidance.basis}`);
-  const dailyLabel = t('dashboard.budget.guidance.daily');
-
-  return (
-    <Row gutter={[16, 16]}>
-      <Col xs={24} sm={12}>
-        <Typography.Text type="secondary">{remainingLabel}</Typography.Text>
-        <Typography.Title level={3} style={{ margin: '4px 0' }}>
-          <MoneyText amount={guidance.remaining} aria-label={remainingLabel} />
-        </Typography.Title>
-        <Typography.Text type="secondary">
-          {t(`dashboard.budget.guidance.${guidance.basis}Hint`)}
-        </Typography.Text>
-      </Col>
-      <Col xs={24} sm={12}>
-        <Typography.Text type="secondary">{dailyLabel}</Typography.Text>
-        <Typography.Title level={3} style={{ margin: '4px 0' }}>
-          {guidance.dailyAllowance === null ? (
-            <Typography.Text type="secondary" aria-label={dailyLabel}>
-              —
-            </Typography.Text>
-          ) : (
-            <MoneyText
-              amount={guidance.dailyAllowance}
-              aria-label={dailyLabel}
-            />
-          )}
-        </Typography.Title>
-        <Typography.Text type="secondary">
-          {guidance.dailyAllowance === null
-            ? t('dashboard.budget.guidance.noDaysLeft')
-            : t('dashboard.budget.guidance.dailyHint')}
-        </Typography.Text>
-      </Col>
-    </Row>
-  );
-};
-
 interface BudgetCardProps {
   budget: DashboardBudget | null;
-  guidance: DashboardSpendingGuidance;
+  guidance?: DashboardSpendingGuidance;
   extra?: ReactNode;
   emptyAction?: ReactNode;
 }
@@ -129,9 +83,22 @@ export const BudgetCard = ({
   const overallName = t('dashboard.budget.overall');
 
   return (
-    <Card title={t('dashboard.budget.title')} extra={extra}>
+    <Card
+      title={t(
+        guidance ? 'dashboard.budget.title' : 'dashboard.budget.limitsTitle',
+      )}
+      extra={extra}
+    >
       <Flex vertical gap="large">
-        <SpendingGuidanceSummary guidance={guidance} />
+        {guidance && (
+          <Row gutter={[16, 16]}>
+            <SpendingGuidanceFigures
+              guidance={guidance}
+              level={3}
+              span={{ xs: 24, sm: 12 }}
+            />
+          </Row>
+        )}
         {budget ? (
           <Flex vertical gap="middle">
             {budget.overall && (

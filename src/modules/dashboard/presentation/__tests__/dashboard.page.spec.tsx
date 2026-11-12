@@ -24,10 +24,14 @@ import {
   type StubResponse,
   stubHttpRoutes,
 } from '@/test/http-stub';
+import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
 import { formatMoney } from '@/shared/money/money';
 import type { Transaction } from '@/modules/transactions/domain/transaction.schema';
-import type { Dashboard } from '../../domain/dashboard.schema';
+import type {
+  Dashboard,
+  DashboardBudgetLimit,
+} from '../../domain/dashboard.schema';
 import { formatMonthLabel } from '@/shared/date/month-ref';
 
 const sessionUser: UserDetail = {
@@ -377,6 +381,343 @@ describe('DashboardPage', () => {
     const page = await main();
     await within(page).findByLabelText(i18n.t('dashboard.balances.available'));
     expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('leads with what is left to spend and the available balance', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        balances: {
+          actual: '1000.30',
+          projected: '900.00',
+          available: '700.30',
+        },
+        spendingGuidance: {
+          basis: 'BALANCE',
+          remaining: '700.30',
+          dailyAllowance: '233.43',
+        },
+      }),
+    });
+
+    const page = await main();
+    const amountOf = (key: ParseKeys) =>
+      within(page).getAllByLabelText(i18n.t(key))[0];
+
+    expect(
+      await within(page).findByLabelText(
+        i18n.t('dashboard.budget.guidance.BALANCE'),
+      ),
+    ).toHaveTextContent(money('700.30'));
+    expect(amountOf('dashboard.budget.guidance.daily')).toHaveTextContent(
+      money('233.43'),
+    );
+    expect(amountOf('dashboard.balances.available')).toHaveTextContent(
+      money('700.30'),
+    );
+    expect(amountOf('dashboard.balances.actual')).toHaveTextContent(
+      money('1000.30'),
+    );
+    expect(amountOf('dashboard.balances.projected')).toHaveTextContent(
+      money('900.00'),
+    );
+    for (const key of [
+      'dashboard.budget.guidance.BALANCEHint',
+      'dashboard.budget.guidance.dailyHint',
+      'dashboard.balances.actualHint',
+      'dashboard.balances.projectedHint',
+      'dashboard.balances.availableHint',
+    ] as const) {
+      expect(within(page).getByText(i18n.t(key))).toBeInTheDocument();
+    }
+    expect(
+      within(page).getAllByText(i18n.t('dashboard.budget.guidance.BALANCE')),
+    ).toHaveLength(1);
+    expect(
+      within(page).getByText(i18n.t('dashboard.budget.limitsTitle')),
+    ).toBeInTheDocument();
+    expect(
+      within(page).queryByText(i18n.t('dashboard.pace.title')),
+    ).not.toBeInTheDocument();
+  });
+
+  describe('budget pace', () => {
+    const withOverallBudget = (
+      total: string,
+      period: Partial<Dashboard['period']> = {},
+    ) =>
+      envelope(
+        buildDashboard({
+          period: {
+            ...buildDashboard().period,
+            remainingDays: 20,
+            ...period,
+          },
+          budget: {
+            overall: {
+              limit: '500.00',
+              total,
+              completed: total,
+              pending: '0.00',
+              remaining: '0.00',
+              overspent:
+                Number(total) > 500 ? (Number(total) - 500).toFixed(2) : '0.00',
+            },
+            categories: [],
+          },
+        }),
+      );
+
+    const renderPace = async (response: StubResponse) => {
+      renderDashboard(AppRoutes.DASHBOARD, { 'GET /dashboard': response });
+      const page = await main();
+      await within(page).findByText(i18n.t('dashboard.pace.title'));
+      return page;
+    };
+
+    it('compares the budget used with the month elapsed', async () => {
+      const page = await renderPace(withOverallBudget('200.00'));
+
+      expect(
+        within(page).getByRole('progressbar', {
+          name: i18n.t('dashboard.pace.used'),
+        }),
+      ).toHaveAttribute('aria-valuenow', '40');
+      expect(
+        within(page).getByRole('progressbar', {
+          name: i18n.t('dashboard.pace.elapsed'),
+        }),
+      ).toHaveAttribute('aria-valuenow', '35');
+      expect(
+        within(page).getByText(
+          i18n.t('dashboard.pace.summary', { used: 40, elapsed: 35 }),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.onTrack')),
+      ).toBeInTheDocument();
+    });
+
+    it('warns when spending runs faster than the month', async () => {
+      const page = await renderPace(withOverallBudget('300.00'));
+
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.ahead')),
+      ).toBeInTheDocument();
+    });
+
+    it('flags an exceeded overall limit', async () => {
+      const page = await renderPace(withOverallBudget('650.00'));
+
+      expect(
+        within(page).getByText(
+          i18n.t('dashboard.pace.summary', { used: 130, elapsed: 35 }),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.over')),
+      ).toBeInTheDocument();
+    });
+
+    it('counts a closed month as fully elapsed', async () => {
+      const page = await renderPace(
+        withOverallBudget('480.00', { timing: 'PAST', remainingDays: 0 }),
+      );
+
+      expect(
+        within(page).getByText(
+          i18n.t('dashboard.pace.summary', { used: 96, elapsed: 100 }),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.onTrack')),
+      ).toBeInTheDocument();
+    });
+
+    it('is not shown for a future month', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': withOverallBudget('200.00', {
+          timing: 'FUTURE',
+          remainingDays: 31,
+        }),
+      });
+
+      const page = await main();
+      await within(page).findByText(i18n.t('dashboard.period.timing.FUTURE'));
+
+      expect(
+        within(page).queryByText(i18n.t('dashboard.pace.title')),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('needs attention', () => {
+    const limit = (overrides: Partial<DashboardBudgetLimit> = {}) => ({
+      limit: '500.00',
+      total: '200.00',
+      completed: '200.00',
+      pending: '0.00',
+      remaining: '300.00',
+      overspent: '0.00',
+      ...overrides,
+    });
+    const category = (name: string) => ({
+      uuid: `${name}-uuid`,
+      name,
+      color: null,
+    });
+    const upcomingExpense = (uuid: string, overdue: boolean) => ({
+      uuid,
+      type: 'EXPENSE' as const,
+      typeLabel: 'Despesa',
+      description: 'Aluguel',
+      amount: '300.00',
+      date: '2026-10-05',
+      overdue,
+      account: {
+        uuid: 'account-uuid',
+        name: 'Nubank',
+        status: 'ACTIVE' as const,
+      },
+      destinationAccount: null,
+      category: category('Moradia'),
+    });
+    const plannedCharge = (uuid: string, overdue: boolean) => ({
+      uuid,
+      recurrenceUuid: 'recurrence-uuid',
+      description: 'Netflix',
+      amount: '55.90',
+      date: '2026-10-15',
+      invoiceMonth: '2026-10-01',
+      overdue,
+      card: { uuid: 'card-uuid', name: 'Visa' },
+      category: category('Lazer'),
+    });
+    const needingAttention = buildDashboard({
+      balances: { actual: '100.00', projected: '50.00', available: '-250.50' },
+      upcoming: [
+        upcomingExpense('upcoming-overdue-1', true),
+        upcomingExpense('upcoming-overdue-2', true),
+        upcomingExpense('upcoming-next', false),
+      ],
+      upcomingCount: 3,
+      creditCards: {
+        ...buildDashboard().creditCards,
+        invoices: [
+          buildCreditCardInvoice({
+            uuid: 'invoice-overdue',
+            status: 'OVERDUE',
+            statusLabel: 'Vencida',
+            outstanding: '300.00',
+          }),
+          buildCreditCardInvoice({
+            uuid: 'invoice-closed',
+            status: 'CLOSED',
+            statusLabel: 'Fechada',
+            outstanding: '120.00',
+          }),
+          buildCreditCardInvoice({
+            uuid: 'invoice-closed-paid',
+            status: 'CLOSED',
+            statusLabel: 'Fechada',
+            outstanding: '0.00',
+          }),
+          buildCreditCardInvoice({ uuid: 'invoice-open' }),
+        ],
+        plannedCharges: [
+          plannedCharge('charge-overdue', true),
+          plannedCharge('charge-next', false),
+        ],
+        plannedChargesCount: 2,
+      },
+      budget: {
+        overall: limit({ total: '650.00', overspent: '150.00' }),
+        categories: [
+          {
+            ...limit({ total: '700.00', overspent: '200.00' }),
+            category: category('Mercado'),
+          },
+          { ...limit(), category: category('Lazer') },
+        ],
+      },
+    });
+
+    it('lists what needs attention, each with a link to act on it', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': envelope(needingAttention),
+      });
+
+      const strip = await within(await main()).findByRole('alert');
+      const link = (key: ParseKeys) =>
+        within(strip).getAllByRole('link', { name: i18n.t(key) });
+
+      expect(
+        within(strip).getByText(i18n.t('dashboard.attention.title')),
+      ).toBeInTheDocument();
+      for (const message of [
+        i18n.t('dashboard.balances.shortfall', { amount: money('250.50') }),
+        i18n.t('dashboard.attention.overdueInvoices', {
+          count: 1,
+          amount: money('300.00'),
+        }),
+        i18n.t('dashboard.attention.overdueTransactions', { count: 2 }),
+        i18n.t('dashboard.attention.overdueCardCharges', { count: 1 }),
+        i18n.t('dashboard.attention.closedInvoices', {
+          count: 1,
+          amount: money('120.00'),
+        }),
+        i18n.t('dashboard.attention.overallOverspent', {
+          amount: money('150.00'),
+        }),
+        i18n.t('dashboard.attention.categoriesOverspent', {
+          count: 1,
+          categories: 'Mercado',
+        }),
+      ]) {
+        expect(within(strip).getByText(message)).toBeInTheDocument();
+      }
+      expect(within(strip).getAllByRole('listitem')).toHaveLength(7);
+      expect(link('dashboard.attention.actions.accounts')[0]).toHaveAttribute(
+        'href',
+        AppRoutes.ACCOUNTS,
+      );
+      expect(
+        link('dashboard.attention.actions.transactions')[0],
+      ).toHaveAttribute('href', `${AppRoutes.TRANSACTIONS}?year=2026&month=10`);
+      expect(
+        link('dashboard.attention.actions.recurrences')[0],
+      ).toHaveAttribute('href', AppRoutes.RECURRENCES);
+      for (const invoices of link('dashboard.attention.actions.invoices')) {
+        expect(invoices).toHaveAttribute('href', AppRoutes.CREDIT_CARDS);
+      }
+      for (const budget of link('dashboard.attention.actions.budget')) {
+        expect(budget).toHaveAttribute(
+          'href',
+          `${AppRoutes.BUDGETS}?year=2026&month=10`,
+        );
+      }
+    });
+
+    it('stays hidden when nothing needs attention', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': envelope(
+          buildDashboard({
+            creditCards: {
+              ...buildDashboard().creditCards,
+              invoices: [buildCreditCardInvoice()],
+            },
+            budget: { overall: limit(), categories: [] },
+          }),
+        ),
+      });
+
+      const page = await main();
+      await within(page).findByRole('heading', monthHeading(2026, 10));
+
+      expect(
+        within(page).queryByText(i18n.t('dashboard.attention.title')),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('explains what the selected perspective changes', async () => {
@@ -736,7 +1077,7 @@ describe('DashboardPage', () => {
       row.querySelector(':scope > .ant-col > .ant-card'),
     );
 
-    expect(rowsOfCards).toHaveLength(3);
+    expect(rowsOfCards).toHaveLength(2);
 
     for (const row of rowsOfCards) {
       expect(row).toHaveClass('ant-row-stretch');
@@ -993,31 +1334,29 @@ describe('DashboardPage', () => {
       }
     });
 
-    it('groups page links in the shortcuts navigation, apart from the quick actions', async () => {
+    const openCreateMenu = async () => {
+      fireEvent.click(
+        await within(await main()).findByRole('button', {
+          name: new RegExp(i18n.t('dashboard.actions.create')),
+        }),
+      );
+    };
+
+    it('leaves page navigation to the sidebar', async () => {
       renderDashboard();
 
       const page = await main();
-      const shortcuts = await within(page).findByRole('navigation', {
-        name: i18n.t('dashboard.actions.shortcuts'),
-      });
+      await within(page).findByRole('heading', monthHeading(2026, 10));
 
-      for (const [labelKey, path] of [
-        ['dashboard.actions.transactions', AppRoutes.TRANSACTIONS],
-        ['navigation.recurrences', AppRoutes.RECURRENCES],
-        ['navigation.creditCardPurchases', AppRoutes.CREDIT_CARD_PURCHASES],
-        ['dashboard.actions.accounts', AppRoutes.ACCOUNTS],
-        ['dashboard.actions.settings', AppRoutes.FINANCIAL_SETTINGS],
-      ] as const) {
-        expect(
-          within(shortcuts).getByRole('link', {
-            name: new RegExp(i18n.t(labelKey)),
-          }),
-        ).toHaveAttribute('href', path);
-      }
-      expect(within(shortcuts).queryByRole('button')).not.toBeInTheDocument();
+      expect(within(page).queryByRole('navigation')).not.toBeInTheDocument();
+      expect(
+        within(page).queryByRole('link', {
+          name: new RegExp(i18n.t('navigation.recurrences')),
+        }),
+      ).not.toBeInTheDocument();
     });
 
-    it('opens the transaction form from the quick action', async () => {
+    it('opens the transaction form from the new menu', async () => {
       renderDashboard(AppRoutes.DASHBOARD, {
         'GET /accounts': {
           status: 200,
@@ -1029,9 +1368,10 @@ describe('DashboardPage', () => {
         },
       });
 
+      await openCreateMenu();
       fireEvent.click(
-        await within(await main()).findByRole('button', {
-          name: new RegExp(i18n.t('dashboard.actions.addTransaction')),
+        await screen.findByRole('menuitem', {
+          name: new RegExp(i18n.t('dashboard.actions.transaction')),
         }),
       );
 
@@ -1040,7 +1380,7 @@ describe('DashboardPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('opens the card purchase form from the quick action', async () => {
+    it('opens the card purchase form from the new menu', async () => {
       renderDashboard(AppRoutes.DASHBOARD, {
         'GET /credit-cards': {
           status: 200,
@@ -1052,15 +1392,48 @@ describe('DashboardPage', () => {
         },
       });
 
+      await openCreateMenu();
       fireEvent.click(
-        await within(await main()).findByRole('button', {
-          name: new RegExp(i18n.t('dashboard.actions.addPurchase')),
+        await screen.findByRole('menuitem', {
+          name: new RegExp(i18n.t('dashboard.actions.purchase')),
         }),
       );
 
       expect(
         await findDialog(i18n.t('creditCards.purchases.create.title')),
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('on a narrow screen', () => {
+    beforeEach(() => {
+      vi.spyOn(window, 'matchMedia').mockImplementation(createMatchMedia(375));
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('stacks the header, the month, and the perspective vertically', async () => {
+      renderDashboard();
+
+      const page = await main();
+      const month = await within(page).findByRole(
+        'heading',
+        monthHeading(2026, 10),
+      );
+      const create = within(page).getByRole('button', {
+        name: new RegExp(i18n.t('dashboard.actions.create')),
+      });
+      const perspective = within(page).getByRole('radiogroup', {
+        name: i18n.t('preferences.fields.spendingPerspective'),
+      });
+
+      const periodRow = month.parentElement?.parentElement;
+
+      expect(create.parentElement).toHaveClass('ant-flex-vertical');
+      expect(periodRow).toHaveClass('ant-flex-vertical');
+      expect(periodRow).toContainElement(perspective);
     });
   });
 });

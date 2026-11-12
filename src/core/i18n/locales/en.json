@@ -30,12 +30,9 @@
     "greeting": "Hello, {{name}}",
     "description": "Track the month's balances, income, and expenses.",
     "actions": {
-      "addTransaction": "Add transaction",
-      "addPurchase": "Add card purchase",
-      "transactions": "Transactions",
-      "accounts": "Manage accounts",
-      "settings": "Financial settings",
-      "shortcuts": "Shortcuts"
+      "create": "New",
+      "transaction": "Transaction",
+      "purchase": "Card purchase"
     },
     "period": {
       "timing": {
@@ -115,7 +112,8 @@
         "daily": "Daily allowance",
         "dailyHint": "Informational: what is left spread over the remaining days.",
         "noDaysLeft": "No days left in this month."
-      }
+      },
+      "limitsTitle": "Budget limits"
     },
     "investments": {
       "title": "Investments and goals",
@@ -158,6 +156,38 @@
       "accept": "Record additional contribution",
       "viewMovements": "View movements",
       "route": "{{account}} → {{investment}}"
+    },
+    "attention": {
+      "title": "Needs attention",
+      "overdueTransactions_one": "{{count}} planned transaction is overdue.",
+      "overdueTransactions_other": "{{count}} planned transactions are overdue.",
+      "overdueCardCharges_one": "{{count}} recurring card charge is overdue.",
+      "overdueCardCharges_other": "{{count}} recurring card charges are overdue.",
+      "overdueInvoices_one": "{{count}} card invoice is overdue, with {{amount}} due.",
+      "overdueInvoices_other": "{{count}} card invoices are overdue, with {{amount}} due.",
+      "closedInvoices_one": "{{count}} closed card invoice awaits payment of {{amount}}.",
+      "closedInvoices_other": "{{count}} closed card invoices await payment of {{amount}}.",
+      "overallOverspent": "The overall limit is exceeded by {{amount}}.",
+      "categoriesOverspent_one": "{{count}} category is over its limit: {{categories}}.",
+      "categoriesOverspent_other": "{{count}} categories are over their limits: {{categories}}.",
+      "actions": {
+        "accounts": "Review accounts",
+        "invoices": "View invoices",
+        "transactions": "Review transactions",
+        "recurrences": "Review recurrences",
+        "budget": "Review budget"
+      }
+    },
+    "pace": {
+      "title": "Budget pace",
+      "used": "Budget used",
+      "elapsed": "Month elapsed",
+      "summary": "{{used}}% of budget used · {{elapsed}}% of month elapsed",
+      "status": {
+        "onTrack": "On track",
+        "ahead": "Faster than the month",
+        "over": "Over budget"
+      }
     }
   },
   "month": {

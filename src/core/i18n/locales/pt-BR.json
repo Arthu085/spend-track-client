@@ -30,12 +30,9 @@
     "greeting": "Olá, {{name}}",
     "description": "Acompanhe os saldos, as receitas e as despesas do mês.",
     "actions": {
-      "addTransaction": "Adicionar transação",
-      "addPurchase": "Adicionar compra no cartão",
-      "transactions": "Transações",
-      "accounts": "Gerenciar contas",
-      "settings": "Configurações financeiras",
-      "shortcuts": "Atalhos"
+      "create": "Novo",
+      "transaction": "Transação",
+      "purchase": "Compra no cartão"
     },
     "period": {
       "timing": {
@@ -115,7 +112,8 @@
         "daily": "Valor diário",
         "dailyHint": "Informativo: o restante dividido pelos dias que faltam.",
         "noDaysLeft": "Não restam dias neste mês."
-      }
+      },
+      "limitsTitle": "Limites do orçamento"
     },
     "investments": {
       "title": "Investimentos e metas",
@@ -158,6 +156,38 @@
       "accept": "Registrar aporte adicional",
       "viewMovements": "Ver movimentações",
       "route": "{{account}} → {{investment}}"
+    },
+    "attention": {
+      "title": "Precisa de atenção",
+      "overdueTransactions_one": "{{count}} transação planejada está atrasada.",
+      "overdueTransactions_other": "{{count}} transações planejadas estão atrasadas.",
+      "overdueCardCharges_one": "{{count}} cobrança recorrente de cartão está atrasada.",
+      "overdueCardCharges_other": "{{count}} cobranças recorrentes de cartão estão atrasadas.",
+      "overdueInvoices_one": "{{count}} fatura de cartão está vencida, com {{amount}} em aberto.",
+      "overdueInvoices_other": "{{count}} faturas de cartão estão vencidas, com {{amount}} em aberto.",
+      "closedInvoices_one": "{{count}} fatura de cartão fechada aguarda o pagamento de {{amount}}.",
+      "closedInvoices_other": "{{count}} faturas de cartão fechadas aguardam o pagamento de {{amount}}.",
+      "overallOverspent": "O limite geral foi excedido em {{amount}}.",
+      "categoriesOverspent_one": "{{count}} categoria está acima do limite: {{categories}}.",
+      "categoriesOverspent_other": "{{count}} categorias estão acima do limite: {{categories}}.",
+      "actions": {
+        "accounts": "Revisar contas",
+        "invoices": "Ver faturas",
+        "transactions": "Revisar transações",
+        "recurrences": "Revisar recorrências",
+        "budget": "Revisar orçamento"
+      }
+    },
+    "pace": {
+      "title": "Ritmo do orçamento",
+      "used": "Orçamento usado",
+      "elapsed": "Mês decorrido",
+      "summary": "{{used}}% do orçamento usado · {{elapsed}}% do mês decorrido",
+      "status": {
+        "onTrack": "No ritmo",
+        "ahead": "Mais rápido que o mês",
+        "over": "Acima do orçamento"
+      }
     }
   },
   "month": {
