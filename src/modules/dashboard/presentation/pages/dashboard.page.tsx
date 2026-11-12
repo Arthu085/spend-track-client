@@ -99,7 +99,7 @@ export const DashboardPage = () => {
             </Button>
           </Dropdown>
         </Flex>
-        {dashboard && (
+        {!isPending && (
           <Flex
             vertical={!md}
             justify="space-between"
@@ -107,11 +107,12 @@ export const DashboardPage = () => {
             gap="middle"
           >
             <PeriodNavigator
-              period={dashboard.period}
+              month={month}
+              period={dashboard?.period}
               loading={isPlaceholderData}
               onChange={changeMonth}
             />
-            <PerspectiveSwitch value={dashboard.perspective} />
+            {dashboard && <PerspectiveSwitch value={dashboard.perspective} />}
           </Flex>
         )}
         {isPending && <DashboardControlsSkeleton />}

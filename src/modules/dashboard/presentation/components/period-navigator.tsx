@@ -1,5 +1,6 @@
 import { Spin, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { todayDateOnly } from '@/shared/date/date-only';
 import { MonthNavigator } from '@/shared/date/month-navigator';
 import { type MonthRef, monthRefOfDate } from '@/shared/date/month-ref';
 import type {
@@ -14,30 +15,39 @@ const timingColors: Record<PeriodTiming, string | undefined> = {
 };
 
 interface PeriodNavigatorProps {
-  period: DashboardPeriod;
+  month: MonthRef | undefined;
+  period: DashboardPeriod | undefined;
   loading: boolean;
   onChange: (month: MonthRef) => void;
 }
 
 export const PeriodNavigator = ({
+  month,
   period,
   loading,
   onChange,
 }: PeriodNavigatorProps) => {
   const { t } = useTranslation();
+  const current = monthRefOfDate(period?.today ?? todayDateOnly());
+  const shownPeriod = loading ? undefined : period;
+  const value =
+    month ??
+    (shownPeriod
+      ? { year: shownPeriod.year, month: shownPeriod.month }
+      : current);
 
   return (
-    <MonthNavigator
-      value={{ year: period.year, month: period.month }}
-      current={monthRefOfDate(period.today)}
-      onChange={onChange}
-    >
-      <Tag color={timingColors[period.timing]}>
-        {t(`dashboard.period.timing.${period.timing}`)}
-      </Tag>
-      {period.remainingDays > 0 && (
+    <MonthNavigator value={value} current={current} onChange={onChange}>
+      {shownPeriod && (
+        <Tag color={timingColors[shownPeriod.timing]}>
+          {t(`dashboard.period.timing.${shownPeriod.timing}`)}
+        </Tag>
+      )}
+      {shownPeriod && shownPeriod.remainingDays > 0 && (
         <Typography.Text type="secondary">
-          {t('dashboard.period.remainingDays', { count: period.remainingDays })}
+          {t('dashboard.period.remainingDays', {
+            count: shownPeriod.remainingDays,
+          })}
         </Typography.Text>
       )}
       {loading && (
