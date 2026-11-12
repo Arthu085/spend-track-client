@@ -95,7 +95,8 @@
       "spendingPlanned": "(+{{amount}} previsto)",
       "plannedDue": "Cobranças recorrentes previstas:",
       "plannedHint": "Cobranças recorrentes de cartão ainda não confirmadas, previstas nas faturas até este mês.",
-      "manageRecurrences": "Gerenciar recorrências"
+      "manageRecurrences": "Gerenciar recorrências",
+      "dueOn": "Vence em {{date}}"
     },
     "budget": {
       "title": "Orçamento e orientação de gastos",

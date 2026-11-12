@@ -1,14 +1,5 @@
 import { EyeOutlined } from '@ant-design/icons';
-import {
-  Card,
-  Empty,
-  Flex,
-  Space,
-  Table,
-  type TableColumnsType,
-  Tag,
-  Typography,
-} from 'antd';
+import { Card, Empty, Flex, type TableColumnsType, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -25,6 +16,8 @@ import type {
   DashboardCreditCards,
   DashboardPlannedCardCharge,
 } from '../../domain/dashboard.schema';
+import { PlannedDate } from './planned-date';
+import { ResponsiveTable } from './responsive-table';
 
 interface CreditCardInvoicesCardProps {
   creditCards: DashboardCreditCards;
@@ -36,15 +29,33 @@ export const CreditCardInvoicesCard = ({
   const { t, i18n } = useTranslation();
   const viewing = useModalTarget<string>();
 
+  const invoiceMonth = ({ referenceMonth }: CreditCardInvoice) =>
+    formatInvoiceMonth(referenceMonth, i18n.language);
+
+  const viewAction = (invoice: CreditCardInvoice) => (
+    <IconActionButton
+      size="small"
+      icon={<EyeOutlined />}
+      label={t('creditCards.actions.viewInvoiceOf', {
+        card: invoice.card.name,
+        month: invoiceMonth(invoice),
+      })}
+      onClick={() => viewing.show(invoice.uuid)}
+    />
+  );
+
+  const chargeRoute = ({ card, invoiceMonth }: DashboardPlannedCardCharge) =>
+    `${card.name} · ${formatInvoiceMonth(invoiceMonth, i18n.language)}`;
+
   const columns: TableColumnsType<CreditCardInvoice> = [
     {
       title: t('creditCards.fields.card'),
       key: 'card',
-      render: (_, { card, referenceMonth }) => (
+      render: (_, invoice) => (
         <Flex vertical>
-          {card.name}
+          {invoice.card.name}
           <Typography.Text type="secondary">
-            {formatInvoiceMonth(referenceMonth, i18n.language)}
+            {invoiceMonth(invoice)}
           </Typography.Text>
         </Flex>
       ),
@@ -68,17 +79,7 @@ export const CreditCardInvoicesCard = ({
     {
       title: t('creditCards.fields.actions'),
       key: 'actions',
-      render: (_, { uuid, card, referenceMonth }) => (
-        <IconActionButton
-          size="small"
-          icon={<EyeOutlined />}
-          label={t('creditCards.actions.viewInvoiceOf', {
-            card: card.name,
-            month: formatInvoiceMonth(referenceMonth, i18n.language),
-          })}
-          onClick={() => viewing.show(uuid)}
-        />
-      ),
+      render: (_, invoice) => viewAction(invoice),
     },
   ];
 
@@ -87,20 +88,17 @@ export const CreditCardInvoicesCard = ({
       title: t('transactions.fields.date'),
       dataIndex: 'date',
       render: (_, { date, overdue }) => (
-        <Space size="small" wrap>
-          {formatDateOnly(date, i18n.language)}
-          {overdue && <Tag color="error">{t('transactions.overdue')}</Tag>}
-        </Space>
+        <PlannedDate date={date} overdue={overdue} />
       ),
     },
     {
       title: t('transactions.fields.description'),
       dataIndex: 'description',
-      render: (_, { description, card, invoiceMonth }) => (
+      render: (_, charge) => (
         <Flex vertical>
-          {description}
+          {charge.description}
           <Typography.Text type="secondary">
-            {card.name} · {formatInvoiceMonth(invoiceMonth, i18n.language)}
+            {chargeRoute(charge)}
           </Typography.Text>
         </Flex>
       ),
@@ -165,13 +163,25 @@ export const CreditCardInvoicesCard = ({
             description={t('dashboard.creditCards.empty')}
           />
         ) : (
-          <Table
-            rowKey="uuid"
-            size="small"
-            pagination={false}
+          <ResponsiveTable
             columns={columns}
             dataSource={creditCards.invoices}
-            scroll={{ x: 'max-content' }}
+            compactRow={(invoice) => ({
+              title: invoice.card.name,
+              description: invoiceMonth(invoice),
+              amount: <MoneyText amount={invoice.outstanding} strong />,
+              action: viewAction(invoice),
+              extra: (
+                <Flex align="center" gap="small" wrap>
+                  <Typography.Text type="secondary">
+                    {t('dashboard.creditCards.dueOn', {
+                      date: formatDateOnly(invoice.dueDate, i18n.language),
+                    })}
+                  </Typography.Text>
+                  <InvoiceStatusTag {...invoice} />
+                </Flex>
+              ),
+            })}
           />
         )}
         {creditCards.plannedCharges.length > 0 && (
@@ -184,13 +194,17 @@ export const CreditCardInvoicesCard = ({
                 {t('dashboard.creditCards.manageRecurrences')}
               </Link>
             </Flex>
-            <Table
-              rowKey="uuid"
-              size="small"
-              pagination={false}
+            <ResponsiveTable
               columns={plannedColumns}
               dataSource={creditCards.plannedCharges}
-              scroll={{ x: 'max-content' }}
+              compactRow={(charge) => ({
+                title: charge.description,
+                description: chargeRoute(charge),
+                amount: <MoneyText amount={charge.amount} strong />,
+                extra: (
+                  <PlannedDate date={charge.date} overdue={charge.overdue} />
+                ),
+              })}
             />
             {creditCards.plannedChargesCount >
               creditCards.plannedCharges.length && (

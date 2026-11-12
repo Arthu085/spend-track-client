@@ -95,7 +95,8 @@
       "spendingPlanned": "(+{{amount}} planned)",
       "plannedDue": "Planned recurring charges:",
       "plannedHint": "Recurring card charges not confirmed yet, expected on the invoices through this month.",
-      "manageRecurrences": "Manage recurrences"
+      "manageRecurrences": "Manage recurrences",
+      "dueOn": "Due {{date}}"
     },
     "budget": {
       "title": "Budget and spending guidance",

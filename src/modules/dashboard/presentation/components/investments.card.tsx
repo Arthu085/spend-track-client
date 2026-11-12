@@ -6,7 +6,6 @@ import {
   Empty,
   Flex,
   Grid,
-  Table,
   type TableColumnsType,
   theme,
   Typography,
@@ -29,6 +28,7 @@ import type {
   DashboardAmounts,
   DashboardInvestments,
 } from '../../domain/dashboard.schema';
+import { ResponsiveTable } from './responsive-table';
 import { SavingPlansSection } from './saving-plans.section';
 
 type DashboardInvestment = DashboardInvestments['items'][number];
@@ -188,6 +188,27 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
   }>();
   const hasInvestments = investments.items.length > 0;
 
+  const contributeAction = ({ uuid, name }: DashboardInvestment) => (
+    <IconActionButton
+      size="small"
+      icon={<PlusCircleOutlined />}
+      label={t('investments.actions.contribute', { name })}
+      onClick={() => contributing.show({ investment: { uuid, name } })}
+    />
+  );
+
+  const progressOf = ({
+    name,
+    targetAmount,
+    progress,
+  }: DashboardInvestment) => (
+    <InvestmentProgress
+      name={name}
+      targetAmount={targetAmount}
+      progress={progress}
+    />
+  );
+
   const columns: TableColumnsType<DashboardInvestment> = [
     {
       title: t('investments.fields.name'),
@@ -210,25 +231,12 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
     {
       title: t('investments.fields.progress'),
       key: 'progress',
-      render: (_, { name, targetAmount, progress }) => (
-        <InvestmentProgress
-          name={name}
-          targetAmount={targetAmount}
-          progress={progress}
-        />
-      ),
+      render: (_, investment) => progressOf(investment),
     },
     {
       title: t('investments.fields.actions'),
       key: 'actions',
-      render: (_, { uuid, name }) => (
-        <IconActionButton
-          size="small"
-          icon={<PlusCircleOutlined />}
-          label={t('investments.actions.contribute', { name })}
-          onClick={() => contributing.show({ investment: { uuid, name } })}
-        />
-      ),
+      render: (_, investment) => contributeAction(investment),
     },
   ];
 
@@ -259,13 +267,16 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
             </Link>
           </Flex>
           {hasInvestments ? (
-            <Table
-              rowKey="uuid"
-              size="small"
-              pagination={false}
+            <ResponsiveTable
               columns={columns}
               dataSource={investments.items}
-              scroll={{ x: 'max-content' }}
+              compactRow={(investment) => ({
+                title: investment.name,
+                description: investment.typeLabel,
+                amount: <MoneyText amount={investment.currentValue} strong />,
+                action: contributeAction(investment),
+                extra: progressOf(investment),
+              })}
             />
           ) : (
             <Empty
