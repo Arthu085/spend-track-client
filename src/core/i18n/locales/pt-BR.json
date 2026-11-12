@@ -34,7 +34,8 @@
       "addPurchase": "Adicionar compra no cartão",
       "transactions": "Transações",
       "accounts": "Gerenciar contas",
-      "settings": "Configurações financeiras"
+      "settings": "Configurações financeiras",
+      "shortcuts": "Atalhos"
     },
     "period": {
       "timing": {

@@ -34,7 +34,8 @@
       "addPurchase": "Add card purchase",
       "transactions": "Transactions",
       "accounts": "Manage accounts",
-      "settings": "Financial settings"
+      "settings": "Financial settings",
+      "shortcuts": "Shortcuts"
     },
     "period": {
       "timing": {

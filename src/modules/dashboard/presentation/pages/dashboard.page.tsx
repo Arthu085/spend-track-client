@@ -1,16 +1,11 @@
-import {
-  CreditCardOutlined,
-  PlusOutlined,
-  SettingOutlined,
-  TransactionOutlined,
-  WalletOutlined,
-} from '@ant-design/icons';
+import { CreditCardOutlined, PlusOutlined } from '@ant-design/icons';
 import {
   Alert,
   Button,
   Card,
   Col,
   Flex,
+  Grid,
   Row,
   Skeleton,
   Typography,
@@ -21,8 +16,12 @@ import { Link } from 'react-router';
 import { getApiErrorMessage } from '@/core/http/api-error';
 import { AppRoutes } from '@/core/router/app-routes';
 import {
+  accountsPage,
   creditCardPurchasesPage,
+  financialSettingsPage,
+  type PageMetadata,
   recurrencesPage,
+  transactionsPage,
 } from '@/core/router/page-metadata';
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { CreditCardPurchaseFormModal } from '@/modules/credit-cards/presentation/components/credit-card-purchase-form.modal';
@@ -41,7 +40,13 @@ import { PeriodNavigator } from '../components/period-navigator';
 import { PerspectiveSwitch } from '../components/perspective-switch';
 import { UpcomingTransactionsCard } from '../components/upcoming-transactions.card';
 
-const pageShortcuts = [recurrencesPage, creditCardPurchasesPage];
+const pageShortcuts: PageMetadata[] = [
+  { ...transactionsPage, labelKey: 'dashboard.actions.transactions' },
+  recurrencesPage,
+  creditCardPurchasesPage,
+  { ...accountsPage, labelKey: 'dashboard.actions.accounts' },
+  { ...financialSettingsPage, labelKey: 'dashboard.actions.settings' },
+];
 
 const budgetOfMonth = ({ year, month }: DashboardPeriod) =>
   `${AppRoutes.BUDGETS}?${new URLSearchParams({
@@ -51,6 +56,7 @@ const budgetOfMonth = ({ year, month }: DashboardPeriod) =>
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
+  const { sm, xl } = Grid.useBreakpoint();
   const { data: user } = useSession();
   const [month, changeMonth] = useMonthParam();
   const { data: dashboard, error, isPending } = useDashboard(month);
@@ -59,7 +65,12 @@ export const DashboardPage = () => {
 
   return (
     <Flex vertical gap="large">
-      <Flex justify="space-between" align="start" gap="middle" wrap>
+      <Flex
+        vertical={!xl}
+        justify="space-between"
+        align={xl ? 'start' : 'stretch'}
+        gap="middle"
+      >
         <div>
           <Typography.Title level={2}>
             {t('dashboard.greeting', { name: user?.name })}
@@ -68,34 +79,36 @@ export const DashboardPage = () => {
             {t('dashboard.description')}
           </Typography.Text>
         </div>
-        <Flex gap="middle" align="center" wrap>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setCreatingTransaction(true)}
-          >
-            {t('dashboard.actions.addTransaction')}
-          </Button>
-          <Button
-            icon={<CreditCardOutlined />}
-            onClick={() => setCreatingPurchase(true)}
-          >
-            {t('dashboard.actions.addPurchase')}
-          </Button>
-          <Link to={AppRoutes.TRANSACTIONS}>
-            <TransactionOutlined /> {t('dashboard.actions.transactions')}
-          </Link>
-          {pageShortcuts.map(({ path, labelKey, icon: Icon }) => (
-            <Link key={path} to={path}>
-              <Icon /> {t(labelKey)}
-            </Link>
-          ))}
-          <Link to={AppRoutes.ACCOUNTS}>
-            <WalletOutlined /> {t('dashboard.actions.accounts')}
-          </Link>
-          <Link to={AppRoutes.FINANCIAL_SETTINGS}>
-            <SettingOutlined /> {t('dashboard.actions.settings')}
-          </Link>
+        <Flex vertical gap="middle" align={xl ? 'end' : 'stretch'}>
+          <Flex vertical={!sm} gap="small" justify={xl ? 'end' : 'start'}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setCreatingTransaction(true)}
+            >
+              {t('dashboard.actions.addTransaction')}
+            </Button>
+            <Button
+              icon={<CreditCardOutlined />}
+              onClick={() => setCreatingPurchase(true)}
+            >
+              {t('dashboard.actions.addPurchase')}
+            </Button>
+          </Flex>
+          <nav aria-label={t('dashboard.actions.shortcuts')}>
+            <Flex
+              gap="middle"
+              justify={xl ? 'end' : 'start'}
+              align="center"
+              wrap
+            >
+              {pageShortcuts.map(({ path, labelKey, icon: Icon }) => (
+                <Link key={path} to={path}>
+                  <Icon /> {t(labelKey)}
+                </Link>
+              ))}
+            </Flex>
+          </nav>
         </Flex>
       </Flex>
       {error && !dashboard && (

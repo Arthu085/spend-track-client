@@ -993,21 +993,28 @@ describe('DashboardPage', () => {
       }
     });
 
-    it('links to recurrences and card purchases from the quick actions', async () => {
+    it('groups page links in the shortcuts navigation, apart from the quick actions', async () => {
       renderDashboard();
 
       const page = await main();
+      const shortcuts = await within(page).findByRole('navigation', {
+        name: i18n.t('dashboard.actions.shortcuts'),
+      });
 
-      expect(
-        await within(page).findByRole('link', {
-          name: new RegExp(i18n.t('navigation.recurrences')),
-        }),
-      ).toHaveAttribute('href', AppRoutes.RECURRENCES);
-      expect(
-        within(page).getByRole('link', {
-          name: new RegExp(i18n.t('navigation.creditCardPurchases')),
-        }),
-      ).toHaveAttribute('href', AppRoutes.CREDIT_CARD_PURCHASES);
+      for (const [labelKey, path] of [
+        ['dashboard.actions.transactions', AppRoutes.TRANSACTIONS],
+        ['navigation.recurrences', AppRoutes.RECURRENCES],
+        ['navigation.creditCardPurchases', AppRoutes.CREDIT_CARD_PURCHASES],
+        ['dashboard.actions.accounts', AppRoutes.ACCOUNTS],
+        ['dashboard.actions.settings', AppRoutes.FINANCIAL_SETTINGS],
+      ] as const) {
+        expect(
+          within(shortcuts).getByRole('link', {
+            name: new RegExp(i18n.t(labelKey)),
+          }),
+        ).toHaveAttribute('href', path);
+      }
+      expect(within(shortcuts).queryByRole('button')).not.toBeInTheDocument();
     });
 
     it('opens the transaction form from the quick action', async () => {
