@@ -379,7 +379,8 @@ Transaction indicators, each with its own empty state:
   recurring card charges (`creditCards.planned`) appear next to its card spending. Charges still
   unconfirmed on the invoices through the month (`creditCards.plannedDue`) show their total and a
   list of up to ten, oldest first, with their date, an overdue tag, card, and invoice month, and a
-  link to the recurrences page. The API
+  link to the recurrences page. The list sits in a section collapsed by default whose header shows
+  how many charges are planned and how many of the listed ones are overdue. The API
   counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
   following the perspective, and counts planned recurring card charges as pending expenses; invoice
   payments are never expenses.

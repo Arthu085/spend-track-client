@@ -15,6 +15,7 @@ import {
 } from '@/test/credit-card-fixture';
 import { buildDashboard } from '@/test/dashboard-fixture';
 import { findDialog } from '@/test/find-dialog';
+import { expandSection } from '@/test/expand-section';
 import { createMatchMedia } from '@/test/match-media';
 
 const money = (amount: string) => formatMoney(amount, i18n.language);
@@ -143,6 +144,7 @@ describe('Dashboard lists on narrow screens', () => {
       }),
     ).toBeInTheDocument();
 
+    await expandSection(i18n.t('dashboard.creditCards.plannedTitle'));
     const charge = await rowOf('Netflix');
     expect(within(charge).getByText(money('55.90'))).toBeInTheDocument();
     expect(
@@ -195,6 +197,10 @@ describe('Dashboard lists on narrow screens', () => {
     renderDashboard();
 
     const upcoming = await screen.findByText('Aluguel');
+    expect(screen.getAllByRole('table')).toHaveLength(4);
+
+    await expandSection(i18n.t('dashboard.creditCards.plannedTitle'));
+
     expect(screen.getAllByRole('table')).toHaveLength(5);
     expect(upcoming.closest('table')).not.toBeNull();
     expect(upcoming.closest('li')).toBeNull();

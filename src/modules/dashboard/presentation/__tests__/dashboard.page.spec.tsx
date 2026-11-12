@@ -24,6 +24,7 @@ import {
   type StubResponse,
   stubHttpRoutes,
 } from '@/test/http-stub';
+import { expandSection, findSectionHeader } from '@/test/expand-section';
 import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
 import { formatMoney } from '@/shared/money/money';
@@ -224,7 +225,32 @@ describe('DashboardPage', () => {
         }),
       ),
     ).toBeInTheDocument();
+    expect(
+      page.querySelector('tr[data-row-key="charge-overdue"]'),
+    ).not.toBeInTheDocument();
 
+    const plannedHeader = await findSectionHeader(
+      i18n.t('dashboard.creditCards.plannedTitle'),
+      page,
+    );
+    expect(plannedHeader).toHaveAttribute('aria-expanded', 'false');
+    expect(plannedHeader).toHaveTextContent(
+      i18n.t('dashboard.creditCards.plannedCount', { count: 12 }),
+    );
+    expect(plannedHeader).toHaveTextContent(
+      i18n.t('dashboard.creditCards.plannedOverdue', { count: 1 }),
+    );
+
+    await expandSection(i18n.t('dashboard.creditCards.plannedTitle'), page);
+
+    expect(
+      within(page).getByText(i18n.t('dashboard.creditCards.plannedHint')),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByRole('link', {
+        name: i18n.t('dashboard.creditCards.manageRecurrences'),
+      }),
+    ).toBeInTheDocument();
     const overdueCharge = page.querySelector<HTMLElement>(
       'tr[data-row-key="charge-overdue"]',
     );
@@ -261,6 +287,22 @@ describe('DashboardPage', () => {
 
     const dialog = await findDialog(i18n.t('creditCards.invoice.charges'));
     expect(within(dialog).getByText(/Tênis/)).toBeInTheDocument();
+  });
+
+  it('omits the planned charges section when no charge is planned', async () => {
+    renderDashboard();
+
+    const page = await main();
+    await within(page).findByLabelText(
+      i18n.t('dashboard.creditCards.outstanding'),
+    );
+
+    expect(
+      within(page).queryByRole('button', {
+        name: (name) =>
+          name.startsWith(i18n.t('dashboard.creditCards.plannedTitle')),
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it('moves between months through the URL, including future months', async () => {

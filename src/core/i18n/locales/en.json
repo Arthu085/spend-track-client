@@ -93,6 +93,11 @@
       "plannedDue": "Planned recurring charges:",
       "plannedHint": "Recurring card charges not confirmed yet, expected on the invoices through this month.",
       "manageRecurrences": "Manage recurrences",
+      "plannedTitle": "Planned recurring charges",
+      "plannedCount_one": "{{count}} charge",
+      "plannedCount_other": "{{count}} charges",
+      "plannedOverdue_one": "{{count}} overdue",
+      "plannedOverdue_other": "{{count}} overdue",
       "dueOn": "Due {{date}}"
     },
     "budget": {

@@ -93,6 +93,11 @@
       "plannedDue": "Cobranças recorrentes previstas:",
       "plannedHint": "Cobranças recorrentes de cartão ainda não confirmadas, previstas nas faturas até este mês.",
       "manageRecurrences": "Gerenciar recorrências",
+      "plannedTitle": "Cobranças recorrentes previstas",
+      "plannedCount_one": "{{count}} cobrança",
+      "plannedCount_other": "{{count}} cobranças",
+      "plannedOverdue_one": "{{count}} atrasada",
+      "plannedOverdue_other": "{{count}} atrasadas",
       "dueOn": "Vence em {{date}}"
     },
     "budget": {

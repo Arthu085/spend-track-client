@@ -16,6 +16,7 @@ import type {
   DashboardCreditCards,
   DashboardPlannedCardCharge,
 } from '../../domain/dashboard.schema';
+import { DetailsCollapse, DetailsLabel } from './details-collapse';
 import { PlannedDate } from './planned-date';
 import { ResponsiveTable } from './responsive-table';
 
@@ -111,6 +112,41 @@ export const CreditCardInvoicesCard = ({
     },
   ];
 
+  const overdueCharges = creditCards.plannedCharges.filter(
+    ({ overdue }) => overdue,
+  ).length;
+
+  const plannedChargesList = (
+    <Flex vertical gap="small">
+      <Flex justify="space-between" gap="middle" wrap>
+        <Typography.Text type="secondary">
+          {t('dashboard.creditCards.plannedHint')}
+        </Typography.Text>
+        <Link to={AppRoutes.RECURRENCES}>
+          {t('dashboard.creditCards.manageRecurrences')}
+        </Link>
+      </Flex>
+      <ResponsiveTable
+        columns={plannedColumns}
+        dataSource={creditCards.plannedCharges}
+        compactRow={(charge) => ({
+          title: charge.description,
+          description: chargeRoute(charge),
+          amount: <MoneyText amount={charge.amount} strong />,
+          extra: <PlannedDate date={charge.date} overdue={charge.overdue} />,
+        })}
+      />
+      {creditCards.plannedChargesCount > creditCards.plannedCharges.length && (
+        <Typography.Text type="secondary">
+          {t('dashboard.upcoming.partial', {
+            shown: creditCards.plannedCharges.length,
+            count: creditCards.plannedChargesCount,
+          })}
+        </Typography.Text>
+      )}
+    </Flex>
+  );
+
   return (
     <Card
       title={t('dashboard.creditCards.title')}
@@ -184,39 +220,38 @@ export const CreditCardInvoicesCard = ({
             })}
           />
         )}
-        {creditCards.plannedCharges.length > 0 && (
-          <>
-            <Flex justify="space-between" gap="middle" wrap>
-              <Typography.Text type="secondary">
-                {t('dashboard.creditCards.plannedHint')}
-              </Typography.Text>
-              <Link to={AppRoutes.RECURRENCES}>
-                {t('dashboard.creditCards.manageRecurrences')}
-              </Link>
-            </Flex>
-            <ResponsiveTable
-              columns={plannedColumns}
-              dataSource={creditCards.plannedCharges}
-              compactRow={(charge) => ({
-                title: charge.description,
-                description: chargeRoute(charge),
-                amount: <MoneyText amount={charge.amount} strong />,
-                extra: (
-                  <PlannedDate date={charge.date} overdue={charge.overdue} />
-                ),
-              })}
-            />
-            {creditCards.plannedChargesCount >
-              creditCards.plannedCharges.length && (
-              <Typography.Text type="secondary">
-                {t('dashboard.upcoming.partial', {
-                  shown: creditCards.plannedCharges.length,
-                  count: creditCards.plannedChargesCount,
-                })}
-              </Typography.Text>
-            )}
-          </>
-        )}
+        <DetailsCollapse
+          items={
+            creditCards.plannedCharges.length > 0
+              ? [
+                  {
+                    key: 'plannedCharges',
+                    label: (
+                      <DetailsLabel
+                        title={t('dashboard.creditCards.plannedTitle')}
+                        counts={[
+                          {
+                            key: 'count',
+                            label: t('dashboard.creditCards.plannedCount', {
+                              count: creditCards.plannedChargesCount,
+                            }),
+                          },
+                          overdueCharges > 0 && {
+                            key: 'overdue',
+                            color: 'error',
+                            label: t('dashboard.creditCards.plannedOverdue', {
+                              count: overdueCharges,
+                            }),
+                          },
+                        ]}
+                      />
+                    ),
+                    children: plannedChargesList,
+                  },
+                ]
+              : []
+          }
+        />
       </Flex>
       <CreditCardInvoiceModal
         open={viewing.open}
