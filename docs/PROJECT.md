@@ -385,7 +385,8 @@ Transaction indicators, each with its own empty state:
   recurring card charges (`creditCards.planned`) appear next to its card spending. Charges still
   unconfirmed on the invoices through the month (`creditCards.plannedDue`) show their total and a
   list of up to ten, oldest first, with their date, an overdue tag, card, and invoice month, and a
-  link to the recurrences page. The API
+  link to the recurrences page. The list sits in a section collapsed by default whose header shows
+  how many charges are planned and how many of the listed ones are overdue. The API
   counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
   following the perspective, and counts planned recurring card charges as pending expenses; invoice
   payments are never expenses.
@@ -393,9 +394,13 @@ Transaction indicators, each with its own empty state:
   spending, what is left, and how much it is exceeded by (see [Budgets](#budgets)). It links to the
   month on the budgets page. The spending guidance lives in the overview above, not in this card.
 - **Investments and goals:** the total value of active investments, the month's completed
-  contributions and withdrawals (with the planned amount when there is one), and each active
-  investment with its value and target progress (see [Investments](#investments)). It links to the
-  investments page. Contributions and withdrawals never count as income or expenses.
+  contributions with a bar for their share of the month's total and the planned amount, the
+  withdrawals only when the month has any, and the first three investments with a target and their
+  progress (saying how many exist when there are more). It links to the investments page. Sections
+  collapsed by default hold the contributions by kind, the portfolio (each active investment with
+  its value and target progress, see [Investments](#investments)), and the saving plans; their
+  headers count the investments, the plans, the mandatory contributions still to confirm, and the
+  overdue ones. Contributions and withdrawals never count as income or expenses.
 - **Contributions by kind:** when the month has any, the investments card separates mandatory,
   optional additional, and one-time contributions, each with confirmed and planned amounts.
 - **Saving plans:** each monthly contribution with a saving strategy shows the balance for the

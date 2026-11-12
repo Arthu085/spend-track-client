@@ -14,6 +14,7 @@ import type { SavingPlan } from '@/modules/recurrences/domain/saving-plan.schema
 import { dateInputFormat, formatDateOnly } from '@/shared/date/date-only';
 import { formatMoney } from '@/shared/money/money';
 import { buildDashboard } from '@/test/dashboard-fixture';
+import { expandSection, findSectionHeader } from '@/test/expand-section';
 import { findDialog } from '@/test/find-dialog';
 import { requestBody } from '@/test/http-stub';
 import { buildSavingPlan } from '@/test/saving-plan-fixture';
@@ -36,8 +37,13 @@ const renderPlans = (plans: SavingPlan[], routes: StubRoutes = {}) =>
     ...routes,
   });
 
-const planGroup = (description: string) =>
-  screen.findByRole('group', { name: description });
+const expandPlans = () => expandSection(i18n.t('dashboard.savingPlans.title'));
+
+const planGroup = async (description: string) => {
+  await expandPlans();
+
+  return screen.findByRole('group', { name: description });
+};
 
 const amountOf = (group: HTMLElement, label: string) =>
   within(group).getByLabelText(label);
@@ -81,10 +87,83 @@ describe('Saving plans on the dashboard', () => {
       screen.queryByText(i18n.t('dashboard.savingPlans.title')),
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole('group', {
-        name: i18n.t('dashboard.investments.breakdown.label'),
-      }),
+      screen.queryByText(i18n.t('dashboard.investments.breakdown.label')),
     ).not.toBeInTheDocument();
+  });
+
+  it('keeps the plans collapsed behind a header that counts what needs action', async () => {
+    renderPlans([
+      buildSavingPlan(),
+      buildSavingPlan({
+        recurrence: {
+          ...buildSavingPlan().recurrence,
+          uuid: 'c3d4e5f6-cccc-4c3e-9f1a-1a2b3c4d5e6f',
+          description: 'Viagem mensal',
+        },
+        mandatory: {
+          planned: '300.00',
+          completed: '0.00',
+          plannedOccurrences: [
+            {
+              uuid: 'd4e5f6a7-dddd-4c3e-9f1a-1a2b3c4d5e6f',
+              date: '2026-10-30',
+              amount: '300.00',
+              overdue: false,
+            },
+          ],
+        },
+      }),
+    ]);
+    const header = await findSectionHeader(
+      i18n.t('dashboard.savingPlans.title'),
+    );
+
+    expect(header).toHaveAttribute('aria-expanded', 'false');
+    expect(header).toHaveTextContent(
+      i18n.t('dashboard.savingPlans.count', { count: 2 }),
+    );
+    expect(header).toHaveTextContent(
+      i18n.t('dashboard.savingPlans.toConfirm', { count: 2 }),
+    );
+    expect(header).toHaveTextContent(
+      i18n.t('dashboard.savingPlans.overdue', { count: 1 }),
+    );
+    expect(
+      screen.queryByRole('group', { name: 'Reserva mensal' }),
+    ).not.toBeInTheDocument();
+
+    expect(await planGroup('Reserva mensal')).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Viagem mensal' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(i18n.t('dashboard.savingPlans.hint')),
+    ).toBeInTheDocument();
+  });
+
+  it('counts no contribution to confirm once every occurrence is confirmed', async () => {
+    renderPlans([
+      buildSavingPlan({
+        mandatory: {
+          planned: '0.00',
+          completed: '700.00',
+          plannedOccurrences: [],
+        },
+      }),
+    ]);
+    const header = await findSectionHeader(
+      i18n.t('dashboard.savingPlans.title'),
+    );
+
+    expect(header).toHaveTextContent(
+      i18n.t('dashboard.savingPlans.count', { count: 1 }),
+    );
+    expect(header).not.toHaveTextContent(
+      i18n.t('dashboard.savingPlans.toConfirm', { count: 1 }),
+    );
+    expect(header).not.toHaveTextContent(
+      i18n.t('dashboard.savingPlans.overdue', { count: 1 }),
+    );
   });
 
   it('separates mandatory, additional, and one-time contributions', async () => {
@@ -105,6 +184,13 @@ describe('Saving plans on the dashboard', () => {
       ),
     });
 
+    expect(
+      screen.queryByRole('group', {
+        name: i18n.t('dashboard.investments.breakdown.label'),
+      }),
+    ).not.toBeInTheDocument();
+
+    await expandSection(i18n.t('dashboard.investments.breakdown.label'));
     const group = await screen.findByRole('group', {
       name: i18n.t('dashboard.investments.breakdown.label'),
     });
@@ -114,9 +200,15 @@ describe('Saving plans on the dashboard', () => {
         planned: money(planned),
       });
 
-    expect(within(group).getByText(amounts('100.00', '700.00'))).toBeVisible();
-    expect(within(group).getByText(amounts('50.00', '600.00'))).toBeVisible();
-    expect(within(group).getByText(amounts('20.00', '30.00'))).toBeVisible();
+    expect(
+      within(group).getByText(amounts('100.00', '700.00')),
+    ).toBeInTheDocument();
+    expect(
+      within(group).getByText(amounts('50.00', '600.00')),
+    ).toBeInTheDocument();
+    expect(
+      within(group).getByText(amounts('20.00', '30.00')),
+    ).toBeInTheDocument();
   });
 
   it('shows the figures of a plan, the card note, and creates nothing by itself', async () => {
@@ -224,6 +316,7 @@ describe('Saving plans on the dashboard', () => {
         },
       }),
     ]);
+    await expandPlans();
 
     expect(
       await screen.findByText(
@@ -608,6 +701,7 @@ describe('Saving plans on the dashboard', () => {
         }),
       ),
     });
+    await expandSection(i18n.t('dashboard.investments.portfolio'));
     const group = await planGroup('Reserva mensal');
     const table = screen.getByRole('table');
 

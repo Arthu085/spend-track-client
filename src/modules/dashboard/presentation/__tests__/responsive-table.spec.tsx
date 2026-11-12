@@ -15,6 +15,7 @@ import {
 } from '@/test/credit-card-fixture';
 import { buildDashboard } from '@/test/dashboard-fixture';
 import { findDialog } from '@/test/find-dialog';
+import { expandSection } from '@/test/expand-section';
 import { createMatchMedia } from '@/test/match-media';
 
 const money = (amount: string) => formatMoney(amount, i18n.language);
@@ -100,7 +101,9 @@ const renderDashboard = () =>
   });
 
 const rowOf = async (text: string) => {
-  const item = (await screen.findByText(text)).closest('li');
+  const [item] = (await screen.findAllByText(text))
+    .map((element) => element.closest('li'))
+    .filter((element) => element !== null);
 
   if (!item) {
     throw new Error('Row not found');
@@ -143,12 +146,14 @@ describe('Dashboard lists on narrow screens', () => {
       }),
     ).toBeInTheDocument();
 
+    await expandSection(i18n.t('dashboard.creditCards.plannedTitle'));
     const charge = await rowOf('Netflix');
     expect(within(charge).getByText(money('55.90'))).toBeInTheDocument();
     expect(
       within(charge).getByText(i18n.t('transactions.overdue')),
     ).toBeInTheDocument();
 
+    await expandSection(i18n.t('dashboard.investments.portfolio'));
     const investment = await rowOf('Viagem');
     expect(within(investment).getByText(money('1500.00'))).toBeInTheDocument();
     expect(
@@ -195,6 +200,11 @@ describe('Dashboard lists on narrow screens', () => {
     renderDashboard();
 
     const upcoming = await screen.findByText('Aluguel');
+    expect(screen.getAllByRole('table')).toHaveLength(3);
+
+    await expandSection(i18n.t('dashboard.creditCards.plannedTitle'));
+    await expandSection(i18n.t('dashboard.investments.portfolio'));
+
     expect(screen.getAllByRole('table')).toHaveLength(5);
     expect(upcoming.closest('table')).not.toBeNull();
     expect(upcoming.closest('li')).toBeNull();

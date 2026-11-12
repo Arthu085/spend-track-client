@@ -97,6 +97,11 @@
       "plannedDue": "Cobranças recorrentes previstas:",
       "plannedHint": "Cobranças recorrentes de cartão ainda não confirmadas, previstas nas faturas até este mês.",
       "manageRecurrences": "Gerenciar recorrências",
+      "plannedTitle": "Cobranças recorrentes previstas",
+      "plannedCount_one": "{{count}} cobrança",
+      "plannedCount_other": "{{count}} cobranças",
+      "plannedOverdue_one": "{{count}} atrasada",
+      "plannedOverdue_other": "{{count}} atrasadas",
       "dueOn": "Vence em {{date}}"
     },
     "budget": {
@@ -128,7 +133,11 @@
       "pending": "+{{amount}} previsto",
       "empty": "Nenhum investimento, reserva ou meta ativa.",
       "contribute": "Aportar",
+      "contributionsShare": "Parcela dos aportes previstos já confirmada",
+      "goals": "Metas",
       "portfolio": "Carteira",
+      "portfolioCount_one": "{{count}} investimento",
+      "portfolioCount_other": "{{count}} investimentos",
       "breakdown": {
         "label": "Aportes por tipo",
         "mandatory": "Obrigatório",
@@ -159,6 +168,12 @@
       "confirmOccurrence": "Confirmar {{amount}} de {{date}}",
       "accept": "Registrar aporte adicional",
       "viewMovements": "Ver movimentações",
+      "count_one": "{{count}} plano",
+      "count_other": "{{count}} planos",
+      "toConfirm_one": "{{count}} aporte a confirmar",
+      "toConfirm_other": "{{count}} aportes a confirmar",
+      "overdue_one": "{{count}} atrasado",
+      "overdue_other": "{{count}} atrasados",
       "route": "{{account}} → {{investment}}"
     },
     "attention": {

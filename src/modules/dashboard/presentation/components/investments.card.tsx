@@ -6,6 +6,7 @@ import {
   Empty,
   Flex,
   Grid,
+  Progress,
   type TableColumnsType,
   theme,
   Typography,
@@ -28,8 +29,10 @@ import type {
   DashboardAmounts,
   DashboardInvestments,
 } from '../../domain/dashboard.schema';
+import { DetailsCollapse, DetailsLabel } from './details-collapse';
 import { ResponsiveTable } from './responsive-table';
-import { SavingPlansSection } from './saving-plans.section';
+import { SavingPlansLabel, SavingPlansSection } from './saving-plans.section';
+import { displaySharePercent } from './share-percent';
 
 type DashboardInvestment = DashboardInvestments['items'][number];
 
@@ -44,7 +47,7 @@ interface KpiProps {
 }
 
 const Kpi = ({ label, amount, children }: KpiProps) => (
-  <Flex vertical>
+  <Flex vertical flex={1} style={{ minWidth: 0 }}>
     <Typography.Text type="secondary">{label}</Typography.Text>
     <Typography.Title level={3} style={{ margin: '4px 0' }}>
       <MoneyText amount={amount} aria-label={label} />
@@ -76,10 +79,6 @@ const ContributionBreakdownSummary = ({
 }) => {
   const { t, i18n } = useTranslation();
 
-  if (!Object.values(breakdown).some(isPositiveMoney)) {
-    return null;
-  }
-
   const kinds = [
     {
       key: 'mandatory',
@@ -100,30 +99,44 @@ const ContributionBreakdownSummary = ({
 
   return (
     <Flex
-      vertical
+      gap="large"
+      wrap
       role="group"
       aria-label={t('dashboard.investments.breakdown.label')}
-      gap="small"
     >
-      <Divider titlePlacement="start" plain style={{ margin: 0 }}>
-        {t('dashboard.investments.breakdown.label')}
-      </Divider>
-      <Flex gap="large" wrap>
-        {kinds.map(({ key, completed, planned }) => (
-          <Flex key={key} vertical>
-            <Typography.Text type="secondary">
-              {t(`dashboard.investments.breakdown.${key}`)}
-            </Typography.Text>
-            <Typography.Text>
-              {t('dashboard.investments.breakdown.amounts', {
-                completed: formatMoney(completed, i18n.language),
-                planned: formatMoney(planned, i18n.language),
-              })}
-            </Typography.Text>
-          </Flex>
-        ))}
-      </Flex>
+      {kinds.map(({ key, completed, planned }) => (
+        <Flex key={key} vertical>
+          <Typography.Text type="secondary">
+            {t(`dashboard.investments.breakdown.${key}`)}
+          </Typography.Text>
+          <Typography.Text>
+            {t('dashboard.investments.breakdown.amounts', {
+              completed: formatMoney(completed, i18n.language),
+              planned: formatMoney(planned, i18n.language),
+            })}
+          </Typography.Text>
+        </Flex>
+      ))}
     </Flex>
+  );
+};
+
+const hasAnyAmount = (amounts: ContributionBreakdown | DashboardAmounts) =>
+  Object.values(amounts).some(isPositiveMoney);
+
+const ContributionsProgress = ({ amounts }: { amounts: DashboardAmounts }) => {
+  const { t } = useTranslation();
+
+  if (!isPositiveMoney(amounts.total)) {
+    return null;
+  }
+
+  return (
+    <Progress
+      percent={displaySharePercent(amounts.completed, amounts.total)}
+      status="normal"
+      aria-label={t('dashboard.investments.contributionsShare')}
+    />
   );
 };
 
@@ -142,41 +155,104 @@ const InvestmentsSummary = ({ investments }: InvestmentsCardProps) => {
       key: 'contributions',
       label: t('dashboard.investments.contributions'),
       amount: investments.contributions.completed,
-      pending: investments.contributions,
+      details: (
+        <>
+          <ContributionsProgress amounts={investments.contributions} />
+          <PendingAmount amounts={investments.contributions} />
+        </>
+      ),
     },
-    {
+    hasAnyAmount(investments.withdrawals) && {
       key: 'withdrawals',
       label: t('dashboard.investments.withdrawals'),
       amount: investments.withdrawals.completed,
-      pending: investments.withdrawals,
+      details: <PendingAmount amounts={investments.withdrawals} />,
     },
-  ];
+  ].filter((kpi) => kpi !== false);
 
   return (
     <Flex
-      vertical
-      gap="middle"
+      vertical={!md}
+      gap={md ? 'large' : 'middle'}
       style={{
         padding: token.padding,
         background: token.colorFillAlter,
         borderRadius: token.borderRadiusLG,
       }}
     >
-      <Flex vertical={!md} gap={md ? 'large' : 'middle'}>
-        {kpis.map(({ key, label, amount, pending }, index) => (
-          <Fragment key={key}>
-            {md && index > 0 && (
-              <Divider vertical style={{ height: 'auto', margin: 0 }} />
-            )}
-            <Kpi label={label} amount={amount}>
-              {pending && <PendingAmount amounts={pending} />}
-            </Kpi>
-          </Fragment>
-        ))}
+      {kpis.map(({ key, label, amount, details }, index) => (
+        <Fragment key={key}>
+          {md && index > 0 && (
+            <Divider vertical style={{ height: 'auto', margin: 0 }} />
+          )}
+          <Kpi label={label} amount={amount}>
+            {details}
+          </Kpi>
+        </Fragment>
+      ))}
+    </Flex>
+  );
+};
+
+const GOALS_SHOWN = 3;
+
+const GoalsOverview = ({ items }: { items: DashboardInvestment[] }) => {
+  const { t } = useTranslation();
+  const goals = items.filter(
+    ({ targetAmount, progress }) => targetAmount !== null && progress !== null,
+  );
+  const shown = goals.slice(0, GOALS_SHOWN);
+
+  return (
+    <Flex vertical gap="small">
+      <Flex
+        justify={shown.length > 0 ? 'space-between' : 'end'}
+        align="center"
+        gap="middle"
+        wrap
+      >
+        {shown.length > 0 && (
+          <Typography.Text strong>
+            {t('dashboard.investments.goals')}
+          </Typography.Text>
+        )}
+        <Link to={AppRoutes.INVESTMENTS}>
+          {t('dashboard.investments.manage')}
+        </Link>
       </Flex>
-      <ContributionBreakdownSummary
-        breakdown={investments.contributionBreakdown}
-      />
+      {shown.length > 0 && (
+        <Flex
+          gap="middle"
+          wrap
+          role="group"
+          aria-label={t('dashboard.investments.goals')}
+        >
+          {shown.map(({ uuid, name, targetAmount, progress }) => (
+            <Flex
+              key={uuid}
+              vertical
+              style={{ flex: '1 1 220px', minWidth: 0 }}
+            >
+              <Typography.Text ellipsis={{ tooltip: name }}>
+                {name}
+              </Typography.Text>
+              <InvestmentProgress
+                name={name}
+                targetAmount={targetAmount}
+                progress={progress}
+              />
+            </Flex>
+          ))}
+        </Flex>
+      )}
+      {goals.length > shown.length && (
+        <Typography.Text type="secondary">
+          {t('dashboard.upcoming.partial', {
+            shown: shown.length,
+            count: goals.length,
+          })}
+        </Typography.Text>
+      )}
     </Flex>
   );
 };
@@ -240,6 +316,54 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
     },
   ];
 
+  const detailItems = [
+    hasAnyAmount(investments.contributionBreakdown) && {
+      key: 'breakdown',
+      label: (
+        <DetailsLabel title={t('dashboard.investments.breakdown.label')} />
+      ),
+      children: (
+        <ContributionBreakdownSummary
+          breakdown={investments.contributionBreakdown}
+        />
+      ),
+    },
+    hasInvestments && {
+      key: 'portfolio',
+      label: (
+        <DetailsLabel
+          title={t('dashboard.investments.portfolio')}
+          counts={[
+            {
+              key: 'count',
+              label: t('dashboard.investments.portfolioCount', {
+                count: investments.items.length,
+              }),
+            },
+          ]}
+        />
+      ),
+      children: (
+        <ResponsiveTable
+          columns={columns}
+          dataSource={investments.items}
+          compactRow={(investment) => ({
+            title: investment.name,
+            description: investment.typeLabel,
+            amount: <MoneyText amount={investment.currentValue} strong />,
+            action: contributeAction(investment),
+            extra: progressOf(investment),
+          })}
+        />
+      ),
+    },
+    investments.savingPlans.length > 0 && {
+      key: 'savingPlans',
+      label: <SavingPlansLabel plans={investments.savingPlans} />,
+      children: <SavingPlansSection plans={investments.savingPlans} />,
+    },
+  ].filter((item) => item !== false);
+
   return (
     <Card
       title={t('dashboard.investments.title')}
@@ -255,37 +379,16 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
         )
       }
     >
-      <Flex vertical gap="large">
+      <Flex vertical gap="middle">
         <InvestmentsSummary investments={investments} />
-        <Flex vertical gap="small">
-          <Flex justify="space-between" align="center" gap="middle" wrap>
-            <Typography.Text strong>
-              {t('dashboard.investments.portfolio')}
-            </Typography.Text>
-            <Link to={AppRoutes.INVESTMENTS}>
-              {t('dashboard.investments.manage')}
-            </Link>
-          </Flex>
-          {hasInvestments ? (
-            <ResponsiveTable
-              columns={columns}
-              dataSource={investments.items}
-              compactRow={(investment) => ({
-                title: investment.name,
-                description: investment.typeLabel,
-                amount: <MoneyText amount={investment.currentValue} strong />,
-                action: contributeAction(investment),
-                extra: progressOf(investment),
-              })}
-            />
-          ) : (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={t('dashboard.investments.empty')}
-            />
-          )}
-        </Flex>
-        <SavingPlansSection plans={investments.savingPlans} />
+        <GoalsOverview items={investments.items} />
+        {!hasInvestments && (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={t('dashboard.investments.empty')}
+          />
+        )}
+        <DetailsCollapse items={detailItems} />
       </Flex>
       <InvestmentContributionModal
         open={contributing.open}

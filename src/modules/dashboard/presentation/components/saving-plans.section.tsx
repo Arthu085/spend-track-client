@@ -16,6 +16,7 @@ import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
+import { DetailsLabel } from './details-collapse';
 
 interface PlanFigureProps {
   label: string;
@@ -197,6 +198,38 @@ const contributionOf = (recurrence?: SavingPlan['recurrence']) => ({
   creditCard: null,
 });
 
+export const SavingPlansLabel = ({ plans }: { plans: SavingPlan[] }) => {
+  const { t } = useTranslation();
+  const toConfirm = plans.flatMap(
+    ({ mandatory }) => mandatory.plannedOccurrences,
+  );
+  const overdue = toConfirm.filter(({ overdue }) => overdue).length;
+
+  return (
+    <DetailsLabel
+      title={t('dashboard.savingPlans.title')}
+      counts={[
+        {
+          key: 'count',
+          label: t('dashboard.savingPlans.count', { count: plans.length }),
+        },
+        toConfirm.length > 0 && {
+          key: 'toConfirm',
+          color: 'warning',
+          label: t('dashboard.savingPlans.toConfirm', {
+            count: toConfirm.length,
+          }),
+        },
+        overdue > 0 && {
+          key: 'overdue',
+          color: 'error',
+          label: t('dashboard.savingPlans.overdue', { count: overdue }),
+        },
+      ]}
+    />
+  );
+};
+
 export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
   const { t } = useTranslation();
   const confirming = useModalTarget<ConfirmingTarget>();
@@ -211,14 +244,9 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
 
   return (
     <Flex vertical gap="small">
-      <Flex vertical>
-        <Typography.Text strong>
-          {t('dashboard.savingPlans.title')}
-        </Typography.Text>
-        <Typography.Text type="secondary">
-          {t('dashboard.savingPlans.hint')}
-        </Typography.Text>
-      </Flex>
+      <Typography.Text type="secondary">
+        {t('dashboard.savingPlans.hint')}
+      </Typography.Text>
       {accountsWithOverlappingSuggestions(plans).map((account) => (
         <Alert
           key={account}
