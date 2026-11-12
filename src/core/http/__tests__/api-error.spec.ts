@@ -34,6 +34,56 @@ describe('getApiErrorMessage', () => {
     expect(getApiErrorMessage(error)).toBe('Email already in use');
   });
 
+  it('joins every validation message sent as an array', () => {
+    const error = responseError(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: [
+        'The email field must be a valid email',
+        'Password is required',
+      ],
+      timestamp: '2026-11-09T12:00:00.000Z',
+      path: '/api/auth/login',
+    });
+
+    expect(getApiErrorMessage(error)).toBe(
+      'The email field must be a valid email; Password is required',
+    );
+  });
+
+  it('returns the only validation message of a single-item array', () => {
+    const error = responseError(400, {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: ['The email field must be a valid email'],
+    });
+
+    expect(getApiErrorMessage(error)).toBe(
+      'The email field must be a valid email',
+    );
+  });
+
+  it('trims validation messages and drops blank ones', () => {
+    const error = responseError(400, {
+      message: ['  Name is required ', '', '   ', 'Email is required'],
+    });
+
+    expect(getApiErrorMessage(error)).toBe(
+      'Name is required; Email is required',
+    );
+  });
+
+  it.each([
+    ['an empty array', []],
+    ['only blank messages', ['', '   ']],
+    ['a non-string item', ['Name is required', 42]],
+    ['a nested array', [['Name is required']]],
+  ])('falls back when the message array has %s', (_case, message) => {
+    expect(getApiErrorMessage(responseError(400, { message }))).toBe(
+      i18n.t('apiErrors.unexpected'),
+    );
+  });
+
   it('falls back when the body is not an API error', () => {
     expect(
       getApiErrorMessage(responseError(502, '<html>Bad Gateway</html>')),

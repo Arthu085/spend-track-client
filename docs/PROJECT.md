@@ -116,7 +116,8 @@ session's cookies with the previous session's tokens. Logout does not need it: i
 session anyway, and it needs a valid access token, so a `401` on it must be able to refresh.
 
 `getApiErrorMessage` returns the API's localized `message`, or a localized fallback for network,
-timeout, and unexpected errors. When an API error includes `auditId`, the message also displays
+timeout, and unexpected errors. DTO validation `400`s send `message` as an array of localized
+messages, which it joins with `; `. When an API error includes `auditId`, the message also displays
 a localized reference label with that value for support investigations.
 
 ### Server state
@@ -170,8 +171,8 @@ The `auth` module mirrors the API's cookie session; the browser never sees a tok
   the same for every address. A login rejected with `403` (the API's unconfirmed-email answer)
   opens an error dialog linking to that page with the typed email filled in.
 - **Forms:** Ant Design forms validate fields with Zod schemas from the module's `domain/` through
-  `zodRule` (`src/shared/forms/`). Length limits mirror the API: email up to 255 characters,
-  passwords up to 128, and new passwords at least 8. New passwords (reset, create user, and change
+  `zodRule` (`src/shared/forms/`). Length limits mirror the API: email up to 255 characters
+  with a local part up to 64, passwords up to 128, and new passwords at least 8. New passwords (reset, create user, and change
   own password) must also mix an ASCII lowercase letter, an ASCII uppercase letter, an ASCII digit,
   and a character that is not an ASCII letter or digit (`STRONG_PASSWORD_PATTERN`), as the API
   requires. A new password that is too short or misses a character class gets one message that
@@ -634,6 +635,12 @@ Users menu entry needs the same ability.
   partial body to `POST /users/:uuid/change-requests` (`UPDATE` + `READ` on `USER`, like edit),
   closes the edit modal, and confirms with a success message; cancelling returns to the edit
   modal with the typed values. Any other error opens the error dialog.
+- **Manual email verification:** with `READ` and `UPDATE` on `USER`, active users whose
+  `emailConfirmedAt` is null have a verification button. Admin targets also require an active
+  `ADMIN` role on the signed-in user. The button loads current details and asks the operator to
+  confirm the displayed address before calling `PUT /users/:uuid/email-confirmation` with
+  `{ email }`. The API rejects a changed address with `409`, so the operator must review it again.
+  Success shows the API message and refreshes users queries; failures open the error dialog.
 - **Status and delete:** a switch activates or deactivates a user, and delete asks for
   confirmation. A delete that empties the last page moves to the previous one.
 - **Feedback:** every mutation shows the API's success message and refetches the users queries;
@@ -685,8 +692,9 @@ account page read the same query for the pending count.
 
 - **Diff:** each request is a card with the requester (or "a removed user" when the API sends no
   name), the request and expiry dates, and a table of name, email, and roles with the values when
-  the request was made (`current`) next to the requested ones. Changed fields are tagged; emails
-  are compared like the account form, roles by uuid.
+  the request was made (`current`) next to the requested ones. Dates use the selected language's
+  numeric date format with a four-digit year and short time (hour and minute). Changed fields are
+  tagged; emails are compared like the account form, roles by uuid.
 - **Decisions:** approve and reject each ask for confirmation first.
   `POST /users/me/change-requests/:uuid/approve` applies the change and ends every session of the
   user, so on success the mutation drops the CSRF token and calls `clearSession`, and an

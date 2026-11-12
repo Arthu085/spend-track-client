@@ -18,6 +18,7 @@ import {
 import { userDetailSchema } from '@/modules/users/domain/user.schema';
 import {
   createUser,
+  confirmUserEmail,
   deleteUser,
   fetchUser,
   fetchUsers,
@@ -101,6 +102,35 @@ describe('real backend API contracts', () => {
     );
   });
 
+  it('shows every server validation message from the standard error body', async () => {
+    try {
+      await fetchUsers({ page: 0, limit: 500 });
+    } catch (error) {
+      expect(getHttpStatus(error)).toBe(400);
+
+      if (!isAxiosError(error)) {
+        throw error;
+      }
+
+      const body = apiErrorSchema
+        .extend({ message: z.array(z.string().min(1)).nonempty() })
+        .parse(error.response?.data);
+
+      expect(body.statusCode).toBe(400);
+      expect(body.error).toBe('Bad Request');
+      expect(body.message).toEqual([
+        'The page field must not be less than 1',
+        'The limit field must not be greater than 50',
+      ]);
+      expect(body.path).toBe('/api/users?page=0&limit=500');
+      expect(getApiErrorMessage(error)).toBe(body.message.join('; '));
+
+      return;
+    }
+
+    throw new Error('Expected the API to reject invalid pagination.');
+  });
+
   it('refreshes an expired access cookie once and rotates refresh cookies sequentially', async () => {
     await new Promise((resolve) =>
       setTimeout(
@@ -164,6 +194,46 @@ describe('real backend API contracts', () => {
       requests.filter((request) => request === 'get /auth/csrf'),
     ).toHaveLength(1);
     expect(await fetchSessionUser()).toBeNull();
+  });
+
+  it('manually confirms the reviewed email and preserves the timestamp on repeated requests', async () => {
+    const userRole = (await fetchRoles()).find(({ role }) => role === 'USER');
+    if (!userRole) throw new Error('Missing USER role');
+    const created = await createUser({
+      name: 'Manual contract user',
+      email: 'manual-contract@example.com',
+      password: 'StrongContract123!',
+      roleUuids: [userRole.uuid],
+    });
+    const user = created.data;
+    try {
+      expect(user.emailConfirmedAt).toBeNull();
+      expect(
+        (await fetchUsers({ page: 1, limit: 20, email: user.email })).data[0]
+          .emailConfirmedAt,
+      ).toBeNull();
+      await expectApiError(
+        confirmUserEmail({ uuid: user.uuid, email: 'stale@example.com' }),
+        409,
+      );
+      expect((await fetchUser(user.uuid)).emailConfirmedAt).toBeNull();
+      const confirmed = await confirmUserEmail({
+        uuid: user.uuid,
+        email: user.email,
+      });
+      expect(confirmed.data.emailConfirmedAt).toEqual(expect.any(String));
+      expect(confirmed.meta.message).toBe('Email confirmed successfully');
+      expect(
+        (await fetchUsers({ page: 1, limit: 20, email: user.email })).data[0]
+          .emailConfirmedAt,
+      ).toBe(confirmed.data.emailConfirmedAt);
+      expect(
+        (await confirmUserEmail({ uuid: user.uuid, email: user.email })).data
+          .emailConfirmedAt,
+      ).toBe(confirmed.data.emailConfirmedAt);
+    } finally {
+      await deleteUser(user.uuid);
+    }
   });
 
   it('creates, filters, edits, deactivates, reactivates, and deletes a user', async () => {

@@ -22,8 +22,11 @@ export const UserChangeRequestCard = ({
 }: UserChangeRequestCardProps) => {
   const { t, i18n } = useTranslation();
   const dateTimeFormat = new Intl.DateTimeFormat(i18n.language, {
-    dateStyle: 'short',
-    timeStyle: 'short',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
 
   return (

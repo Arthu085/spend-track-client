@@ -48,7 +48,8 @@ Rules for every change to this repository. Project scope and layout are in
   environment example and must contain placeholders or safe local defaults.
 - Vite exposes `VITE_*` values to the browser. Treat them as public configuration, never secrets.
 - When adding environment configuration, document it in `.env.example` and the README and add it
-  to the Zod schema in `src/core/config/env.config.ts`; read it only through `env`.
+  to the Zod schema in `src/core/config/env.schema.ts`; read it only through `env` from
+  `src/core/config/env.config.ts`.
 
 ## Formatting and validation
 
@@ -57,7 +58,8 @@ Rules for every change to this repository. Project scope and layout are in
 - ESLint uses flat configuration, type-aware TypeScript rules, React Hooks rules, React Refresh
   rules, and Prettier integration. `npm run lint` applies fixes; `npm run lint:check` fails on warnings.
 - Await promises or explicitly handle rejections. Do not silence floating promises with `void` alone.
-- Run the required gate before delivery; CI runs the same checks:
+- Select local validation according to [`AGENTS.md`](../AGENTS.md#gate). The full gate is below;
+  CI continues to run its configured checks:
 
 ```sh
 npm run format:check && npm run lint:check && npm run typecheck && npm test && npm run build

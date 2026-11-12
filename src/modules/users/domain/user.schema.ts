@@ -15,11 +15,11 @@ export const userListItemSchema = z.object({
   status: recordStatusSchema,
   statusLabel: z.string(),
   roles: z.array(roleSchema),
+  emailConfirmedAt: z.iso.datetime().nullable(),
 });
 
 export const userDetailSchema = userListItemSchema.extend({
   email: z.string(),
-  emailConfirmedAt: z.iso.datetime().nullable(),
   creatorName: z.string().nullable(),
   updaterName: z.string().nullable(),
   createdAt: z.iso.datetime(),

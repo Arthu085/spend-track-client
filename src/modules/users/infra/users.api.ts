@@ -104,6 +104,23 @@ export const updateUserStatus = async ({
   return parseApiResponse(userDetailSchema, response.data);
 };
 
+export interface ConfirmUserEmailPayload {
+  uuid: string;
+  email: string;
+}
+
+export const confirmUserEmail = async ({
+  uuid,
+  email,
+}: ConfirmUserEmailPayload): Promise<ApiResponse<UserDetail>> => {
+  const response = await httpClient.put<unknown>(
+    `/users/${uuid}/email-confirmation`,
+    { email },
+  );
+
+  return parseApiResponse(userDetailSchema, response.data);
+};
+
 export const deleteUser = async (uuid: string): Promise<ApiResponse<null>> => {
   const response = await httpClient.delete<unknown>(`/users/${uuid}`);
 

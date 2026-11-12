@@ -1,6 +1,8 @@
+import { isAxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { beforeAll, beforeEach, describe, expect, inject, it } from 'vitest';
-import { getHttpStatus } from '@/core/http/api-error';
+import { z } from 'zod';
+import { getApiErrorMessage, getHttpStatus } from '@/core/http/api-error';
 import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { login } from '@/modules/auth/infra/auth.api';
@@ -124,6 +126,33 @@ describe('real backend finance contracts', () => {
 
     await login(backend.user);
     await updatePreferences({ spendingPerspective: 'PURCHASE_DATE' });
+  });
+
+  it('shows every validation message of a rejected finance form', async () => {
+    try {
+      await httpClient.post('/accounts', {
+        name: 'Contract invalid account',
+        type: 'CHECKING',
+        openingBalance: 'not-an-amount',
+        openingBalanceDate: 'not-a-date',
+      });
+    } catch (error) {
+      expect(getHttpStatus(error)).toBe(400);
+
+      if (!isAxiosError(error)) {
+        throw error;
+      }
+
+      const { message } = z
+        .object({ message: z.array(z.string().min(1)).min(2) })
+        .parse(error.response?.data);
+
+      expect(getApiErrorMessage(error)).toBe(message.join('; '));
+
+      return;
+    }
+
+    throw new Error('Expected the API to reject the invalid account.');
   });
 
   it('manages accounts with exact amounts and hides them from other users', async () => {

@@ -2,15 +2,18 @@ import react from '@vitejs/plugin-react';
 import { loadEnv } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { configDefaults, defineConfig } from 'vitest/config';
+import { parseEnv } from './src/core/config/env.schema.ts';
 
 const SHELL_BACKGROUND = '#ffffff';
 
-export default defineConfig(({ mode }) => {
-  const { VITE_APP_NAME, VITE_APP_MARK } = loadEnv(
-    mode,
-    process.cwd(),
-    'VITE_',
-  );
+export default defineConfig(({ command, mode }) => {
+  const source = loadEnv(mode, process.cwd(), 'VITE_');
+
+  if (command === 'build') {
+    parseEnv(source);
+  }
+
+  const { VITE_APP_NAME, VITE_APP_MARK } = source;
 
   return {
     plugins: [

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import i18n from '@/core/i18n/i18n.config';
 
 export const EMAIL_MAX_LENGTH = 255;
+const EMAIL_LOCAL_PART_MAX_LENGTH = 64;
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
 export const STRONG_PASSWORD_PATTERN =
@@ -10,13 +11,24 @@ export const STRONG_PASSWORD_PATTERN =
 const required = () => i18n.t('validation.required');
 const maxLength = (max: number) => () =>
   i18n.t('validation.maxLength', { max });
+const invalidEmail = () => i18n.t('validation.email');
+
+const emailLocalPart = (email: string) =>
+  email.slice(0, email.lastIndexOf('@'));
 
 export const emailSchema = z
   .string({ error: required })
   .trim()
   .min(1, { error: required })
   .max(EMAIL_MAX_LENGTH, { error: maxLength(EMAIL_MAX_LENGTH) })
-  .pipe(z.email({ error: () => i18n.t('validation.email') }));
+  .pipe(
+    z
+      .email({ error: invalidEmail })
+      .refine(
+        (email) => emailLocalPart(email).length <= EMAIL_LOCAL_PART_MAX_LENGTH,
+        { error: invalidEmail },
+      ),
+  );
 
 export const loginFormSchema = z.object({
   email: emailSchema,

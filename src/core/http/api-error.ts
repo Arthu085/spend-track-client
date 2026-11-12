@@ -7,8 +7,20 @@ const TIMEOUT_CODES = new Set<string>([
   AxiosError.ETIMEDOUT,
 ]);
 
+const VALIDATION_MESSAGE_SEPARATOR = '; ';
+
+const validationMessagesSchema = z
+  .array(z.string())
+  .transform((messages) =>
+    messages
+      .map((message) => message.trim())
+      .filter((message) => message.length > 0)
+      .join(VALIDATION_MESSAGE_SEPARATOR),
+  )
+  .pipe(z.string().min(1));
+
 const apiErrorBodySchema = z.object({
-  message: z.string().min(1),
+  message: z.union([z.string().min(1), validationMessagesSchema]),
   auditId: z.string().trim().min(1).optional().catch(undefined),
 });
 

@@ -935,7 +935,8 @@
       "details": "View details of {{name}}",
       "edit": "Edit {{name}}",
       "delete": "Delete {{name}}",
-      "toggleStatus": "Activate or deactivate {{name}}"
+      "toggleStatus": "Activate or deactivate {{name}}",
+      "confirmEmail": "Verify email for {{name}}"
     },
     "delete": {
       "title": "Delete user",
@@ -946,6 +947,11 @@
       "offer": "Send these changes to {{name}} as a change request? They apply only after approval and replace any pending request.",
       "send": "Send change request",
       "sent": "Change request sent. The changes apply once {{name}} approves them."
+    },
+    "confirmEmail": {
+      "title": "Verify email",
+      "description": "Verify {{email}} for {{name}}? This allows the user to sign in without the email link.",
+      "submit": "Verify email"
     }
   },
   "account": {
