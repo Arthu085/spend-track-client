@@ -27,6 +27,9 @@
     }
   },
   "dashboard": {
+    "retry": "Try again",
+    "refreshFailed": "Couldn't update the dashboard. It shows the last figures loaded.",
+    "loading": "Loading the dashboard",
     "greeting": "Hello, {{name}}",
     "description": "Track the month's balances, income, and expenses.",
     "actions": {
@@ -35,6 +38,7 @@
       "purchase": "Card purchase"
     },
     "period": {
+      "loading": "Loading the month",
       "timing": {
         "PAST": "Closed month",
         "CURRENT": "Current month",

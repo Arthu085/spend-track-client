@@ -4,7 +4,6 @@ import {
   TransactionOutlined,
 } from '@ant-design/icons';
 import {
-  Alert,
   Button,
   Col,
   Dropdown,
@@ -12,13 +11,12 @@ import {
   Grid,
   type MenuProps,
   Row,
-  Skeleton,
+  theme,
   Typography,
 } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { getApiErrorMessage } from '@/core/http/api-error';
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { CreditCardPurchaseFormModal } from '@/modules/credit-cards/presentation/components/credit-card-purchase-form.modal';
 import { TransactionFormModal } from '@/modules/transactions/presentation/components/transaction-form.modal';
@@ -30,6 +28,11 @@ import { BudgetCard } from '../components/budget.card';
 import { CashFlowSummary } from '../components/cash-flow-summary';
 import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
 import { DashboardHero } from '../components/dashboard-hero';
+import { DashboardLoadError } from '../components/dashboard-load-error';
+import {
+  DashboardControlsSkeleton,
+  DashboardSkeleton,
+} from '../components/dashboard-skeleton';
 import { ExpensesByCategoryCard } from '../components/expenses-by-category.card';
 import { InvestmentsCard } from '../components/investments.card';
 import { budgetOfMonth } from '../components/month-links';
@@ -40,11 +43,23 @@ import { UpcomingTransactionsCard } from '../components/upcoming-transactions.ca
 export const DashboardPage = () => {
   const { t } = useTranslation();
   const { sm, md } = Grid.useBreakpoint();
+  const { token } = theme.useToken();
   const { data: user } = useSession();
   const [month, changeMonth] = useMonthParam();
-  const { data: dashboard, error, isPending } = useDashboard(month);
+  const {
+    data: dashboard,
+    error,
+    isPending,
+    isFetching,
+    isPlaceholderData,
+    refetch,
+  } = useDashboard(month);
   const [creatingTransaction, setCreatingTransaction] = useState(false);
   const [creatingPurchase, setCreatingPurchase] = useState(false);
+
+  const retry = () => {
+    refetch().catch(() => undefined);
+  };
 
   const createItems: MenuProps['items'] = [
     {
@@ -91,17 +106,35 @@ export const DashboardPage = () => {
             align={md ? 'center' : 'start'}
             gap="middle"
           >
-            <PeriodNavigator period={dashboard.period} onChange={changeMonth} />
+            <PeriodNavigator
+              period={dashboard.period}
+              loading={isPlaceholderData}
+              onChange={changeMonth}
+            />
             <PerspectiveSwitch value={dashboard.perspective} />
           </Flex>
         )}
+        {isPending && <DashboardControlsSkeleton />}
       </Flex>
-      {error && !dashboard && (
-        <Alert type="error" showIcon title={getApiErrorMessage(error)} />
+      {error && (
+        <DashboardLoadError
+          error={error}
+          showingStaleData={Boolean(dashboard)}
+          retrying={isFetching}
+          onRetry={retry}
+        />
       )}
-      {isPending && <Skeleton active />}
+      {isPending && <DashboardSkeleton />}
       {dashboard && (
-        <>
+        <Flex
+          vertical
+          gap="large"
+          aria-busy={isPlaceholderData}
+          style={{
+            opacity: isPlaceholderData ? token.opacityLoading : 1,
+            transition: `opacity ${token.motionDurationMid}`,
+          }}
+        >
           {dashboard.accounts.length === 0 && (
             <AccountBalancesCard accounts={dashboard.accounts} />
           )}
@@ -144,7 +177,7 @@ export const DashboardPage = () => {
           {dashboard.accounts.length > 0 && (
             <AccountBalancesCard accounts={dashboard.accounts} />
           )}
-        </>
+        </Flex>
       )}
       <TransactionFormModal
         open={creatingTransaction}

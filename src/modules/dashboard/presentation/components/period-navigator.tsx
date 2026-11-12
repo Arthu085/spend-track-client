@@ -1,4 +1,4 @@
-import { Tag, Typography } from 'antd';
+import { Spin, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { MonthNavigator } from '@/shared/date/month-navigator';
 import { type MonthRef, monthRefOfDate } from '@/shared/date/month-ref';
@@ -15,10 +15,15 @@ const timingColors: Record<PeriodTiming, string | undefined> = {
 
 interface PeriodNavigatorProps {
   period: DashboardPeriod;
+  loading: boolean;
   onChange: (month: MonthRef) => void;
 }
 
-export const PeriodNavigator = ({ period, onChange }: PeriodNavigatorProps) => {
+export const PeriodNavigator = ({
+  period,
+  loading,
+  onChange,
+}: PeriodNavigatorProps) => {
   const { t } = useTranslation();
 
   return (
@@ -34,6 +39,11 @@ export const PeriodNavigator = ({ period, onChange }: PeriodNavigatorProps) => {
         <Typography.Text type="secondary">
           {t('dashboard.period.remainingDays', { count: period.remainingDays })}
         </Typography.Text>
+      )}
+      {loading && (
+        <span role="status" aria-label={t('dashboard.period.loading')}>
+          <Spin size="small" />
+        </span>
       )}
     </MonthNavigator>
   );
