@@ -111,7 +111,8 @@
         "daily": "Valor diário",
         "dailyHint": "Informativo: o restante dividido pelos dias que faltam.",
         "noDaysLeft": "Não restam dias neste mês."
-      }
+      },
+      "limitsTitle": "Limites do orçamento"
     },
     "investments": {
       "title": "Investimentos e metas",
@@ -174,6 +175,17 @@
         "transactions": "Revisar transações",
         "recurrences": "Revisar recorrências",
         "budget": "Revisar orçamento"
+      }
+    },
+    "pace": {
+      "title": "Ritmo do orçamento",
+      "used": "Orçamento usado",
+      "elapsed": "Mês decorrido",
+      "summary": "{{used}}% do orçamento usado · {{elapsed}}% do mês decorrido",
+      "status": {
+        "onTrack": "No ritmo",
+        "ahead": "Mais rápido que o mês",
+        "over": "Acima do orçamento"
       }
     }
   },

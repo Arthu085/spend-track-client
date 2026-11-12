@@ -334,6 +334,16 @@ overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
 
+The overview opens the page. Its dominant figures are the amount left to spend
+(`spendingGuidance.remaining`, the lower of what the overall limit leaves and the available
+balance) and the informational daily allowance (a dash once no days are left). Next to them, the
+available balance leads, with the actual and projected balances smaller below it, each with its
+explanation. When the month has an overall limit, a pace line compares the share of the limit
+already used (paid and planned expenses) with the share of the month elapsed (the days
+already gone in the current month, all of a past month) and says whether spending is on
+track, faster than the month (more than 10 percentage points ahead), or over budget. A future
+month shows no pace.
+
 A compact "Needs attention" warning lists, only when present, a negative available balance
 (with the amount missing), overdue card invoices and closed invoices still awaiting payment (with
 the amount due), overdue planned transactions among those shown as upcoming, overdue planned
@@ -373,10 +383,9 @@ Transaction indicators, each with its own empty state:
   counts card spending in `expenses` and `expensesByCategory` by purchase date or by invoice month,
   following the perspective, and counts planned recurring card charges as pending expenses; invoice
   payments are never expenses.
-- **Budget and spending guidance:** the amount left to spend, the lower of what the overall limit
-  leaves and the available balance, and the informational daily allowance, then the month's overall limit and each category limit with its paid and pending
+- **Budget limits:** the month's overall limit and each category limit with its paid and pending
   spending, what is left, and how much it is exceeded by (see [Budgets](#budgets)). It links to the
-  month on the budgets page.
+  month on the budgets page. The spending guidance lives in the overview above, not in this card.
 - **Investments and goals:** the total value of active investments, the month's completed
   contributions and withdrawals (with the planned amount when there is one), and each active
   investment with its value and target progress (see [Investments](#investments)). It links to the

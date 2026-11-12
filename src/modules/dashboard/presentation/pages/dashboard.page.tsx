@@ -26,10 +26,10 @@ import { useMonthParam } from '@/shared/date/use-month-param';
 import { useDashboard } from '../../infra/dashboard.queries';
 import { AccountBalancesCard } from '../components/account-balances.card';
 import { AttentionStrip } from '../components/attention-strip';
-import { BalanceSummary } from '../components/balance-summary';
 import { BudgetCard } from '../components/budget.card';
 import { CashFlowSummary } from '../components/cash-flow-summary';
 import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
+import { DashboardHero } from '../components/dashboard-hero';
 import { ExpensesByCategoryCard } from '../components/expenses-by-category.card';
 import { InvestmentsCard } from '../components/investments.card';
 import { budgetOfMonth } from '../components/month-links';
@@ -105,7 +105,12 @@ export const DashboardPage = () => {
           {dashboard.accounts.length === 0 && (
             <AccountBalancesCard accounts={dashboard.accounts} />
           )}
-          <BalanceSummary balances={dashboard.balances} />
+          <DashboardHero
+            balances={dashboard.balances}
+            guidance={dashboard.spendingGuidance}
+            budget={dashboard.budget}
+            period={dashboard.period}
+          />
           <AttentionStrip dashboard={dashboard} />
           <CashFlowSummary
             income={dashboard.income}
@@ -113,7 +118,6 @@ export const DashboardPage = () => {
           />
           <BudgetCard
             budget={dashboard.budget}
-            guidance={dashboard.spendingGuidance}
             extra={
               <Link to={budgetOfMonth(dashboard.period)}>
                 {t('dashboard.budget.manage')}

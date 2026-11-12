@@ -111,7 +111,8 @@
         "daily": "Daily allowance",
         "dailyHint": "Informational: what is left spread over the remaining days.",
         "noDaysLeft": "No days left in this month."
-      }
+      },
+      "limitsTitle": "Budget limits"
     },
     "investments": {
       "title": "Investments and goals",
@@ -174,6 +175,17 @@
         "transactions": "Review transactions",
         "recurrences": "Review recurrences",
         "budget": "Review budget"
+      }
+    },
+    "pace": {
+      "title": "Budget pace",
+      "used": "Budget used",
+      "elapsed": "Month elapsed",
+      "summary": "{{used}}% of budget used · {{elapsed}}% of month elapsed",
+      "status": {
+        "onTrack": "On track",
+        "ahead": "Faster than the month",
+        "over": "Over budget"
       }
     }
   },

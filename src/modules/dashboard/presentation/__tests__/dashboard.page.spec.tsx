@@ -383,6 +383,174 @@ describe('DashboardPage', () => {
     expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
   });
 
+  it('leads with what is left to spend and the available balance', async () => {
+    renderDashboard(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope({
+        ...withAccounts,
+        balances: {
+          actual: '1000.30',
+          projected: '900.00',
+          available: '700.30',
+        },
+        spendingGuidance: {
+          basis: 'BALANCE',
+          remaining: '700.30',
+          dailyAllowance: '233.43',
+        },
+      }),
+    });
+
+    const page = await main();
+    const amountOf = (key: ParseKeys) =>
+      within(page).getAllByLabelText(i18n.t(key))[0];
+
+    expect(
+      await within(page).findByLabelText(
+        i18n.t('dashboard.budget.guidance.BALANCE'),
+      ),
+    ).toHaveTextContent(money('700.30'));
+    expect(amountOf('dashboard.budget.guidance.daily')).toHaveTextContent(
+      money('233.43'),
+    );
+    expect(amountOf('dashboard.balances.available')).toHaveTextContent(
+      money('700.30'),
+    );
+    expect(amountOf('dashboard.balances.actual')).toHaveTextContent(
+      money('1000.30'),
+    );
+    expect(amountOf('dashboard.balances.projected')).toHaveTextContent(
+      money('900.00'),
+    );
+    for (const key of [
+      'dashboard.budget.guidance.BALANCEHint',
+      'dashboard.budget.guidance.dailyHint',
+      'dashboard.balances.actualHint',
+      'dashboard.balances.projectedHint',
+      'dashboard.balances.availableHint',
+    ] as const) {
+      expect(within(page).getByText(i18n.t(key))).toBeInTheDocument();
+    }
+    expect(
+      within(page).getAllByText(i18n.t('dashboard.budget.guidance.BALANCE')),
+    ).toHaveLength(1);
+    expect(
+      within(page).getByText(i18n.t('dashboard.budget.limitsTitle')),
+    ).toBeInTheDocument();
+    expect(
+      within(page).queryByText(i18n.t('dashboard.pace.title')),
+    ).not.toBeInTheDocument();
+  });
+
+  describe('budget pace', () => {
+    const withOverallBudget = (
+      total: string,
+      period: Partial<Dashboard['period']> = {},
+    ) =>
+      envelope(
+        buildDashboard({
+          period: {
+            ...buildDashboard().period,
+            remainingDays: 20,
+            ...period,
+          },
+          budget: {
+            overall: {
+              limit: '500.00',
+              total,
+              completed: total,
+              pending: '0.00',
+              remaining: '0.00',
+              overspent:
+                Number(total) > 500 ? (Number(total) - 500).toFixed(2) : '0.00',
+            },
+            categories: [],
+          },
+        }),
+      );
+
+    const renderPace = async (response: StubResponse) => {
+      renderDashboard(AppRoutes.DASHBOARD, { 'GET /dashboard': response });
+      const page = await main();
+      await within(page).findByText(i18n.t('dashboard.pace.title'));
+      return page;
+    };
+
+    it('compares the budget used with the month elapsed', async () => {
+      const page = await renderPace(withOverallBudget('200.00'));
+
+      expect(
+        within(page).getByRole('progressbar', {
+          name: i18n.t('dashboard.pace.used'),
+        }),
+      ).toHaveAttribute('aria-valuenow', '40');
+      expect(
+        within(page).getByRole('progressbar', {
+          name: i18n.t('dashboard.pace.elapsed'),
+        }),
+      ).toHaveAttribute('aria-valuenow', '35');
+      expect(
+        within(page).getByText(
+          i18n.t('dashboard.pace.summary', { used: 40, elapsed: 35 }),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.onTrack')),
+      ).toBeInTheDocument();
+    });
+
+    it('warns when spending runs faster than the month', async () => {
+      const page = await renderPace(withOverallBudget('300.00'));
+
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.ahead')),
+      ).toBeInTheDocument();
+    });
+
+    it('flags an exceeded overall limit', async () => {
+      const page = await renderPace(withOverallBudget('650.00'));
+
+      expect(
+        within(page).getByText(
+          i18n.t('dashboard.pace.summary', { used: 130, elapsed: 35 }),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.over')),
+      ).toBeInTheDocument();
+    });
+
+    it('counts a closed month as fully elapsed', async () => {
+      const page = await renderPace(
+        withOverallBudget('480.00', { timing: 'PAST', remainingDays: 0 }),
+      );
+
+      expect(
+        within(page).getByText(
+          i18n.t('dashboard.pace.summary', { used: 96, elapsed: 100 }),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.pace.status.onTrack')),
+      ).toBeInTheDocument();
+    });
+
+    it('is not shown for a future month', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': withOverallBudget('200.00', {
+          timing: 'FUTURE',
+          remainingDays: 31,
+        }),
+      });
+
+      const page = await main();
+      await within(page).findByText(i18n.t('dashboard.period.timing.FUTURE'));
+
+      expect(
+        within(page).queryByText(i18n.t('dashboard.pace.title')),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('needs attention', () => {
     const limit = (overrides: Partial<DashboardBudgetLimit> = {}) => ({
       limit: '500.00',
@@ -909,7 +1077,7 @@ describe('DashboardPage', () => {
       row.querySelector(':scope > .ant-col > .ant-card'),
     );
 
-    expect(rowsOfCards).toHaveLength(3);
+    expect(rowsOfCards).toHaveLength(2);
 
     for (const row of rowsOfCards) {
       expect(row).toHaveClass('ant-row-stretch');
