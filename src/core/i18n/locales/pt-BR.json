@@ -75,6 +75,11 @@
       "completedShare": "Parcela das despesas já paga",
       "empty": "Nenhuma despesa registrada neste mês."
     },
+    "net": {
+      "title": "Resultado líquido",
+      "savingsRate": "Taxa de poupança",
+      "completed": "Realizado"
+    },
     "expensesByCategory": {
       "title": "Despesas por categoria",
       "breakdown": "Pago {{completed}} · A pagar {{pending}}",
