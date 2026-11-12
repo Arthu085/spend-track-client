@@ -294,6 +294,121 @@ describe('Saving plans on the dashboard', () => {
     });
   });
 
+  describe('contribute from the investment row', () => {
+    const plannedOccurrence = (uuid: string, date: string, amount: string) => ({
+      uuid,
+      date,
+      amount,
+      overdue: false,
+    });
+    const rowOf = ({ investment }: SavingPlan) => ({
+      uuid: investment.uuid,
+      name: investment.name,
+      type: investment.type,
+      typeLabel: investment.typeLabel,
+      currentValue: '0.00',
+      targetAmount: null,
+      progress: null,
+    });
+    const renderRow = (plan: SavingPlan, routes: StubRoutes = {}) =>
+      renderWithRoutes(AppRoutes.DASHBOARD, {
+        'GET /dashboard': envelope(
+          buildDashboard({
+            investments: investmentsWith({
+              items: [rowOf(plan)],
+              savingPlans: [plan],
+            }),
+          }),
+        ),
+        ...routes,
+      });
+    const contributeTo = async (plan: SavingPlan) => {
+      fireEvent.click(
+        await screen.findByRole('button', {
+          name: i18n.t('investments.actions.contribute', {
+            name: plan.investment.name,
+          }),
+        }),
+      );
+    };
+
+    it('confirms the earliest planned occurrence with its amount prefilled', async () => {
+      const plan = buildSavingPlan({
+        mandatory: {
+          planned: '1000.00',
+          completed: '0.00',
+          plannedOccurrences: [
+            plannedOccurrence('later', '2026-10-20', '300.00'),
+            plannedOccurrence('earliest', '2026-10-05', '700.00'),
+          ],
+        },
+      });
+      const path = `PUT /recurrences/${plan.recurrence.uuid}/occurrences/earliest/confirmation`;
+      const { sent } = renderRow(plan, {
+        [path]: envelope(
+          {
+            uuid: 'earliest',
+            occurrenceDate: '2026-10-05',
+            date: '2026-10-05',
+            amount: '700.00',
+            description: plan.recurrence.description,
+            state: 'COMPLETED',
+            stateLabel: 'Realizada',
+            completedOn: '2026-10-29',
+            transactionUuid: null,
+            purchaseUuid: null,
+            movementUuid: 'movement',
+            invoiceMonth: null,
+          },
+          'Aporte confirmado',
+        ),
+      });
+
+      await contributeTo(plan);
+      const dialog = await findDialog(
+        i18n.t('recurrences.confirm.contributionDescription', {
+          description: plan.recurrence.description,
+        }),
+      );
+
+      expect(
+        within(dialog).getByLabelText(i18n.t('recurrences.fields.amount')),
+      ).toHaveValue('700.00');
+
+      save(dialog);
+
+      expect(await screen.findByText('Aporte confirmado')).toBeInTheDocument();
+      expect(requestBody(sent(path)[0])).toEqual({
+        amount: '700.00',
+        date: '2026-10-29',
+      });
+    });
+
+    it('opens the one-time contribution without a planned occurrence', async () => {
+      const plan = buildSavingPlan({
+        mandatory: {
+          planned: '0.00',
+          completed: '700.00',
+          plannedOccurrences: [],
+        },
+      });
+      const emptyPage = {
+        status: 200,
+        data: { data: [], meta: { total: 0, page: 1, limit: 50 } },
+      };
+      renderRow(plan, {
+        'GET /investments': emptyPage,
+        'GET /accounts': emptyPage,
+      });
+
+      await contributeTo(plan);
+
+      expect(
+        await findDialog(i18n.t('investments.contribution.title')),
+      ).toBeInTheDocument();
+    });
+  });
+
   it('prefills the suggestion and records it only after the explicit action', async () => {
     const plan = buildSavingPlan();
     const { dialog, sent } = await openAccept(plan, {

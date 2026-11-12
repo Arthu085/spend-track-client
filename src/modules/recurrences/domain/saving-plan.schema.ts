@@ -120,3 +120,24 @@ export const accountsWithOverlappingSuggestions = (
     ),
   ];
 };
+
+export interface PlannedContribution {
+  plan: SavingPlan;
+  occurrence: SavingPlanOccurrence;
+}
+
+export const nextPlannedContributionOf = (
+  plans: SavingPlan[],
+  investmentUuid: string,
+): PlannedContribution | undefined =>
+  plans
+    .filter((plan) => plan.investment.uuid === investmentUuid)
+    .flatMap((plan) =>
+      plan.mandatory.plannedOccurrences.map((occurrence) => ({
+        plan,
+        occurrence,
+      })),
+    )
+    .sort((left, right) =>
+      left.occurrence.date.localeCompare(right.occurrence.date),
+    )[0];

@@ -372,7 +372,9 @@ Transaction indicators, each with its own empty state:
 - **Investments and goals:** the total value of active investments, the month's completed
   contributions and withdrawals (with the planned amount when there is one), and each active
   investment with its value and target progress (see [Investments](#investments)). It links to the
-  investments page. Contributions and withdrawals never count as income or expenses.
+  investments page. Contributions and withdrawals never count as income or expenses. A row's
+  contribute action confirms the investment's earliest planned mandatory occurrence from the saving
+  plans, prefilled with its amount, and opens a one-time contribution only when none is planned.
 - **Contributions by kind:** when the month has any, the investments card separates mandatory,
   optional additional, and one-time contributions, each with confirmed and planned amounts.
 - **Saving plans:** each monthly contribution with a saving strategy shows the balance for the

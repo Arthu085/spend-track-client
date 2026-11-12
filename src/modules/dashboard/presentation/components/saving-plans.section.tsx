@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { investmentMovementsPath } from '@/core/router/app-routes';
 import {
   accountsWithOverlappingSuggestions,
+  type PlannedContribution,
   resultingTotalOf,
   retainedBalanceOf,
   type SavingPlan,
@@ -184,11 +185,6 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
   );
 };
 
-interface ConfirmingTarget {
-  plan: SavingPlan;
-  occurrence: SavingPlanOccurrence;
-}
-
 const contributionOf = (recurrence?: SavingPlan['recurrence']) => ({
   uuid: recurrence?.uuid ?? '',
   type: 'INVESTMENT_CONTRIBUTION' as const,
@@ -197,9 +193,35 @@ const contributionOf = (recurrence?: SavingPlan['recurrence']) => ({
   creditCard: null,
 });
 
-export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
+interface ConfirmContributionModalProps {
+  open: boolean;
+  target?: PlannedContribution;
+  onClose: () => void;
+}
+
+export const ConfirmContributionModal = ({
+  open,
+  target,
+  onClose,
+}: ConfirmContributionModalProps) => (
+  <OccurrenceFormModal
+    open={open}
+    recurrence={contributionOf(target?.plan.recurrence)}
+    target={target && { action: 'confirm', occurrence: target.occurrence }}
+    onClose={onClose}
+  />
+);
+
+interface SavingPlansSectionProps {
+  plans: SavingPlan[];
+  onConfirm: (target: PlannedContribution) => void;
+}
+
+export const SavingPlansSection = ({
+  plans,
+  onConfirm,
+}: SavingPlansSectionProps) => {
   const { t } = useTranslation();
-  const confirming = useModalTarget<ConfirmingTarget>();
   const accepting = useModalTarget<string>();
   const acceptingPlan = plans.find(
     (plan) => plan.recurrence.uuid === accepting.target,
@@ -232,22 +254,11 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
           key={plan.recurrence.uuid}
           plan={plan}
           onConfirm={(target, occurrence) => {
-            confirming.show({ plan: target, occurrence });
+            onConfirm({ plan: target, occurrence });
           }}
           onAccept={(target) => accepting.show(target.recurrence.uuid)}
         />
       ))}
-      <OccurrenceFormModal
-        open={confirming.open}
-        recurrence={contributionOf(confirming.target?.plan.recurrence)}
-        target={
-          confirming.target && {
-            action: 'confirm',
-            occurrence: confirming.target.occurrence,
-          }
-        }
-        onClose={confirming.close}
-      />
       <AcceptAdditionalContributionModal
         open={accepting.open}
         plan={acceptingPlan}

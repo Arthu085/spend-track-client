@@ -20,6 +20,10 @@ import {
   InvestmentContributionModal,
 } from '@/modules/investments/presentation/components/investment-contribution.modal';
 import { InvestmentProgress } from '@/modules/investments/presentation/components/investment-progress';
+import {
+  nextPlannedContributionOf,
+  type PlannedContribution,
+} from '@/modules/recurrences/domain/saving-plan.schema';
 import { IconActionButton } from '@/shared/components/icon-action-button';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
@@ -29,7 +33,10 @@ import type {
   DashboardAmounts,
   DashboardInvestments,
 } from '../../domain/dashboard.schema';
-import { SavingPlansSection } from './saving-plans.section';
+import {
+  ConfirmContributionModal,
+  SavingPlansSection,
+} from './saving-plans.section';
 
 type DashboardInvestment = DashboardInvestments['items'][number];
 
@@ -186,7 +193,21 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
   const contributing = useModalTarget<{
     investment?: ContributionInvestment;
   }>();
+  const confirming = useModalTarget<PlannedContribution>();
   const hasInvestments = investments.items.length > 0;
+
+  const contributeTo = (investment: ContributionInvestment) => {
+    const planned = nextPlannedContributionOf(
+      investments.savingPlans,
+      investment.uuid,
+    );
+
+    if (planned) {
+      confirming.show(planned);
+    } else {
+      contributing.show({ investment });
+    }
+  };
 
   const columns: TableColumnsType<DashboardInvestment> = [
     {
@@ -226,7 +247,7 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
           size="small"
           icon={<PlusCircleOutlined />}
           label={t('investments.actions.contribute', { name })}
-          onClick={() => contributing.show({ investment: { uuid, name } })}
+          onClick={() => contributeTo({ uuid, name })}
         />
       ),
     },
@@ -274,12 +295,20 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
             />
           )}
         </Flex>
-        <SavingPlansSection plans={investments.savingPlans} />
+        <SavingPlansSection
+          plans={investments.savingPlans}
+          onConfirm={confirming.show}
+        />
       </Flex>
       <InvestmentContributionModal
         open={contributing.open}
         investment={contributing.target?.investment}
         onClose={contributing.close}
+      />
+      <ConfirmContributionModal
+        open={confirming.open}
+        target={confirming.target}
+        onClose={confirming.close}
       />
     </Card>
   );
