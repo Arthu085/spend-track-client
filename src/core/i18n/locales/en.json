@@ -531,6 +531,7 @@
       "endFromInvoiceMonth": "Planned charges on this invoice and later ones are removed. Earlier invoices stay as they are.",
       "endEntire": "The recurrence ends today. Planned occurrences up to today are kept, and later ones are removed.",
       "investmentFixed": "The investment cannot change later.",
+      "descriptionFromInvestment": "If left empty, the investment name is used.",
       "savingStrategy": "Monthly only. The amount above stays mandatory, and the dashboard suggests what is left of the month. Nothing is created until you accept it.",
       "minimumRetainedBalance": "Kept in the account before anything is suggested."
     },
