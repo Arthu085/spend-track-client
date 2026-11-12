@@ -2,15 +2,16 @@ import { PlusCircleOutlined } from '@ant-design/icons';
 import {
   Button,
   Card,
-  Col,
+  Divider,
   Empty,
   Flex,
-  Row,
+  Grid,
   Table,
   type TableColumnsType,
+  theme,
   Typography,
 } from 'antd';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -43,13 +44,11 @@ interface KpiProps {
 }
 
 const Kpi = ({ label, amount, children }: KpiProps) => (
-  <Flex vertical gap="small">
-    <div>
-      <Typography.Text type="secondary">{label}</Typography.Text>
-      <Typography.Title level={3} style={{ margin: '4px 0' }}>
-        <MoneyText amount={amount} aria-label={label} />
-      </Typography.Title>
-    </div>
+  <Flex vertical>
+    <Typography.Text type="secondary">{label}</Typography.Text>
+    <Typography.Title level={3} style={{ margin: '4px 0' }}>
+      <MoneyText amount={amount} aria-label={label} />
+    </Typography.Title>
     {children}
   </Flex>
 );
@@ -104,20 +103,80 @@ const ContributionBreakdownSummary = ({
       vertical
       role="group"
       aria-label={t('dashboard.investments.breakdown.label')}
+      gap="small"
     >
-      {kinds.map(({ key, completed, planned }) => (
-        <Flex key={key} justify="space-between" gap="small" wrap>
-          <Typography.Text type="secondary">
-            {t(`dashboard.investments.breakdown.${key}`)}
-          </Typography.Text>
-          <Typography.Text>
-            {t('dashboard.investments.breakdown.amounts', {
-              completed: formatMoney(completed, i18n.language),
-              planned: formatMoney(planned, i18n.language),
-            })}
-          </Typography.Text>
-        </Flex>
-      ))}
+      <Divider titlePlacement="start" plain style={{ margin: 0 }}>
+        {t('dashboard.investments.breakdown.label')}
+      </Divider>
+      <Flex gap="large" wrap>
+        {kinds.map(({ key, completed, planned }) => (
+          <Flex key={key} vertical>
+            <Typography.Text type="secondary">
+              {t(`dashboard.investments.breakdown.${key}`)}
+            </Typography.Text>
+            <Typography.Text>
+              {t('dashboard.investments.breakdown.amounts', {
+                completed: formatMoney(completed, i18n.language),
+                planned: formatMoney(planned, i18n.language),
+              })}
+            </Typography.Text>
+          </Flex>
+        ))}
+      </Flex>
+    </Flex>
+  );
+};
+
+const InvestmentsSummary = ({ investments }: InvestmentsCardProps) => {
+  const { t } = useTranslation();
+  const { token } = theme.useToken();
+  const { md } = Grid.useBreakpoint();
+
+  const kpis = [
+    {
+      key: 'totalValue',
+      label: t('dashboard.investments.totalValue'),
+      amount: investments.totalValue,
+    },
+    {
+      key: 'contributions',
+      label: t('dashboard.investments.contributions'),
+      amount: investments.contributions.completed,
+      pending: investments.contributions,
+    },
+    {
+      key: 'withdrawals',
+      label: t('dashboard.investments.withdrawals'),
+      amount: investments.withdrawals.completed,
+      pending: investments.withdrawals,
+    },
+  ];
+
+  return (
+    <Flex
+      vertical
+      gap="middle"
+      style={{
+        padding: token.padding,
+        background: token.colorFillAlter,
+        borderRadius: token.borderRadiusLG,
+      }}
+    >
+      <Flex vertical={!md} gap={md ? 'large' : 'middle'}>
+        {kpis.map(({ key, label, amount, pending }, index) => (
+          <Fragment key={key}>
+            {md && index > 0 && (
+              <Divider vertical style={{ height: 'auto', margin: 0 }} />
+            )}
+            <Kpi label={label} amount={amount}>
+              {pending && <PendingAmount amounts={pending} />}
+            </Kpi>
+          </Fragment>
+        ))}
+      </Flex>
+      <ContributionBreakdownSummary
+        breakdown={investments.contributionBreakdown}
+      />
     </Flex>
   );
 };
@@ -189,33 +248,7 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
       }
     >
       <Flex vertical gap="large">
-        <Row gutter={[16, 16]}>
-          <Col xs={24} md={8}>
-            <Kpi
-              label={t('dashboard.investments.totalValue')}
-              amount={investments.totalValue}
-            />
-          </Col>
-          <Col xs={24} md={8}>
-            <Kpi
-              label={t('dashboard.investments.contributions')}
-              amount={investments.contributions.completed}
-            >
-              <PendingAmount amounts={investments.contributions} />
-              <ContributionBreakdownSummary
-                breakdown={investments.contributionBreakdown}
-              />
-            </Kpi>
-          </Col>
-          <Col xs={24} md={8}>
-            <Kpi
-              label={t('dashboard.investments.withdrawals')}
-              amount={investments.withdrawals.completed}
-            >
-              <PendingAmount amounts={investments.withdrawals} />
-            </Kpi>
-          </Col>
-        </Row>
+        <InvestmentsSummary investments={investments} />
         <Flex vertical gap="small">
           <Flex justify="space-between" align="center" gap="middle" wrap>
             <Typography.Text strong>

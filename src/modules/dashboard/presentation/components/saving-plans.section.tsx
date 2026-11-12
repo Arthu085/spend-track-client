@@ -1,4 +1,4 @@
-import { Alert, Button, Col, Flex, Row, Space, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Flex, Space, Tag, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -12,7 +12,6 @@ import {
 } from '@/modules/recurrences/domain/saving-plan.schema';
 import { AcceptAdditionalContributionModal } from '@/modules/recurrences/presentation/components/accept-additional-contribution.modal';
 import { OccurrenceFormModal } from '@/modules/recurrences/presentation/components/occurrence-form.modal';
-import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
@@ -25,13 +24,11 @@ interface PlanFigureProps {
 }
 
 const PlanFigure = ({ label, children, detail }: PlanFigureProps) => (
-  <Col xs={24} sm={12}>
-    <Flex vertical>
-      <Typography.Text type="secondary">{label}</Typography.Text>
-      {children}
-      {detail && <Typography.Text type="secondary">{detail}</Typography.Text>}
-    </Flex>
-  </Col>
+  <Flex vertical style={{ flex: '1 1 160px' }}>
+    <Typography.Text type="secondary">{label}</Typography.Text>
+    {children}
+    {detail && <Typography.Text type="secondary">{detail}</Typography.Text>}
+  </Flex>
 );
 
 const PlanAmount = ({ label, amount }: { label: string; amount: string }) => (
@@ -67,11 +64,7 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
     additional !== null;
 
   return (
-    <EqualHeightCard
-      size="small"
-      role="group"
-      aria-label={recurrence.description}
-    >
+    <Card size="small" role="group" aria-label={recurrence.description}>
       <Flex vertical gap="middle">
         <Flex vertical>
           <Typography.Text strong>{recurrence.description}</Typography.Text>
@@ -92,7 +85,7 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
             })}
           />
         )}
-        <Row gutter={[16, 12]}>
+        <Flex gap="large" wrap>
           <PlanFigure label={t('dashboard.savingPlans.mandatory')}>
             <Typography.Text strong>
               {t('dashboard.savingPlans.mandatoryDetail', {
@@ -143,7 +136,7 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
               aria-label={t('dashboard.savingPlans.retained')}
             />
           </PlanFigure>
-        </Row>
+        </Flex>
         {isPositiveMoney(cardObligations) && (
           <Typography.Text type="secondary">
             {t('dashboard.savingPlans.cardNote', {
@@ -187,7 +180,7 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
           </Flex>
         )}
       </Flex>
-    </EqualHeightCard>
+    </Card>
   );
 };
 
@@ -234,19 +227,16 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
           title={t('dashboard.savingPlans.overlap', { account })}
         />
       ))}
-      <Row gutter={[16, 16]} align="stretch">
-        {plans.map((plan) => (
-          <Col key={plan.recurrence.uuid} xs={24} xl={12}>
-            <SavingPlanCard
-              plan={plan}
-              onConfirm={(target, occurrence) => {
-                confirming.show({ plan: target, occurrence });
-              }}
-              onAccept={(target) => accepting.show(target.recurrence.uuid)}
-            />
-          </Col>
-        ))}
-      </Row>
+      {plans.map((plan) => (
+        <SavingPlanCard
+          key={plan.recurrence.uuid}
+          plan={plan}
+          onConfirm={(target, occurrence) => {
+            confirming.show({ plan: target, occurrence });
+          }}
+          onAccept={(target) => accepting.show(target.recurrence.uuid)}
+        />
+      ))}
       <OccurrenceFormModal
         open={confirming.open}
         recurrence={contributionOf(confirming.target?.plan.recurrence)}
