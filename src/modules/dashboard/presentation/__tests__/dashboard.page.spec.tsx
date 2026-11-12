@@ -28,7 +28,10 @@ import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
 import { formatMoney } from '@/shared/money/money';
 import type { Transaction } from '@/modules/transactions/domain/transaction.schema';
-import type { Dashboard } from '../../domain/dashboard.schema';
+import type {
+  Dashboard,
+  DashboardBudgetLimit,
+} from '../../domain/dashboard.schema';
 import { formatMonthLabel } from '@/shared/date/month-ref';
 
 const sessionUser: UserDetail = {
@@ -378,6 +381,175 @@ describe('DashboardPage', () => {
     const page = await main();
     await within(page).findByLabelText(i18n.t('dashboard.balances.available'));
     expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  describe('needs attention', () => {
+    const limit = (overrides: Partial<DashboardBudgetLimit> = {}) => ({
+      limit: '500.00',
+      total: '200.00',
+      completed: '200.00',
+      pending: '0.00',
+      remaining: '300.00',
+      overspent: '0.00',
+      ...overrides,
+    });
+    const category = (name: string) => ({
+      uuid: `${name}-uuid`,
+      name,
+      color: null,
+    });
+    const upcomingExpense = (uuid: string, overdue: boolean) => ({
+      uuid,
+      type: 'EXPENSE' as const,
+      typeLabel: 'Despesa',
+      description: 'Aluguel',
+      amount: '300.00',
+      date: '2026-10-05',
+      overdue,
+      account: {
+        uuid: 'account-uuid',
+        name: 'Nubank',
+        status: 'ACTIVE' as const,
+      },
+      destinationAccount: null,
+      category: category('Moradia'),
+    });
+    const plannedCharge = (uuid: string, overdue: boolean) => ({
+      uuid,
+      recurrenceUuid: 'recurrence-uuid',
+      description: 'Netflix',
+      amount: '55.90',
+      date: '2026-10-15',
+      invoiceMonth: '2026-10-01',
+      overdue,
+      card: { uuid: 'card-uuid', name: 'Visa' },
+      category: category('Lazer'),
+    });
+    const needingAttention = buildDashboard({
+      balances: { actual: '100.00', projected: '50.00', available: '-250.50' },
+      upcoming: [
+        upcomingExpense('upcoming-overdue-1', true),
+        upcomingExpense('upcoming-overdue-2', true),
+        upcomingExpense('upcoming-next', false),
+      ],
+      upcomingCount: 3,
+      creditCards: {
+        ...buildDashboard().creditCards,
+        invoices: [
+          buildCreditCardInvoice({
+            uuid: 'invoice-overdue',
+            status: 'OVERDUE',
+            statusLabel: 'Vencida',
+            outstanding: '300.00',
+          }),
+          buildCreditCardInvoice({
+            uuid: 'invoice-closed',
+            status: 'CLOSED',
+            statusLabel: 'Fechada',
+            outstanding: '120.00',
+          }),
+          buildCreditCardInvoice({
+            uuid: 'invoice-closed-paid',
+            status: 'CLOSED',
+            statusLabel: 'Fechada',
+            outstanding: '0.00',
+          }),
+          buildCreditCardInvoice({ uuid: 'invoice-open' }),
+        ],
+        plannedCharges: [
+          plannedCharge('charge-overdue', true),
+          plannedCharge('charge-next', false),
+        ],
+        plannedChargesCount: 2,
+      },
+      budget: {
+        overall: limit({ total: '650.00', overspent: '150.00' }),
+        categories: [
+          {
+            ...limit({ total: '700.00', overspent: '200.00' }),
+            category: category('Mercado'),
+          },
+          { ...limit(), category: category('Lazer') },
+        ],
+      },
+    });
+
+    it('lists what needs attention, each with a link to act on it', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': envelope(needingAttention),
+      });
+
+      const strip = await within(await main()).findByRole('alert');
+      const link = (key: ParseKeys) =>
+        within(strip).getAllByRole('link', { name: i18n.t(key) });
+
+      expect(
+        within(strip).getByText(i18n.t('dashboard.attention.title')),
+      ).toBeInTheDocument();
+      for (const message of [
+        i18n.t('dashboard.balances.shortfall', { amount: money('250.50') }),
+        i18n.t('dashboard.attention.overdueInvoices', {
+          count: 1,
+          amount: money('300.00'),
+        }),
+        i18n.t('dashboard.attention.overdueTransactions', { count: 2 }),
+        i18n.t('dashboard.attention.overdueCardCharges', { count: 1 }),
+        i18n.t('dashboard.attention.closedInvoices', {
+          count: 1,
+          amount: money('120.00'),
+        }),
+        i18n.t('dashboard.attention.overallOverspent', {
+          amount: money('150.00'),
+        }),
+        i18n.t('dashboard.attention.categoriesOverspent', {
+          count: 1,
+          categories: 'Mercado',
+        }),
+      ]) {
+        expect(within(strip).getByText(message)).toBeInTheDocument();
+      }
+      expect(within(strip).getAllByRole('listitem')).toHaveLength(7);
+      expect(link('dashboard.attention.actions.accounts')[0]).toHaveAttribute(
+        'href',
+        AppRoutes.ACCOUNTS,
+      );
+      expect(
+        link('dashboard.attention.actions.transactions')[0],
+      ).toHaveAttribute('href', `${AppRoutes.TRANSACTIONS}?year=2026&month=10`);
+      expect(
+        link('dashboard.attention.actions.recurrences')[0],
+      ).toHaveAttribute('href', AppRoutes.RECURRENCES);
+      for (const invoices of link('dashboard.attention.actions.invoices')) {
+        expect(invoices).toHaveAttribute('href', AppRoutes.CREDIT_CARDS);
+      }
+      for (const budget of link('dashboard.attention.actions.budget')) {
+        expect(budget).toHaveAttribute(
+          'href',
+          `${AppRoutes.BUDGETS}?year=2026&month=10`,
+        );
+      }
+    });
+
+    it('stays hidden when nothing needs attention', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /dashboard': envelope(
+          buildDashboard({
+            creditCards: {
+              ...buildDashboard().creditCards,
+              invoices: [buildCreditCardInvoice()],
+            },
+            budget: { overall: limit(), categories: [] },
+          }),
+        ),
+      });
+
+      const page = await main();
+      await within(page).findByRole('heading', monthHeading(2026, 10));
+
+      expect(
+        within(page).queryByText(i18n.t('dashboard.attention.title')),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('explains what the selected perspective changes', async () => {

@@ -19,29 +19,23 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { getApiErrorMessage } from '@/core/http/api-error';
-import { AppRoutes } from '@/core/router/app-routes';
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { CreditCardPurchaseFormModal } from '@/modules/credit-cards/presentation/components/credit-card-purchase-form.modal';
 import { TransactionFormModal } from '@/modules/transactions/presentation/components/transaction-form.modal';
 import { useMonthParam } from '@/shared/date/use-month-param';
-import type { DashboardPeriod } from '../../domain/dashboard.schema';
 import { useDashboard } from '../../infra/dashboard.queries';
 import { AccountBalancesCard } from '../components/account-balances.card';
+import { AttentionStrip } from '../components/attention-strip';
 import { BalanceSummary } from '../components/balance-summary';
 import { BudgetCard } from '../components/budget.card';
 import { CashFlowSummary } from '../components/cash-flow-summary';
 import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
 import { ExpensesByCategoryCard } from '../components/expenses-by-category.card';
 import { InvestmentsCard } from '../components/investments.card';
+import { budgetOfMonth } from '../components/month-links';
 import { PeriodNavigator } from '../components/period-navigator';
 import { PerspectiveSwitch } from '../components/perspective-switch';
 import { UpcomingTransactionsCard } from '../components/upcoming-transactions.card';
-
-const budgetOfMonth = ({ year, month }: DashboardPeriod) =>
-  `${AppRoutes.BUDGETS}?${new URLSearchParams({
-    year: String(year),
-    month: String(month),
-  }).toString()}`;
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
@@ -112,6 +106,7 @@ export const DashboardPage = () => {
             <AccountBalancesCard accounts={dashboard.accounts} />
           )}
           <BalanceSummary balances={dashboard.balances} />
+          <AttentionStrip dashboard={dashboard} />
           <CashFlowSummary
             income={dashboard.income}
             expenses={dashboard.expenses}

@@ -1,7 +1,6 @@
-import { Alert, Col, Flex, Row, Typography } from 'antd';
+import { Col, Flex, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { EqualHeightCard } from '@/shared/components/equal-height-card';
-import { formatMoney, isNegativeMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type { Dashboard } from '../../domain/dashboard.schema';
 
@@ -10,7 +9,7 @@ interface BalanceSummaryProps {
 }
 
 export const BalanceSummary = ({ balances }: BalanceSummaryProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const items = [
     {
@@ -35,18 +34,6 @@ export const BalanceSummary = ({ balances }: BalanceSummaryProps) => {
 
   return (
     <Flex vertical gap="middle">
-      {isNegativeMoney(balances.available) && (
-        <Alert
-          type="warning"
-          showIcon
-          title={t('dashboard.balances.shortfall', {
-            amount: formatMoney(
-              balances.available.replace('-', ''),
-              i18n.language,
-            ),
-          })}
-        />
-      )}
       <Row gutter={[16, 16]} align="stretch">
         {items.map(({ key, label, hint, amount }) => (
           <Col key={key} xs={24} md={8}>

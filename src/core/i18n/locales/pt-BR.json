@@ -154,6 +154,27 @@
       "accept": "Registrar aporte adicional",
       "viewMovements": "Ver movimentações",
       "route": "{{account}} → {{investment}}"
+    },
+    "attention": {
+      "title": "Precisa de atenção",
+      "overdueTransactions_one": "{{count}} transação planejada está atrasada.",
+      "overdueTransactions_other": "{{count}} transações planejadas estão atrasadas.",
+      "overdueCardCharges_one": "{{count}} cobrança recorrente de cartão está atrasada.",
+      "overdueCardCharges_other": "{{count}} cobranças recorrentes de cartão estão atrasadas.",
+      "overdueInvoices_one": "{{count}} fatura de cartão está vencida, com {{amount}} em aberto.",
+      "overdueInvoices_other": "{{count}} faturas de cartão estão vencidas, com {{amount}} em aberto.",
+      "closedInvoices_one": "{{count}} fatura de cartão fechada aguarda o pagamento de {{amount}}.",
+      "closedInvoices_other": "{{count}} faturas de cartão fechadas aguardam o pagamento de {{amount}}.",
+      "overallOverspent": "O limite geral foi excedido em {{amount}}.",
+      "categoriesOverspent_one": "{{count}} categoria está acima do limite: {{categories}}.",
+      "categoriesOverspent_other": "{{count}} categorias estão acima do limite: {{categories}}.",
+      "actions": {
+        "accounts": "Revisar contas",
+        "invoices": "Ver faturas",
+        "transactions": "Revisar transações",
+        "recurrences": "Revisar recorrências",
+        "budget": "Revisar orçamento"
+      }
     }
   },
   "month": {

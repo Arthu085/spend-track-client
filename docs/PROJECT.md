@@ -322,7 +322,7 @@ greets the user, offers a single "New" menu for creating, and holds the month na
 perspective switch; page navigation stays in the sidebar. It reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
 and available balances, and the balance of each active account. A user without accounts sees the
-invitation to add one right below the month, and a negative available balance shows a warning with the amount missing. Previous and next buttons move through past and future months and keep the month in the URL
+invitation to add one right below the month. Previous and next buttons move through past and future months and keep the month in the URL
 (`?year=2026&month=11`); without it the API picks the user's default month. The perspective switch
 saves the preference with `PATCH /preferences` and reloads the dashboard, and a line below it says what the
 selected perspective changes: card spending moves between months, balances and invoices never do. Account, category,
@@ -333,6 +333,14 @@ transaction and planned investment contribution or withdrawal dated up to the en
 overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
+
+A compact "Needs attention" warning lists, only when present, a negative available balance
+(with the amount missing), overdue card invoices and closed invoices still awaiting payment (with
+the amount due), overdue planned transactions among those shown as upcoming, overdue planned
+card charges, and an overall or category budget limit exceeded. Each item links to the page that
+resolves it: accounts, credit cards, the month on the transactions or budgets page, or
+recurrences. Nothing is shown when no item applies; everything is derived from the dashboard
+response.
 
 Transaction indicators, each with its own empty state:
 
