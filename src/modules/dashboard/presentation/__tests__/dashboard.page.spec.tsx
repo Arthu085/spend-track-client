@@ -325,7 +325,7 @@ describe('DashboardPage', () => {
       month: 11,
     });
     expect(
-      within(page).getByText(i18n.t('dashboard.period.timing.FUTURE')),
+      await within(page).findByText(i18n.t('dashboard.period.timing.FUTURE')),
     ).toBeInTheDocument();
 
     fireEvent.click(

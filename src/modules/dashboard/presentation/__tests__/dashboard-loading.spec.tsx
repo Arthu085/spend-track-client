@@ -39,7 +39,10 @@ const envelope = (data: unknown): StubResponse => ({
 type DashboardRoute =
   StubResponse | ((config: InternalAxiosRequestConfig) => StubResponse);
 
-const renderDashboard = (dashboardRoute: DashboardRoute) => {
+const renderDashboard = (
+  dashboardRoute: DashboardRoute,
+  path: string = AppRoutes.DASHBOARD,
+) => {
   const routes: Record<string, DashboardRoute> = {
     'GET /auth/csrf': csrfResponse('csrf-token'),
     'GET /users/me': envelope(sessionUser),
@@ -48,11 +51,11 @@ const renderDashboard = (dashboardRoute: DashboardRoute) => {
     'GET /dashboard': dashboardRoute,
   };
   const requests = stubHttpRoutes(httpClient, routes);
-  const { queryClient } = renderRoute(AppRoutes.DASHBOARD);
+  const { router, queryClient } = renderRoute(path);
   const dashboardRequests = () =>
     requests.filter((request) => requestKey(request) === 'GET /dashboard');
 
-  return { routes, queryClient, dashboardRequests };
+  return { routes, router, queryClient, dashboardRequests };
 };
 
 // Holds the dashboard requests that match until the returned release is called.
@@ -88,8 +91,11 @@ const monthOf = ({ params }: InternalAxiosRequestConfig) => {
     : dashboard;
 };
 
-const isNovember = ({ params }: InternalAxiosRequestConfig) =>
-  (params as { month?: number } | undefined)?.month === 11;
+const requestedMonth = ({ params }: InternalAxiosRequestConfig) =>
+  (params as { month?: number } | undefined)?.month;
+
+const isNovember = (config: InternalAxiosRequestConfig) =>
+  requestedMonth(config) === 11;
 
 const invalidMonth: StubResponse = {
   status: 400,
@@ -101,6 +107,11 @@ const retryButton = (container: HTMLElement) =>
 
 const loadingDashboard = () =>
   screen.queryByRole('status', { name: i18n.t('dashboard.loading') });
+
+const monthButton = (
+  container: HTMLElement,
+  key: 'month.previous' | 'month.next',
+) => within(container).getByRole('button', { name: i18n.t(key) });
 
 describe('DashboardPage loading states', () => {
   it('shows a skeleton of the dashboard until the month loads', async () => {
@@ -150,13 +161,19 @@ describe('DashboardPage loading states', () => {
     ).toBeInTheDocument();
     expect(content()).toHaveAttribute('aria-busy', 'true');
     expect(
-      within(page).getByRole('heading', monthHeading(2026, 10)),
+      within(page).getByRole('heading', monthHeading(2026, 11)),
     ).toBeInTheDocument();
+    expect(
+      within(page).queryByText(i18n.t('dashboard.period.timing.CURRENT')),
+    ).not.toBeInTheDocument();
 
     release();
 
     expect(
-      await within(page).findByRole('heading', monthHeading(2026, 11)),
+      await within(page).findByText(i18n.t('dashboard.period.timing.CURRENT')),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByRole('heading', monthHeading(2026, 11)),
     ).toBeInTheDocument();
     expect(loadingMonth()).not.toBeInTheDocument();
     expect(content()).toHaveAttribute('aria-busy', 'false');
@@ -168,6 +185,7 @@ describe('DashboardPage loading states', () => {
     const page = await screen.findByRole('main');
     const alert = await within(page).findByRole('alert');
     expect(alert).toHaveTextContent('Mês inválido');
+    expect(monthButton(page, 'month.next')).toBeInTheDocument();
 
     routes['GET /dashboard'] = envelope(buildDashboard());
     fireEvent.click(retryButton(alert));
@@ -204,5 +222,79 @@ describe('DashboardPage loading states', () => {
       expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
     });
     expect(dashboardRequests()).toHaveLength(3);
+  });
+
+  it.each([
+    { button: 'month.previous', month: 10 },
+    { button: 'month.next', month: 12 },
+  ] as const)(
+    'moves from a month that failed to load with $button',
+    async ({ button, month }) => {
+      const { router, dashboardRequests } = renderDashboard(
+        (config) =>
+          isNovember(config) ? invalidMonth : envelope(monthOf(config)),
+        `${AppRoutes.DASHBOARD}?year=2026&month=11`,
+      );
+
+      const page = await screen.findByRole('main');
+      const alert = await within(page).findByRole('alert');
+      expect(alert).toHaveTextContent('Mês inválido');
+      expect(
+        within(page).getByRole('heading', monthHeading(2026, 11)),
+      ).toBeInTheDocument();
+
+      fireEvent.click(monthButton(page, button));
+
+      expect(
+        await within(page).findByText(
+          i18n.t('dashboard.period.timing.CURRENT'),
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByRole('heading', monthHeading(2026, month)),
+      ).toBeInTheDocument();
+      expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
+      expect(router.state.location.search).toBe(`?year=2026&month=${month}`);
+      expect(dashboardRequests().at(-1)?.params).toEqual({ year: 2026, month });
+    },
+  );
+
+  it('moves on from the requested month while the previous one is shown', async () => {
+    const { router, dashboardRequests } = renderDashboard((config) =>
+      envelope(monthOf(config)),
+    );
+    const release = holdDashboardRequests(isNovember);
+
+    const page = await screen.findByRole('main');
+    await within(page).findByRole('heading', monthHeading(2026, 10));
+
+    fireEvent.click(monthButton(page, 'month.next'));
+    await within(page).findByRole('status', {
+      name: i18n.t('dashboard.period.loading'),
+    });
+    fireEvent.click(monthButton(page, 'month.next'));
+
+    await waitFor(() => {
+      expect(router.state.location.search).toBe('?year=2026&month=12');
+    });
+    expect(
+      await within(page).findByText(i18n.t('dashboard.period.timing.CURRENT')),
+    ).toBeInTheDocument();
+    expect(
+      within(page).getByRole('heading', monthHeading(2026, 12)),
+    ).toBeInTheDocument();
+
+    release();
+
+    await waitFor(() => {
+      expect(dashboardRequests().map(requestedMonth)).toEqual([
+        undefined,
+        12,
+        11,
+      ]);
+    });
+    expect(
+      within(page).getByRole('heading', monthHeading(2026, 12)),
+    ).toBeInTheDocument();
   });
 });
