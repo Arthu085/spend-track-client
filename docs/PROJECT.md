@@ -334,6 +334,12 @@ overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
 
+While the first month loads, a skeleton shaped like the header controls and the page's sections
+holds their place. Moving to another month keeps the previous month on screen, dimmed and marked
+busy, with a spinner next to the month until the new month arrives. When the dashboard cannot
+load, an error with the API message offers to try again; when a refresh fails after a month has
+loaded, a warning says the figures on screen are the last ones loaded and offers to try again.
+
 The overview opens the page. Its dominant figures are the amount left to spend
 (`spendingGuidance.remaining`, the lower of what the overall limit leaves and the available
 balance) and the informational daily allowance (a dash once no days are left). Next to them, the
