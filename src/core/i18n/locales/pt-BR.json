@@ -117,12 +117,13 @@
     "investments": {
       "title": "Investimentos e metas",
       "manage": "Gerenciar investimentos",
-      "totalValue": "Valor total:",
-      "contributions": "Aportado no mês:",
-      "withdrawals": "Resgatado no mês:",
-      "pending": "(+{{amount}} previsto)",
+      "totalValue": "Valor total",
+      "contributions": "Aportado no mês",
+      "withdrawals": "Resgatado no mês",
+      "pending": "+{{amount}} previsto",
       "empty": "Nenhum investimento, reserva ou meta ativa.",
       "contribute": "Aportar",
+      "portfolio": "Carteira",
       "breakdown": {
         "label": "Aportes por tipo",
         "mandatory": "Obrigatório",

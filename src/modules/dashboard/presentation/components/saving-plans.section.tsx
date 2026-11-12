@@ -1,13 +1,5 @@
-import {
-  Alert,
-  Button,
-  Card,
-  Descriptions,
-  Flex,
-  Space,
-  Tag,
-  Typography,
-} from 'antd';
+import { Alert, Button, Col, Flex, Row, Space, Tag, Typography } from 'antd';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { investmentMovementsPath } from '@/core/router/app-routes';
@@ -20,10 +12,33 @@ import {
 } from '@/modules/recurrences/domain/saving-plan.schema';
 import { AcceptAdditionalContributionModal } from '@/modules/recurrences/presentation/components/accept-additional-contribution.modal';
 import { OccurrenceFormModal } from '@/modules/recurrences/presentation/components/occurrence-form.modal';
+import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import { formatDateOnly } from '@/shared/date/date-only';
 import { useModalTarget } from '@/shared/forms/use-modal-target';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
+
+interface PlanFigureProps {
+  label: string;
+  children: ReactNode;
+  detail?: string;
+}
+
+const PlanFigure = ({ label, children, detail }: PlanFigureProps) => (
+  <Col xs={24} sm={12}>
+    <Flex vertical>
+      <Typography.Text type="secondary">{label}</Typography.Text>
+      {children}
+      {detail && <Typography.Text type="secondary">{detail}</Typography.Text>}
+    </Flex>
+  </Col>
+);
+
+const PlanAmount = ({ label, amount }: { label: string; amount: string }) => (
+  <PlanFigure label={label}>
+    <MoneyText amount={amount} strong aria-label={label} />
+  </PlanFigure>
+);
 
 interface SavingPlanCardProps {
   plan: SavingPlan;
@@ -46,108 +61,101 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
     minimumRetainedBalance,
     canAcceptAdditional,
   } = plan;
-  const labelled = (key: string, label: string, amount: string) => ({
-    key,
-    label,
-    children: <MoneyText amount={amount} aria-label={label} />,
-  });
+  const hasActions =
+    mandatory.plannedOccurrences.length > 0 ||
+    canAcceptAdditional ||
+    additional !== null;
 
   return (
-    <div role="group" aria-label={recurrence.description}>
-      <Card size="small" title={recurrence.description}>
-        <Flex vertical gap="small">
+    <EqualHeightCard
+      size="small"
+      role="group"
+      aria-label={recurrence.description}
+    >
+      <Flex vertical gap="middle">
+        <Flex vertical>
+          <Typography.Text strong>{recurrence.description}</Typography.Text>
           <Typography.Text type="secondary">
             {t('dashboard.savingPlans.route', {
               account: account.name,
               investment: investment.name,
             })}
           </Typography.Text>
-          {isPositiveMoney(shortfall) && (
-            <Alert
-              type="error"
-              showIcon
-              title={t('dashboard.savingPlans.shortfall', {
-                amount: money(shortfall),
-                account: account.name,
-              })}
-            />
-          )}
-          <Descriptions
-            size="small"
-            column={{ xs: 1, sm: 2, lg: 3 }}
-            items={[
-              labelled(
-                'balanceForRemaining',
-                t('dashboard.savingPlans.balanceForRemaining'),
-                plan.balanceBeforeContribution,
-              ),
-              {
-                key: 'mandatory',
-                label: t('dashboard.savingPlans.mandatory'),
-                children: t('dashboard.savingPlans.mandatoryDetail', {
-                  planned: money(mandatory.planned),
-                  completed: money(mandatory.completed),
-                }),
-              },
-              additional
-                ? {
-                    key: 'additional',
-                    label: t('dashboard.savingPlans.additional'),
-                    children: (
-                      <Space size="small" wrap>
-                        <MoneyText
-                          amount={additional.amount}
-                          aria-label={t('dashboard.savingPlans.additional')}
-                        />
-                        <Tag>{additional.stateLabel}</Tag>
-                        <Typography.Text type="secondary">
-                          {t('dashboard.savingPlans.additionalOf', {
-                            amount: money(additional.suggestedAmount),
-                          })}
-                        </Typography.Text>
-                      </Space>
-                    ),
-                  }
-                : labelled(
-                    'suggested',
-                    t('dashboard.savingPlans.suggested'),
-                    suggestedAdditional,
-                  ),
-              labelled(
-                'total',
-                t('dashboard.savingPlans.total'),
-                resultingTotalOf(plan),
-              ),
-              {
-                key: 'retained',
-                label: t('dashboard.savingPlans.retained'),
-                children: (
-                  <Space size="small" wrap>
-                    <MoneyText
-                      amount={retainedBalanceOf(plan)}
-                      aria-label={t('dashboard.savingPlans.retained')}
-                    />
-                    <Typography.Text type="secondary">
-                      {t('dashboard.savingPlans.retainedMinimum', {
-                        amount: money(minimumRetainedBalance),
-                      })}
-                    </Typography.Text>
-                  </Space>
-                ),
-              },
-            ]}
+        </Flex>
+        {isPositiveMoney(shortfall) && (
+          <Alert
+            type="error"
+            showIcon
+            title={t('dashboard.savingPlans.shortfall', {
+              amount: money(shortfall),
+              account: account.name,
+            })}
           />
-          {isPositiveMoney(cardObligations) && (
-            <Typography.Text type="secondary">
-              {t('dashboard.savingPlans.cardNote', {
-                amount: money(cardObligations),
-                account: account.name,
+        )}
+        <Row gutter={[16, 12]}>
+          <PlanFigure label={t('dashboard.savingPlans.mandatory')}>
+            <Typography.Text strong>
+              {t('dashboard.savingPlans.mandatoryDetail', {
+                planned: money(mandatory.planned),
+                completed: money(mandatory.completed),
               })}
             </Typography.Text>
+          </PlanFigure>
+          {additional ? (
+            <PlanFigure
+              label={t('dashboard.savingPlans.additional')}
+              detail={t('dashboard.savingPlans.additionalOf', {
+                amount: money(additional.suggestedAmount),
+              })}
+            >
+              <Space size="small" wrap>
+                <MoneyText
+                  amount={additional.amount}
+                  strong
+                  aria-label={t('dashboard.savingPlans.additional')}
+                />
+                <Tag>{additional.stateLabel}</Tag>
+              </Space>
+            </PlanFigure>
+          ) : (
+            <PlanAmount
+              label={t('dashboard.savingPlans.suggested')}
+              amount={suggestedAdditional}
+            />
           )}
+          <PlanAmount
+            label={t('dashboard.savingPlans.total')}
+            amount={resultingTotalOf(plan)}
+          />
+          <PlanAmount
+            label={t('dashboard.savingPlans.balanceForRemaining')}
+            amount={plan.balanceBeforeContribution}
+          />
+          <PlanFigure
+            label={t('dashboard.savingPlans.retained')}
+            detail={t('dashboard.savingPlans.retainedMinimum', {
+              amount: money(minimumRetainedBalance),
+            })}
+          >
+            <MoneyText
+              amount={retainedBalanceOf(plan)}
+              strong
+              aria-label={t('dashboard.savingPlans.retained')}
+            />
+          </PlanFigure>
+        </Row>
+        {isPositiveMoney(cardObligations) && (
+          <Typography.Text type="secondary">
+            {t('dashboard.savingPlans.cardNote', {
+              amount: money(cardObligations),
+              account: account.name,
+            })}
+          </Typography.Text>
+        )}
+        {hasActions && (
           <Flex gap="small" align="center" wrap>
             {mandatory.plannedOccurrences.map((occurrence) => (
-              <Space key={occurrence.uuid} size="small">
+              <Space key={occurrence.uuid} size="small" wrap>
                 <Button
                   size="small"
                   onClick={() => onConfirm(plan, occurrence)}
@@ -177,9 +185,9 @@ const SavingPlanCard = ({ plan, onConfirm, onAccept }: SavingPlanCardProps) => {
               </Link>
             )}
           </Flex>
-        </Flex>
-      </Card>
-    </div>
+        )}
+      </Flex>
+    </EqualHeightCard>
   );
 };
 
@@ -210,12 +218,14 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
 
   return (
     <Flex vertical gap="small">
-      <Typography.Text strong>
-        {t('dashboard.savingPlans.title')}
-      </Typography.Text>
-      <Typography.Text type="secondary">
-        {t('dashboard.savingPlans.hint')}
-      </Typography.Text>
+      <Flex vertical>
+        <Typography.Text strong>
+          {t('dashboard.savingPlans.title')}
+        </Typography.Text>
+        <Typography.Text type="secondary">
+          {t('dashboard.savingPlans.hint')}
+        </Typography.Text>
+      </Flex>
       {accountsWithOverlappingSuggestions(plans).map((account) => (
         <Alert
           key={account}
@@ -224,16 +234,19 @@ export const SavingPlansSection = ({ plans }: { plans: SavingPlan[] }) => {
           title={t('dashboard.savingPlans.overlap', { account })}
         />
       ))}
-      {plans.map((plan) => (
-        <SavingPlanCard
-          key={plan.recurrence.uuid}
-          plan={plan}
-          onConfirm={(target, occurrence) => {
-            confirming.show({ plan: target, occurrence });
-          }}
-          onAccept={(plan) => accepting.show(plan.recurrence.uuid)}
-        />
-      ))}
+      <Row gutter={[16, 16]} align="stretch">
+        {plans.map((plan) => (
+          <Col key={plan.recurrence.uuid} xs={24} xl={12}>
+            <SavingPlanCard
+              plan={plan}
+              onConfirm={(target, occurrence) => {
+                confirming.show({ plan: target, occurrence });
+              }}
+              onAccept={(target) => accepting.show(target.recurrence.uuid)}
+            />
+          </Col>
+        ))}
+      </Row>
       <OccurrenceFormModal
         open={confirming.open}
         recurrence={contributionOf(confirming.target?.plan.recurrence)}

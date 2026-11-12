@@ -523,6 +523,9 @@ describe('DashboardPage', () => {
       ),
     ).toBeInTheDocument();
     expect(
+      within(page).getByLabelText(i18n.t('dashboard.investments.withdrawals')),
+    ).toHaveTextContent(money('0.00'));
+    expect(
       within(page).getByText(
         i18n.t('investments.targetRemaining', {
           remaining: money('4500.00'),
