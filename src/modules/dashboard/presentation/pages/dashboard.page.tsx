@@ -4,7 +4,6 @@ import {
   TransactionOutlined,
 } from '@ant-design/icons';
 import {
-  Alert,
   Button,
   Col,
   Dropdown,
@@ -18,7 +17,6 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { getApiErrorMessage } from '@/core/http/api-error';
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { CreditCardPurchaseFormModal } from '@/modules/credit-cards/presentation/components/credit-card-purchase-form.modal';
 import { TransactionFormModal } from '@/modules/transactions/presentation/components/transaction-form.modal';
@@ -30,6 +28,7 @@ import { BudgetCard } from '../components/budget.card';
 import { CashFlowSummary } from '../components/cash-flow-summary';
 import { CreditCardInvoicesCard } from '../components/credit-card-invoices.card';
 import { DashboardHero } from '../components/dashboard-hero';
+import { DashboardLoadError } from '../components/dashboard-load-error';
 import {
   DashboardControlsSkeleton,
   DashboardSkeleton,
@@ -51,10 +50,16 @@ export const DashboardPage = () => {
     data: dashboard,
     error,
     isPending,
+    isFetching,
     isPlaceholderData,
+    refetch,
   } = useDashboard(month);
   const [creatingTransaction, setCreatingTransaction] = useState(false);
   const [creatingPurchase, setCreatingPurchase] = useState(false);
+
+  const retry = () => {
+    refetch().catch(() => undefined);
+  };
 
   const createItems: MenuProps['items'] = [
     {
@@ -111,8 +116,13 @@ export const DashboardPage = () => {
         )}
         {isPending && <DashboardControlsSkeleton />}
       </Flex>
-      {error && !dashboard && (
-        <Alert type="error" showIcon title={getApiErrorMessage(error)} />
+      {error && (
+        <DashboardLoadError
+          error={error}
+          showingStaleData={Boolean(dashboard)}
+          retrying={isFetching}
+          onRetry={retry}
+        />
       )}
       {isPending && <DashboardSkeleton />}
       {dashboard && (

@@ -27,6 +27,8 @@
     }
   },
   "dashboard": {
+    "retry": "Tentar novamente",
+    "refreshFailed": "Não foi possível atualizar o painel. Ele mostra os últimos valores carregados.",
     "loading": "Carregando o painel",
     "greeting": "Olá, {{name}}",
     "description": "Acompanhe os saldos, as receitas e as despesas do mês.",

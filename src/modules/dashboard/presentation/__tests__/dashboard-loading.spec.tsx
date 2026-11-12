@@ -1,6 +1,7 @@
-import { fireEvent, screen, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { getAdapter, type InternalAxiosRequestConfig } from 'axios';
 import { describe, expect, it } from 'vitest';
+import { act } from 'react';
 import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -8,10 +9,12 @@ import type { UserDetail } from '@/modules/users/domain/user.schema';
 import { buildDashboard } from '@/test/dashboard-fixture';
 import {
   csrfResponse,
+  requestKey,
   type StubResponse,
   stubHttpRoutes,
 } from '@/test/http-stub';
 import { renderRoute } from '@/test/render-route';
+import { dashboardKey } from '../../infra/dashboard.queries';
 import { formatMonthLabel } from '@/shared/date/month-ref';
 
 const sessionUser: UserDetail = {
@@ -37,17 +40,19 @@ type DashboardRoute =
   StubResponse | ((config: InternalAxiosRequestConfig) => StubResponse);
 
 const renderDashboard = (dashboardRoute: DashboardRoute) => {
-  const routes = {
+  const routes: Record<string, DashboardRoute> = {
     'GET /auth/csrf': csrfResponse('csrf-token'),
     'GET /users/me': envelope(sessionUser),
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
     'GET /dashboard': dashboardRoute,
   };
-  stubHttpRoutes(httpClient, routes);
-  renderRoute(AppRoutes.DASHBOARD);
+  const requests = stubHttpRoutes(httpClient, routes);
+  const { queryClient } = renderRoute(AppRoutes.DASHBOARD);
+  const dashboardRequests = () =>
+    requests.filter((request) => requestKey(request) === 'GET /dashboard');
 
-  return routes;
+  return { routes, queryClient, dashboardRequests };
 };
 
 // Holds the dashboard requests that match until the returned release is called.
@@ -85,6 +90,14 @@ const monthOf = ({ params }: InternalAxiosRequestConfig) => {
 
 const isNovember = ({ params }: InternalAxiosRequestConfig) =>
   (params as { month?: number } | undefined)?.month === 11;
+
+const invalidMonth: StubResponse = {
+  status: 400,
+  data: { statusCode: 400, message: 'Mês inválido' },
+};
+
+const retryButton = (container: HTMLElement) =>
+  within(container).getByRole('button', { name: i18n.t('dashboard.retry') });
 
 const loadingDashboard = () =>
   screen.queryByRole('status', { name: i18n.t('dashboard.loading') });
@@ -147,5 +160,49 @@ describe('DashboardPage loading states', () => {
     ).toBeInTheDocument();
     expect(loadingMonth()).not.toBeInTheDocument();
     expect(content()).toHaveAttribute('aria-busy', 'false');
+  });
+
+  it('retries a dashboard that failed to load', async () => {
+    const { routes, dashboardRequests } = renderDashboard(invalidMonth);
+
+    const page = await screen.findByRole('main');
+    const alert = await within(page).findByRole('alert');
+    expect(alert).toHaveTextContent('Mês inválido');
+
+    routes['GET /dashboard'] = envelope(buildDashboard());
+    fireEvent.click(retryButton(alert));
+
+    expect(
+      await within(page).findByRole('heading', monthHeading(2026, 10)),
+    ).toBeInTheDocument();
+    expect(dashboardRequests()).toHaveLength(2);
+    expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('keeps the last figures with a warning when a refresh fails', async () => {
+    const { routes, queryClient, dashboardRequests } = renderDashboard(
+      envelope(buildDashboard()),
+    );
+
+    const page = await screen.findByRole('main');
+    await within(page).findByRole('heading', monthHeading(2026, 10));
+
+    routes['GET /dashboard'] = invalidMonth;
+    await act(() => queryClient.invalidateQueries({ queryKey: dashboardKey }));
+
+    const alert = await within(page).findByRole('alert');
+    expect(alert).toHaveTextContent(i18n.t('dashboard.refreshFailed'));
+    expect(alert).toHaveTextContent('Mês inválido');
+    expect(
+      within(page).getByRole('heading', monthHeading(2026, 10)),
+    ).toBeInTheDocument();
+
+    routes['GET /dashboard'] = envelope(buildDashboard());
+    fireEvent.click(retryButton(alert));
+
+    await waitFor(() => {
+      expect(within(page).queryByRole('alert')).not.toBeInTheDocument();
+    });
+    expect(dashboardRequests()).toHaveLength(3);
   });
 });
