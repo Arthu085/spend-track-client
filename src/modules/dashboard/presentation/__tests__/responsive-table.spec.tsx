@@ -194,8 +194,9 @@ describe('Dashboard lists on narrow screens', () => {
   it('keeps the tables on wide screens', async () => {
     renderDashboard();
 
-    await screen.findByText('Aluguel');
+    const upcoming = await screen.findByText('Aluguel');
     expect(screen.getAllByRole('table')).toHaveLength(5);
-    expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
+    expect(upcoming.closest('table')).not.toBeNull();
+    expect(upcoming.closest('li')).toBeNull();
   });
 });
