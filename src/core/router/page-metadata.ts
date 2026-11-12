@@ -16,7 +16,7 @@ import type { ComponentType } from 'react';
 import type { Ability } from '@/modules/authorization/domain/ability.schema';
 import { AppRoutes } from './app-routes';
 
-interface PageMetadata {
+export interface PageMetadata {
   path: string;
   labelKey: ParseKeys;
   icon: ComponentType;
