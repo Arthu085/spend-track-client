@@ -10,7 +10,6 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { AppRoutes } from '@/core/router/app-routes';
 import {
   type CompletableTransaction,
   CompleteTransactionModal,
@@ -24,6 +23,7 @@ import type {
   DashboardPeriod,
   DashboardUpcoming,
 } from '../../domain/dashboard.schema';
+import { transactionsOfMonth } from './month-links';
 import { PlannedDate } from './planned-date';
 import { ResponsiveTable } from './responsive-table';
 
@@ -32,12 +32,6 @@ interface UpcomingTransactionsCardProps {
   upcoming: DashboardUpcoming[];
   upcomingCount: number;
 }
-
-const transactionsOfMonth = ({ year, month }: DashboardPeriod) =>
-  `${AppRoutes.TRANSACTIONS}?${new URLSearchParams({
-    year: String(year),
-    month: String(month),
-  }).toString()}`;
 
 export const UpcomingTransactionsCard = ({
   period,
