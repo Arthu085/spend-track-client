@@ -118,12 +118,13 @@
     "investments": {
       "title": "Investments and goals",
       "manage": "Manage investments",
-      "totalValue": "Total value:",
-      "contributions": "Contributed this month:",
-      "withdrawals": "Withdrawn this month:",
-      "pending": "(+{{amount}} planned)",
+      "totalValue": "Total value",
+      "contributions": "Contributed this month",
+      "withdrawals": "Withdrawn this month",
+      "pending": "+{{amount}} planned",
       "empty": "No active investments, reserves, or goals.",
       "contribute": "Contribute",
+      "portfolio": "Portfolio",
       "breakdown": {
         "label": "Contributions by kind",
         "mandatory": "Mandatory",

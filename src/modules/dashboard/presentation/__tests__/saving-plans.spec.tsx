@@ -587,6 +587,57 @@ describe('Saving plans on the dashboard', () => {
     ).toBeInTheDocument();
   });
 
+  it('lists the portfolio before the saving plans', async () => {
+    renderWithRoutes(AppRoutes.DASHBOARD, {
+      'GET /dashboard': envelope(
+        buildDashboard({
+          investments: investmentsWith({
+            savingPlans: [buildSavingPlan()],
+            items: [
+              {
+                uuid: '7a1b2c3d-7777-4c3e-9f1a-1a2b3c4d5e6f',
+                name: 'Viagem',
+                type: 'GOAL',
+                typeLabel: 'Meta',
+                currentValue: '1500.00',
+                targetAmount: null,
+                progress: null,
+              },
+            ],
+          }),
+        }),
+      ),
+    });
+    const group = await planGroup('Reserva mensal');
+    const table = screen.getByRole('table');
+
+    expect(within(table).getByText('Viagem')).toBeInTheDocument();
+    expect(
+      table.compareDocumentPosition(group) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      screen.getByText(i18n.t('dashboard.savingPlans.title')),
+    ).toBeInTheDocument();
+  });
+
+  it('offers no plan action once nothing is left to confirm or accept', async () => {
+    renderPlans([
+      buildSavingPlan({
+        mandatory: {
+          planned: '0.00',
+          completed: '700.00',
+          plannedOccurrences: [],
+        },
+        suggestedAdditional: '0.00',
+        canAcceptAdditional: false,
+      }),
+    ]);
+    const group = await planGroup('Reserva mensal');
+
+    expect(within(group).queryByRole('button')).not.toBeInTheDocument();
+    expect(within(group).queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('shows a live additional contribution instead of offering another', async () => {
     renderPlans([
       buildSavingPlan({
