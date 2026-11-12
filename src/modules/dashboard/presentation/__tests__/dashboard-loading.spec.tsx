@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { getAdapter, type InternalAxiosRequestConfig } from 'axios';
 import { describe, expect, it } from 'vitest';
 import { httpClient } from '@/core/http/http-client';
@@ -50,15 +50,17 @@ const renderDashboard = (dashboardRoute: DashboardRoute) => {
   return routes;
 };
 
-// Holds every dashboard request until the returned release is called.
-const holdDashboardRequests = () => {
+// Holds the dashboard requests that match until the returned release is called.
+const holdDashboardRequests = (
+  matches: (config: InternalAxiosRequestConfig) => boolean = () => true,
+) => {
   const adapter = getAdapter(httpClient.defaults.adapter);
   let release: (() => void) | undefined;
   const released = new Promise<void>((resolve) => {
     release = resolve;
   });
   httpClient.defaults.adapter = async (config) => {
-    if (config.url === '/dashboard') {
+    if (config.url === '/dashboard' && matches(config)) {
       await released;
     }
 
@@ -71,6 +73,18 @@ const holdDashboardRequests = () => {
 const monthHeading = (year: number, month: number) => ({
   name: formatMonthLabel({ year, month }, i18n.language),
 });
+
+const monthOf = ({ params }: InternalAxiosRequestConfig) => {
+  const { year, month } = (params ?? {}) as { year?: number; month?: number };
+  const dashboard = buildDashboard();
+
+  return year && month
+    ? buildDashboard({ period: { ...dashboard.period, year, month } })
+    : dashboard;
+};
+
+const isNovember = ({ params }: InternalAxiosRequestConfig) =>
+  (params as { month?: number } | undefined)?.month === 11;
 
 const loadingDashboard = () =>
   screen.queryByRole('status', { name: i18n.t('dashboard.loading') });
@@ -93,5 +107,45 @@ describe('DashboardPage loading states', () => {
       await within(page).findByRole('heading', monthHeading(2026, 10)),
     ).toBeInTheDocument();
     expect(loadingDashboard()).not.toBeInTheDocument();
+  });
+
+  it('marks the previous month as busy while the next month loads', async () => {
+    renderDashboard((config) => envelope(monthOf(config)));
+    const release = holdDashboardRequests(isNovember);
+
+    const page = await screen.findByRole('main');
+    await within(page).findByRole('heading', monthHeading(2026, 10));
+    const content = () =>
+      within(page)
+        .getByLabelText(i18n.t('dashboard.balances.available'))
+        .closest('[aria-busy]');
+    const loadingMonth = () =>
+      within(page).queryByRole('status', {
+        name: i18n.t('dashboard.period.loading'),
+      });
+    expect(content()).toHaveAttribute('aria-busy', 'false');
+    expect(loadingMonth()).not.toBeInTheDocument();
+
+    fireEvent.click(
+      within(page).getByRole('button', { name: i18n.t('month.next') }),
+    );
+
+    expect(
+      await within(page).findByRole('status', {
+        name: i18n.t('dashboard.period.loading'),
+      }),
+    ).toBeInTheDocument();
+    expect(content()).toHaveAttribute('aria-busy', 'true');
+    expect(
+      within(page).getByRole('heading', monthHeading(2026, 10)),
+    ).toBeInTheDocument();
+
+    release();
+
+    expect(
+      await within(page).findByRole('heading', monthHeading(2026, 11)),
+    ).toBeInTheDocument();
+    expect(loadingMonth()).not.toBeInTheDocument();
+    expect(content()).toHaveAttribute('aria-busy', 'false');
   });
 });

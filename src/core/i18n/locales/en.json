@@ -36,6 +36,7 @@
       "purchase": "Card purchase"
     },
     "period": {
+      "loading": "Loading the month",
       "timing": {
         "PAST": "Closed month",
         "CURRENT": "Current month",

@@ -335,7 +335,8 @@ available balance subtracts what is still due on the invoices through the month 
 charges expected on them (`creditCards.plannedDue`) from the projected one.
 
 While the first month loads, a skeleton shaped like the header controls and the page's sections
-holds their place.
+holds their place. Moving to another month keeps the previous month on screen, dimmed and marked
+busy, with a spinner next to the month until the new month arrives.
 
 The overview opens the page. Its dominant figures are the amount left to spend
 (`spendingGuidance.remaining`, the lower of what the overall limit leaves and the available

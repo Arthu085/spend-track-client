@@ -12,6 +12,7 @@ import {
   Grid,
   type MenuProps,
   Row,
+  theme,
   Typography,
 } from 'antd';
 import { useState } from 'react';
@@ -43,9 +44,15 @@ import { UpcomingTransactionsCard } from '../components/upcoming-transactions.ca
 export const DashboardPage = () => {
   const { t } = useTranslation();
   const { sm, md } = Grid.useBreakpoint();
+  const { token } = theme.useToken();
   const { data: user } = useSession();
   const [month, changeMonth] = useMonthParam();
-  const { data: dashboard, error, isPending } = useDashboard(month);
+  const {
+    data: dashboard,
+    error,
+    isPending,
+    isPlaceholderData,
+  } = useDashboard(month);
   const [creatingTransaction, setCreatingTransaction] = useState(false);
   const [creatingPurchase, setCreatingPurchase] = useState(false);
 
@@ -94,7 +101,11 @@ export const DashboardPage = () => {
             align={md ? 'center' : 'start'}
             gap="middle"
           >
-            <PeriodNavigator period={dashboard.period} onChange={changeMonth} />
+            <PeriodNavigator
+              period={dashboard.period}
+              loading={isPlaceholderData}
+              onChange={changeMonth}
+            />
             <PerspectiveSwitch value={dashboard.perspective} />
           </Flex>
         )}
@@ -105,7 +116,15 @@ export const DashboardPage = () => {
       )}
       {isPending && <DashboardSkeleton />}
       {dashboard && (
-        <>
+        <Flex
+          vertical
+          gap="large"
+          aria-busy={isPlaceholderData}
+          style={{
+            opacity: isPlaceholderData ? token.opacityLoading : 1,
+            transition: `opacity ${token.motionDurationMid}`,
+          }}
+        >
           {dashboard.accounts.length === 0 && (
             <AccountBalancesCard accounts={dashboard.accounts} />
           )}
@@ -148,7 +167,7 @@ export const DashboardPage = () => {
           {dashboard.accounts.length > 0 && (
             <AccountBalancesCard accounts={dashboard.accounts} />
           )}
-        </>
+        </Flex>
       )}
       <TransactionFormModal
         open={creatingTransaction}

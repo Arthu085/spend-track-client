@@ -36,6 +36,7 @@
       "purchase": "Compra no cartão"
     },
     "period": {
+      "loading": "Carregando o mês",
       "timing": {
         "PAST": "Mês encerrado",
         "CURRENT": "Mês atual",
