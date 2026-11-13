@@ -39,7 +39,6 @@ export const LoginPage = () => {
       <Typography.Title level={3}>{t('auth.login.title')}</Typography.Title>
       <Form<LoginForm>
         layout="vertical"
-        requiredMark={false}
         disabled={loginMutation.isPending}
         onFinish={handleFinish}
       >

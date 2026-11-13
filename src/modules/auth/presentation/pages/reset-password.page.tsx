@@ -51,6 +51,7 @@ export const ResetPasswordPage = () => {
   }
 
   const confirmPasswordRule: FormRule = ({ getFieldValue }) => ({
+    required: true,
     validator: (_rule, value: unknown) =>
       value === getFieldValue('password')
         ? Promise.resolve()
@@ -78,7 +79,6 @@ export const ResetPasswordPage = () => {
       </Typography.Title>
       <Form<ResetPasswordFormValues>
         layout="vertical"
-        requiredMark={false}
         disabled={resetPasswordMutation.isPending}
         onFinish={handleFinish}
       >

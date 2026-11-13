@@ -42,7 +42,6 @@ export const FormModal = <T extends object>({
       modalRender={(dom) => (
         <Form<T>
           layout="vertical"
-          requiredMark={false}
           disabled={submitting || readOnly}
           initialValues={initialValues}
           onFinish={readOnly ? undefined : onSubmit}

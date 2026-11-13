@@ -25,6 +25,9 @@ Rules for every change to this repository. Project scope and layout are in
 - Use semantic HTML, associated form labels, accessible names, and keyboard-operable controls.
   Navigate with links, not buttons.
 - Build UI with Ant Design components and theme tokens before writing custom CSS.
+- Every required form field shows the Ant Design required asterisk (`*`). Never hide it with
+  `requiredMark={false}`. `zodRule` (`src/shared/forms/zod-rule.ts`) marks the field required when
+  its schema rejects an empty value; give custom rules for required fields `required: true`.
 - Actions shown only as an icon use `IconActionButton` or `IconActionLink`
   (`src/shared/components/`): the label is the accessible name and the tooltip on hover and keyboard
   focus, also while disabled.
