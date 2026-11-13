@@ -853,8 +853,7 @@
     },
     "hints": {
       "spendingPerspective": "Whether card spending counts by purchase date or by invoice month.",
-      "defaultMonth": "Month shown when the dashboard opens.",
-      "collapsedDashboardCards": "How each card opens on the dashboard. A hidden card shows only its title until you expand it."
+      "defaultMonth": "Month shown when the dashboard opens."
     },
     "spendingPerspectives": {
       "PURCHASE_DATE": "Purchase date",

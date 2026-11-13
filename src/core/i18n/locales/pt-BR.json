@@ -853,8 +853,7 @@
     },
     "hints": {
       "spendingPerspective": "Define se os gastos no cartão contam pela data da compra ou pelo mês da fatura.",
-      "defaultMonth": "Mês exibido ao abrir o painel.",
-      "collapsedDashboardCards": "Como cada indicador abre no painel. Um indicador oculto mostra só o título até ser expandido."
+      "defaultMonth": "Mês exibido ao abrir o painel."
     },
     "spendingPerspectives": {
       "PURCHASE_DATE": "Data da compra",
