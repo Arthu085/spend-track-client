@@ -60,6 +60,13 @@ describe('FormModal', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('Ada');
   });
 
+  // Ant Design draws the required asterisk through this class on the field label.
+  it('marks required fields with the Ant Design required asterisk', () => {
+    renderModal();
+
+    expect(screen.getByText('Name')).toHaveClass('ant-form-item-required');
+  });
+
   it('submits the form values', async () => {
     const { onSubmit } = renderModal();
 

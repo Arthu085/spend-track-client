@@ -50,7 +50,6 @@ export const ResendConfirmationPage = () => {
       </Typography.Text>
       <Form<ResendConfirmationForm>
         layout="vertical"
-        requiredMark={false}
         initialValues={{ email: initialEmail }}
         disabled={resendConfirmationMutation.isPending}
         onFinish={handleFinish}

@@ -52,7 +52,6 @@ export const OwnProfileForm = ({ user }: OwnProfileFormProps) => {
         aria-label={t('account.profile.title')}
         form={form}
         layout="vertical"
-        requiredMark={false}
         initialValues={{ name: user.name, email: user.email }}
         disabled={updateMutation.isPending}
         onFinish={handleFinish}

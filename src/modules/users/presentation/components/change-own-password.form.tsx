@@ -46,7 +46,6 @@ export const ChangeOwnPasswordForm = () => {
         name="change-own-password"
         aria-label={t('account.password.title')}
         layout="vertical"
-        requiredMark={false}
         disabled={changePasswordMutation.isPending}
         onFinish={handleFinish}
       >

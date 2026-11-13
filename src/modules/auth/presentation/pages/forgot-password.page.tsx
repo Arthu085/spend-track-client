@@ -43,7 +43,6 @@ export const ForgotPasswordPage = () => {
       </Typography.Text>
       <Form<ForgotPasswordForm>
         layout="vertical"
-        requiredMark={false}
         disabled={forgotPasswordMutation.isPending}
         onFinish={handleFinish}
       >
