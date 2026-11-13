@@ -319,7 +319,12 @@ abilities query settles, so late permission-based entries do not move existing s
 `/` is where sign-in lands unless the guards remembered another page (see
 [Authentication](#authentication)), and the not-found and forbidden pages link back to it. Its header
 greets the user, offers a single "New" menu for creating, and holds the month navigation and the
-perspective switch; page navigation stays in the sidebar. It reads `GET /dashboard` for one month:
+perspective switch; page navigation stays in the sidebar. Next to "New", a "Hide cards" / "Show
+cards" button collapses every card below the controls (the overview, the warnings, and the
+indicators) and leaves a short line saying they are hidden; it exposes the state with
+`aria-expanded`. The page opens with the cards shown or hidden according to the
+`dashboardCardsVisible` preference from `GET /preferences` (shown when the preferences cannot load);
+the button changes only the open page and never saves the preference. It reads `GET /dashboard` for one month:
 the period (with its timing and remaining days), the spending perspective, the actual, projected,
 and available balances, and the balance of each active account. A user without accounts sees the
 invitation to add one right below the month. Previous and next buttons move through past and future months and keep the month in the URL
@@ -334,8 +339,8 @@ overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
 
-While the first month loads, a skeleton shaped like the header controls and the page's sections
-holds their place. Moving to another month keeps the previous month's figures on screen, dimmed
+While the first month or the preferences load, a skeleton shaped like the header controls and the
+page's sections holds their place, so hidden cards never flash on screen. Moving to another month keeps the previous month's figures on screen, dimmed
 and marked busy, while the navigator already shows the requested month (without its timing tag)
 with a spinner until it arrives, so further clicks move on from the requested month. When the
 dashboard cannot load, an error with the API message offers to try again and the month navigator
@@ -635,8 +640,9 @@ API derives from its movements: contributions minus withdrawals plus valuation a
 
 ### Financial settings
 
-`/settings` saves the spending perspective (purchase date or invoice month) and the dashboard's
-default month (current or next) as soon as they change. Its transaction categories panel is a `PaginatedTable`
+`/settings` saves the spending perspective (purchase date or invoice month), the dashboard's
+default month (current or next), and whether the dashboard opens with its cards shown or hidden
+(`dashboardCardsVisible`) as soon as they change. Its transaction categories panel is a `PaginatedTable`
 filtered by kind and status with the shared list filters (expense and active by default), with
 filters, page, and size kept in the URL. Categories follow the API order (stored name), so global
 names translated into another language may not be alphabetical. Global

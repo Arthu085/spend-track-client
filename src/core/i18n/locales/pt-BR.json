@@ -37,6 +37,11 @@
       "transaction": "Transação",
       "purchase": "Compra no cartão"
     },
+    "cards": {
+      "hide": "Ocultar indicadores",
+      "show": "Mostrar indicadores",
+      "hidden": "Os indicadores estão ocultos."
+    },
     "period": {
       "loading": "Carregando o mês",
       "timing": {
@@ -841,11 +846,13 @@
     "title": "Preferências",
     "fields": {
       "spendingPerspective": "Perspectiva de gastos",
-      "defaultMonth": "Mês inicial do painel"
+      "defaultMonth": "Mês inicial do painel",
+      "dashboardCardsVisible": "Indicadores do painel"
     },
     "hints": {
       "spendingPerspective": "Define se os gastos no cartão contam pela data da compra ou pelo mês da fatura.",
-      "defaultMonth": "Mês exibido ao abrir o painel."
+      "defaultMonth": "Mês exibido ao abrir o painel.",
+      "dashboardCardsVisible": "Define se o painel abre com os indicadores visíveis ou ocultos."
     },
     "spendingPerspectives": {
       "PURCHASE_DATE": "Data da compra",
@@ -854,6 +861,10 @@
     "defaultMonths": {
       "CURRENT": "Mês atual",
       "NEXT": "Próximo mês"
+    },
+    "dashboardCardsVisibility": {
+      "shown": "Visíveis",
+      "hidden": "Ocultos"
     }
   },
   "financialSettings": {

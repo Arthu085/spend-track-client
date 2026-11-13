@@ -13,7 +13,7 @@ import { LANGUAGE_STORAGE_KEY } from '@/core/i18n/language-preference';
 import { AppRoutes } from '@/core/router/app-routes';
 import { setThemeMode } from '@/core/theme/use-theme-mode';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
-import { dashboardRoute } from '@/test/dashboard-fixture';
+import { dashboardRoutes } from '@/test/dashboard-fixture';
 import { csrfResponse, requestKey, stubHttpRoutes } from '@/test/http-stub';
 import { createMatchMedia } from '@/test/match-media';
 import { renderRoute } from '@/test/render-route';
@@ -36,7 +36,7 @@ const user: UserDetail = {
 const envelope = (data: unknown) => ({ status: 200, data: { data, meta: {} } });
 
 const signedInRoutes = {
-  ...dashboardRoute,
+  ...dashboardRoutes,
   'GET /users/me': envelope(user),
   'GET /users/me/abilities': envelope([{ action: 'READ', subject: 'USER' }]),
   'GET /users/me/change-requests': envelope([]),

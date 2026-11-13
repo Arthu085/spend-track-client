@@ -15,7 +15,7 @@ See [`docs/PROJECT.md`](docs/PROJECT.md) for scope, architecture, and source lay
 | Budgets (`/budgets`)                                            | Overall and category limits per month, optionally copied from the previous month                             |
 | Investments (`/investments`)                                    | Investments, reserves, and goals with contributions, withdrawals, and manual valuations                      |
 | Accounts (`/accounts`)                                          | Accounts with opening balances, a default account, and deactivation                                          |
-| Financial settings (`/settings`)                                | Spending perspective, the dashboard's default month, and personal categories                                 |
+| Financial settings (`/settings`)                                | Spending perspective, the dashboard's default month and card visibility, and personal categories             |
 | My account (`/account`)                                         | Profile and password changes                                                                                 |
 | Administration (`/users`, `/roles`, `/account/change-requests`) | User and permission management, and approval of changes requested by another administrator                   |
 

@@ -5,6 +5,7 @@ import { useFeedbackModal } from '@/shared/feedback/use-feedback-modal';
 import {
   defaultMonthSchema,
   type PreferencesPayload,
+  preferencesSchema,
   spendingPerspectiveSchema,
 } from '../../domain/preferences.schema';
 import {
@@ -52,7 +53,6 @@ export const PreferencesPanel = () => {
           <Form.Item
             label={t('preferences.fields.defaultMonth')}
             extra={t('preferences.hints.defaultMonth')}
-            style={{ marginBottom: 0 }}
           >
             <Radio.Group
               aria-label={t('preferences.fields.defaultMonth')}
@@ -64,6 +64,34 @@ export const PreferencesPanel = () => {
                 value: option,
                 label: t(`preferences.defaultMonths.${option}`),
               }))}
+            />
+          </Form.Item>
+          <Form.Item
+            label={t('preferences.fields.dashboardCardsVisible')}
+            extra={t('preferences.hints.dashboardCardsVisible')}
+            style={{ marginBottom: 0 }}
+          >
+            <Radio.Group
+              aria-label={t('preferences.fields.dashboardCardsVisible')}
+              value={preferences.dashboardCardsVisible}
+              onChange={({ target }) =>
+                save({
+                  dashboardCardsVisible:
+                    preferencesSchema.shape.dashboardCardsVisible.parse(
+                      target.value,
+                    ),
+                })
+              }
+              options={[
+                {
+                  value: true,
+                  label: t('preferences.dashboardCardsVisibility.shown'),
+                },
+                {
+                  value: false,
+                  label: t('preferences.dashboardCardsVisibility.hidden'),
+                },
+              ]}
             />
           </Form.Item>
         </Form>

@@ -78,6 +78,7 @@ const preferences: Preferences = {
   spendingPerspectiveLabel: 'Mês da fatura',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
+  dashboardCardsVisible: true,
   updatedAt: '2026-10-29T12:00:00.000Z',
 };
 
@@ -115,6 +116,7 @@ const renderDashboard = (
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
     'GET /dashboard': (config) => envelope(monthOf(config)),
+    'GET /preferences': envelope(preferences),
     ...routes,
   });
   const rendered = renderRoute(path);
@@ -368,6 +370,77 @@ describe('DashboardPage', () => {
     });
     await waitFor(() => {
       expect(sent('GET /dashboard')).toHaveLength(2);
+    });
+  });
+
+  describe('card visibility', () => {
+    const cardsButton = (name: 'hide' | 'show') =>
+      within(screen.getByRole('main')).findByRole('button', {
+        name: new RegExp(i18n.t(`dashboard.cards.${name}`)),
+      });
+
+    it('opens with the cards hidden when the preference hides them', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /preferences': envelope({
+          ...preferences,
+          dashboardCardsVisible: false,
+        }),
+      });
+
+      const page = await main();
+      expect(
+        await within(page).findByText(i18n.t('dashboard.cards.hidden')),
+      ).toBeInTheDocument();
+      expect(
+        within(page).getByRole('heading', monthHeading(2026, 10)),
+      ).toBeInTheDocument();
+      expect(await cardsButton('show')).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+      expect(within(page).queryByText('Nubank')).not.toBeInTheDocument();
+    });
+
+    it('opens with the cards shown and toggles them without saving the preference', async () => {
+      const { sent } = renderDashboard();
+
+      const page = await main();
+      expect(await within(page).findByText('Nubank')).toBeInTheDocument();
+      const hide = await cardsButton('hide');
+      expect(hide).toHaveAttribute('aria-expanded', 'true');
+
+      fireEvent.click(hide);
+
+      expect(
+        await within(page).findByText(i18n.t('dashboard.cards.hidden')),
+      ).toBeInTheDocument();
+      expect(within(page).queryByText('Nubank')).not.toBeInTheDocument();
+      const show = await cardsButton('show');
+      expect(show).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(show);
+
+      expect(await within(page).findByText('Nubank')).toBeInTheDocument();
+      expect(
+        within(page).queryByText(i18n.t('dashboard.cards.hidden')),
+      ).not.toBeInTheDocument();
+      expect(sent('PATCH /preferences')).toHaveLength(0);
+    });
+
+    it('shows the cards when the preferences cannot load', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /preferences': {
+          status: 403,
+          data: { statusCode: 403, message: 'Proibido' },
+        },
+      });
+
+      const page = await main();
+      expect(await within(page).findByText('Nubank')).toBeInTheDocument();
+      expect(await cardsButton('hide')).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      );
     });
   });
 

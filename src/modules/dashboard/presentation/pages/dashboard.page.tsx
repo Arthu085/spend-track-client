@@ -1,5 +1,7 @@
 import {
   CreditCardOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
   PlusOutlined,
   TransactionOutlined,
 } from '@ant-design/icons';
@@ -14,11 +16,12 @@ import {
   theme,
   Typography,
 } from 'antd';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useSession } from '@/modules/auth/infra/auth.queries';
 import { CreditCardPurchaseFormModal } from '@/modules/credit-cards/presentation/components/credit-card-purchase-form.modal';
+import { usePreferences } from '@/modules/preferences/infra/preferences.queries';
 import { TransactionFormModal } from '@/modules/transactions/presentation/components/transaction-form.modal';
 import { useMonthParam } from '@/shared/date/use-month-param';
 import { useDashboard } from '../../infra/dashboard.queries';
@@ -54,8 +57,19 @@ export const DashboardPage = () => {
     isPlaceholderData,
     refetch,
   } = useDashboard(month);
+  const { data: preferences, isPending: preferencesPending } = usePreferences();
+  const [cardsVisibleOverride, setCardsVisibleOverride] = useState<
+    boolean | null
+  >(null);
+  const cardsId = useId();
   const [creatingTransaction, setCreatingTransaction] = useState(false);
   const [creatingPurchase, setCreatingPurchase] = useState(false);
+
+  const cardsVisible =
+    cardsVisibleOverride ?? preferences?.dashboardCardsVisible ?? true;
+  const loadingCards = isPending || (Boolean(dashboard) && preferencesPending);
+  const cardsReady = Boolean(dashboard) && !preferencesPending;
+  const showingCards = cardsReady && cardsVisible;
 
   const retry = () => {
     refetch().catch(() => undefined);
@@ -93,11 +107,24 @@ export const DashboardPage = () => {
               {t('dashboard.description')}
             </Typography.Text>
           </div>
-          <Dropdown menu={{ items: createItems }} trigger={['click']}>
-            <Button type="primary" icon={<PlusOutlined />}>
-              {t('dashboard.actions.create')}
+          <Flex vertical={!sm} gap="small">
+            <Button
+              icon={cardsVisible ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+              aria-expanded={cardsVisible}
+              aria-controls={showingCards ? cardsId : undefined}
+              disabled={preferencesPending}
+              onClick={() => setCardsVisibleOverride(!cardsVisible)}
+            >
+              {t(
+                cardsVisible ? 'dashboard.cards.hide' : 'dashboard.cards.show',
+              )}
             </Button>
-          </Dropdown>
+            <Dropdown menu={{ items: createItems }} trigger={['click']}>
+              <Button type="primary" icon={<PlusOutlined />}>
+                {t('dashboard.actions.create')}
+              </Button>
+            </Dropdown>
+          </Flex>
         </Flex>
         {!isPending && (
           <Flex
@@ -125,9 +152,15 @@ export const DashboardPage = () => {
           onRetry={retry}
         />
       )}
-      {isPending && <DashboardSkeleton />}
-      {dashboard && (
+      {loadingCards && <DashboardSkeleton />}
+      {cardsReady && !cardsVisible && (
+        <Typography.Text type="secondary">
+          {t('dashboard.cards.hidden')}
+        </Typography.Text>
+      )}
+      {dashboard && showingCards && (
         <Flex
+          id={cardsId}
           vertical
           gap="large"
           aria-busy={isPlaceholderData}

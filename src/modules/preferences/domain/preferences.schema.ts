@@ -12,6 +12,7 @@ export const preferencesSchema = z.object({
   spendingPerspectiveLabel: z.string(),
   defaultMonth: defaultMonthSchema,
   defaultMonthLabel: z.string(),
+  dashboardCardsVisible: z.boolean(),
   updatedAt: z.string().nullable(),
 });
 
@@ -19,5 +20,8 @@ export type SpendingPerspective = z.infer<typeof spendingPerspectiveSchema>;
 export type DefaultMonth = z.infer<typeof defaultMonthSchema>;
 export type Preferences = z.infer<typeof preferencesSchema>;
 export type PreferencesPayload = Partial<
-  Pick<Preferences, 'spendingPerspective' | 'defaultMonth'>
+  Pick<
+    Preferences,
+    'spendingPerspective' | 'defaultMonth' | 'dashboardCardsVisible'
+  >
 >;

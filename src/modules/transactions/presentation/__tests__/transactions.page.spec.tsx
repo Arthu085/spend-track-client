@@ -136,6 +136,7 @@ const preferences: Preferences = {
   spendingPerspectiveLabel: 'Data da compra',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
+  dashboardCardsVisible: true,
   updatedAt: null,
 };
 

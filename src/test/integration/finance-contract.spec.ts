@@ -111,21 +111,27 @@ describe('real backend finance contracts', () => {
     const initial = await fetchPreferences();
 
     expect(initial.spendingPerspective).toBe('PURCHASE_DATE');
+    expect(initial.dashboardCardsVisible).toBe(true);
 
     const updated = await updatePreferences({
       spendingPerspective: 'INVOICE_MONTH',
+      dashboardCardsVisible: false,
     });
 
     expect(updated.data.spendingPerspective).toBe('INVOICE_MONTH');
+    expect(updated.data.dashboardCardsVisible).toBe(false);
     expect((await fetchDashboard()).perspective).toBe('INVOICE_MONTH');
 
     await login(backend.admin);
-    expect((await fetchPreferences()).spendingPerspective).toBe(
-      'PURCHASE_DATE',
-    );
+    const adminPreferences = await fetchPreferences();
+    expect(adminPreferences.spendingPerspective).toBe('PURCHASE_DATE');
+    expect(adminPreferences.dashboardCardsVisible).toBe(true);
 
     await login(backend.user);
-    await updatePreferences({ spendingPerspective: 'PURCHASE_DATE' });
+    await updatePreferences({
+      spendingPerspective: 'PURCHASE_DATE',
+      dashboardCardsVisible: true,
+    });
   });
 
   it('shows every validation message of a rejected finance form', async () => {

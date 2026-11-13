@@ -37,6 +37,11 @@
       "transaction": "Transaction",
       "purchase": "Card purchase"
     },
+    "cards": {
+      "hide": "Hide cards",
+      "show": "Show cards",
+      "hidden": "The cards are hidden."
+    },
     "period": {
       "loading": "Loading the month",
       "timing": {
@@ -841,11 +846,13 @@
     "title": "Preferences",
     "fields": {
       "spendingPerspective": "Spending perspective",
-      "defaultMonth": "Dashboard starting month"
+      "defaultMonth": "Dashboard starting month",
+      "dashboardCardsVisible": "Dashboard cards"
     },
     "hints": {
       "spendingPerspective": "Whether card spending counts by purchase date or by invoice month.",
-      "defaultMonth": "Month shown when the dashboard opens."
+      "defaultMonth": "Month shown when the dashboard opens.",
+      "dashboardCardsVisible": "Whether the dashboard opens with its cards shown or hidden."
     },
     "spendingPerspectives": {
       "PURCHASE_DATE": "Purchase date",
@@ -854,6 +861,10 @@
     "defaultMonths": {
       "CURRENT": "Current month",
       "NEXT": "Next month"
+    },
+    "dashboardCardsVisibility": {
+      "shown": "Shown",
+      "hidden": "Hidden"
     }
   },
   "financialSettings": {

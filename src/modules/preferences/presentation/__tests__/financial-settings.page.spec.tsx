@@ -36,6 +36,7 @@ const defaults: Preferences = {
   spendingPerspectiveLabel: 'Data da compra',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
+  dashboardCardsVisible: true,
   updatedAt: null,
 };
 
@@ -151,6 +152,36 @@ describe('FinancialSettingsPage', () => {
     });
     await waitFor(() => {
       expectSelected(nextMonth, true);
+    });
+  });
+
+  it('saves whether the dashboard opens with its cards shown', async () => {
+    const { sent } = renderSettings({
+      'PATCH /preferences': envelope(
+        { ...defaults, dashboardCardsVisible: false },
+        'Preferências salvas',
+      ),
+    });
+
+    const hidden = await screen.findByRole('radio', {
+      name: i18n.t('preferences.dashboardCardsVisibility.hidden'),
+    });
+    expectSelected(
+      screen.getByRole('radio', {
+        name: i18n.t('preferences.dashboardCardsVisibility.shown'),
+      }),
+      true,
+    );
+    expectSelected(hidden, false);
+
+    fireEvent.click(hidden);
+
+    expect(await screen.findByText('Preferências salvas')).toBeInTheDocument();
+    expect(requestBody(sent('PATCH /preferences')[0])).toEqual({
+      dashboardCardsVisible: false,
+    });
+    await waitFor(() => {
+      expectSelected(hidden, true);
     });
   });
 

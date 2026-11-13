@@ -13,6 +13,7 @@ import {
   type StubResponse,
   stubHttpRoutes,
 } from '@/test/http-stub';
+import { buildPreferences } from '@/test/preferences-fixture';
 import { renderRoute } from '@/test/render-route';
 import { dashboardKey } from '../../infra/dashboard.queries';
 import { formatMonthLabel } from '@/shared/date/month-ref';
@@ -49,6 +50,7 @@ const renderDashboard = (
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
     'GET /dashboard': dashboardRoute,
+    'GET /preferences': envelope(buildPreferences()),
   };
   const requests = stubHttpRoutes(httpClient, routes);
   const { router, queryClient } = renderRoute(path);
