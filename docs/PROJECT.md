@@ -342,11 +342,11 @@ dashboard cannot load, an error with the API message offers to try again and the
 stays available (on the current month when the URL has none); when a refresh fails after a month
 has loaded, a warning says the figures on screen are the last ones loaded and offers to try again.
 
-The overview opens the page. Its dominant figures are the amount left to spend
-(`spendingGuidance.remaining`, the lower of what the overall limit leaves and the available
-balance) and the informational daily allowance (a dash once no days are left). Next to them, the
-available balance leads, with the actual and projected balances smaller below it, each with its
-explanation. When the month has an overall limit, a pace line compares the share of the limit
+The overview opens the page. The available balance leads it as the dominant figure, with the
+actual and projected balances smaller below it, each with its explanation. Next to them, the
+amount left to spend (`spendingGuidance.remaining`, the lower of what the overall limit leaves and
+the available balance) sits above the informational daily allowance (a dash once no days are
+left). When the month has an overall limit, a pace line compares the share of the limit
 already used (paid and planned expenses) with the share of the month elapsed (the days
 already gone in the current month, all of a past month) and says whether spending is on
 track, faster than the month (more than 10 percentage points ahead), or over budget. A future

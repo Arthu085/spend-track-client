@@ -17,7 +17,7 @@ const tabularNumbers = { fontVariantNumeric: 'tabular-nums' } as const;
 const BalanceOverview = ({ balances }: { balances: Dashboard['balances'] }) => {
   const { t } = useTranslation();
   const { token } = theme.useToken();
-  const { md, xl } = Grid.useBreakpoint();
+  const { sm, md, xl } = Grid.useBreakpoint();
   const sideBySide = md && !xl;
   const availableLabel = t('dashboard.balances.available');
   const secondary = [
@@ -42,8 +42,15 @@ const BalanceOverview = ({ balances }: { balances: Dashboard['balances'] }) => {
           <Flex vertical>
             <Typography.Text type="secondary">{availableLabel}</Typography.Text>
             <Typography.Title
-              level={3}
-              style={{ margin: '4px 0', ...tabularNumbers }}
+              level={2}
+              style={{
+                margin: '4px 0',
+                fontSize: sm ? token.fontSizeHeading1 : token.fontSizeHeading2,
+                lineHeight: sm
+                  ? token.lineHeightHeading1
+                  : token.lineHeightHeading2,
+                ...tabularNumbers,
+              }}
             >
               <MoneyText
                 amount={balances.available}
@@ -99,28 +106,22 @@ export const DashboardHero = ({
 }: DashboardHeroProps) => (
   <HeroCard>
     <Row gutter={[32, 24]}>
+      <Col {...heroLayout.balances}>
+        <BalanceOverview balances={balances} />
+      </Col>
       <Col {...heroLayout.guidance}>
-        <Flex
-          vertical
-          justify="space-between"
-          gap="large"
-          style={{ height: '100%' }}
-        >
+        <Flex vertical gap="large" style={{ height: '100%' }}>
           <Row gutter={[24, 24]}>
             <SpendingGuidanceFigures
               guidance={guidance}
-              level={2}
+              level={3}
               span={heroLayout.figure}
-              prominent
             />
           </Row>
           {budget?.overall && (
             <BudgetPace overall={budget.overall} period={period} />
           )}
         </Flex>
-      </Col>
-      <Col {...heroLayout.balances}>
-        <BalanceOverview balances={balances} />
       </Col>
     </Row>
   </HeroCard>

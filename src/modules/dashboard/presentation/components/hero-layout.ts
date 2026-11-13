@@ -1,5 +1,5 @@
 export const heroLayout = {
-  guidance: { xs: 24, xl: 16 },
-  figure: { xs: 24, sm: 12 },
-  balances: { xs: 24, xl: 8 },
+  balances: { xs: 24, xl: 12 },
+  guidance: { xs: 24, xl: 12 },
+  figure: { span: 24 },
 };

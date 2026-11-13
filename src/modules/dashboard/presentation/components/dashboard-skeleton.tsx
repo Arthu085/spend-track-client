@@ -11,6 +11,11 @@ const TitledCardSkeleton = () => (
 const HeroSkeleton = () => (
   <HeroCard>
     <Row gutter={[32, 24]}>
+      <Col {...heroLayout.balances}>
+        <HeroBalancePanel>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </HeroBalancePanel>
+      </Col>
       <Col {...heroLayout.guidance}>
         <Row gutter={[24, 24]}>
           <Col {...heroLayout.figure}>
@@ -20,11 +25,6 @@ const HeroSkeleton = () => (
             <Skeleton active paragraph={{ rows: 2 }} />
           </Col>
         </Row>
-      </Col>
-      <Col {...heroLayout.balances}>
-        <HeroBalancePanel>
-          <Skeleton active paragraph={{ rows: 3 }} />
-        </HeroBalancePanel>
       </Col>
     </Row>
   </HeroCard>
