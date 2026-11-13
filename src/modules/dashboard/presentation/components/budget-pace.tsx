@@ -61,7 +61,14 @@ export const BudgetPace = ({ overall, period }: BudgetPaceProps) => {
   };
 
   return (
-    <Flex vertical gap="small">
+    <Flex
+      vertical
+      gap="small"
+      style={{
+        paddingTop: token.paddingLG,
+        borderTop: `${token.lineWidth}px ${token.lineType} ${token.colorBorderSecondary}`,
+      }}
+    >
       <Flex justify="space-between" align="center" gap="small" wrap>
         <Typography.Text strong>{t('dashboard.pace.title')}</Typography.Text>
         <Tag color={statusColors[status]}>

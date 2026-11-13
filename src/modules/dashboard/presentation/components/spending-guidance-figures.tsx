@@ -1,4 +1,4 @@
-import { Col, type ColProps, Flex, Typography } from 'antd';
+import { Col, type ColProps, Flex, Grid, theme, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MoneyText } from '@/shared/money/money-text';
@@ -10,29 +10,50 @@ interface FigureProps {
   label: string;
   hint: string;
   level: FigureLevel;
+  prominent: boolean;
   children: ReactNode;
 }
 
-const Figure = ({ label, hint, level, children }: FigureProps) => (
-  <Flex vertical>
-    <Typography.Text type="secondary">{label}</Typography.Text>
-    <Typography.Title level={level} style={{ margin: '4px 0' }}>
-      {children}
-    </Typography.Title>
-    <Typography.Text type="secondary">{hint}</Typography.Text>
-  </Flex>
-);
+const useProminentValueStyle = () => {
+  const { token } = theme.useToken();
+  const { sm } = Grid.useBreakpoint();
+
+  return {
+    fontSize: sm ? token.fontSizeHeading1 : token.fontSizeHeading2,
+    lineHeight: sm ? token.lineHeightHeading1 : token.lineHeightHeading2,
+    fontVariantNumeric: 'tabular-nums',
+  } as const;
+};
+
+const Figure = ({ label, hint, level, prominent, children }: FigureProps) => {
+  const prominentValueStyle = useProminentValueStyle();
+
+  return (
+    <Flex vertical>
+      <Typography.Text type="secondary">{label}</Typography.Text>
+      <Typography.Title
+        level={level}
+        style={{ margin: '4px 0', ...(prominent && prominentValueStyle) }}
+      >
+        {children}
+      </Typography.Title>
+      <Typography.Text type="secondary">{hint}</Typography.Text>
+    </Flex>
+  );
+};
 
 interface SpendingGuidanceFiguresProps {
   guidance: DashboardSpendingGuidance;
   level: FigureLevel;
   span: ColProps;
+  prominent?: boolean;
 }
 
 export const SpendingGuidanceFigures = ({
   guidance,
   level,
   span,
+  prominent = false,
 }: SpendingGuidanceFiguresProps) => {
   const { t } = useTranslation();
   const remainingLabel = t(`dashboard.budget.guidance.${guidance.basis}`);
@@ -45,6 +66,7 @@ export const SpendingGuidanceFigures = ({
           label={remainingLabel}
           hint={t(`dashboard.budget.guidance.${guidance.basis}Hint`)}
           level={level}
+          prominent={prominent}
         >
           <MoneyText amount={guidance.remaining} aria-label={remainingLabel} />
         </Figure>
@@ -58,6 +80,7 @@ export const SpendingGuidanceFigures = ({
               : t('dashboard.budget.guidance.dailyHint')
           }
           level={level}
+          prominent={prominent}
         >
           {guidance.dailyAllowance === null ? (
             <Typography.Text type="secondary" aria-label={dailyLabel}>
