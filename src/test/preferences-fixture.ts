@@ -7,7 +7,7 @@ export const buildPreferences = (
   spendingPerspectiveLabel: 'Data da compra',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
-  dashboardCardsVisible: true,
+  collapsedDashboardCards: [],
   updatedAt: null,
   ...overrides,
 });

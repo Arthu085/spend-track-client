@@ -1,20 +1,20 @@
-import { Card, Grid, theme } from 'antd';
+import { Card, type CardProps, Grid, theme } from 'antd';
 import type { PropsWithChildren } from 'react';
 
-export const HeroCard = ({ children }: PropsWithChildren) => {
+export const HeroCard = ({ style, ...props }: Omit<CardProps, 'styles'>) => {
   const { token } = theme.useToken();
   const { md } = Grid.useBreakpoint();
 
   return (
     <Card
+      {...props}
       style={{
         borderColor: token.colorBorder,
         boxShadow: token.boxShadowTertiary,
+        ...style,
       }}
       styles={{ body: { padding: md ? token.paddingXL : token.padding } }}
-    >
-      {children}
-    </Card>
+    />
   );
 };
 

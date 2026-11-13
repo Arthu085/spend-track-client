@@ -7,21 +7,35 @@ export const spendingPerspectiveSchema = z.enum([
 
 export const defaultMonthSchema = z.enum(['CURRENT', 'NEXT']);
 
+export const dashboardCardSchema = z.enum([
+  'OVERVIEW',
+  'INCOME',
+  'EXPENSES',
+  'NET_RESULT',
+  'BUDGET',
+  'UPCOMING_TRANSACTIONS',
+  'EXPENSES_BY_CATEGORY',
+  'CREDIT_CARD_INVOICES',
+  'INVESTMENTS',
+  'ACCOUNT_BALANCES',
+]);
+
 export const preferencesSchema = z.object({
   spendingPerspective: spendingPerspectiveSchema,
   spendingPerspectiveLabel: z.string(),
   defaultMonth: defaultMonthSchema,
   defaultMonthLabel: z.string(),
-  dashboardCardsVisible: z.boolean(),
+  collapsedDashboardCards: z.array(dashboardCardSchema),
   updatedAt: z.string().nullable(),
 });
 
 export type SpendingPerspective = z.infer<typeof spendingPerspectiveSchema>;
 export type DefaultMonth = z.infer<typeof defaultMonthSchema>;
+export type DashboardCard = z.infer<typeof dashboardCardSchema>;
 export type Preferences = z.infer<typeof preferencesSchema>;
 export type PreferencesPayload = Partial<
   Pick<
     Preferences,
-    'spendingPerspective' | 'defaultMonth' | 'dashboardCardsVisible'
+    'spendingPerspective' | 'defaultMonth' | 'collapsedDashboardCards'
   >
 >;

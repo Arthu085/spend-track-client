@@ -8,6 +8,7 @@ import type {
   DashboardSpendingGuidance,
 } from '../../domain/dashboard.schema';
 import { BudgetPace } from './budget-pace';
+import { CollapsibleCard } from './collapsible-card';
 import { HeroBalancePanel, HeroCard } from './hero-card';
 import { heroLayout } from './hero-layout';
 import { SpendingGuidanceFigures } from './spending-guidance-figures';
@@ -103,26 +104,34 @@ export const DashboardHero = ({
   guidance,
   budget,
   period,
-}: DashboardHeroProps) => (
-  <HeroCard>
-    <Row gutter={[32, 24]}>
-      <Col {...heroLayout.balances}>
-        <BalanceOverview balances={balances} />
-      </Col>
-      <Col {...heroLayout.guidance}>
-        <Flex vertical gap="large" style={{ height: '100%' }}>
-          <Row gutter={[24, 24]}>
-            <SpendingGuidanceFigures
-              guidance={guidance}
-              level={3}
-              span={heroLayout.figure}
-            />
-          </Row>
-          {budget?.overall && (
-            <BudgetPace overall={budget.overall} period={period} />
-          )}
-        </Flex>
-      </Col>
-    </Row>
-  </HeroCard>
-);
+}: DashboardHeroProps) => {
+  const { t } = useTranslation();
+
+  return (
+    <CollapsibleCard
+      card="OVERVIEW"
+      title={t('dashboard.overview.title')}
+      component={HeroCard}
+    >
+      <Row gutter={[32, 24]}>
+        <Col {...heroLayout.balances}>
+          <BalanceOverview balances={balances} />
+        </Col>
+        <Col {...heroLayout.guidance}>
+          <Flex vertical gap="large" style={{ height: '100%' }}>
+            <Row gutter={[24, 24]}>
+              <SpendingGuidanceFigures
+                guidance={guidance}
+                level={3}
+                span={heroLayout.figure}
+              />
+            </Row>
+            {budget?.overall && (
+              <BudgetPace overall={budget.overall} period={period} />
+            )}
+          </Flex>
+        </Col>
+      </Row>
+    </CollapsibleCard>
+  );
+};

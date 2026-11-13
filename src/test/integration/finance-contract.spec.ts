@@ -111,26 +111,29 @@ describe('real backend finance contracts', () => {
     const initial = await fetchPreferences();
 
     expect(initial.spendingPerspective).toBe('PURCHASE_DATE');
-    expect(initial.dashboardCardsVisible).toBe(true);
+    expect(initial.collapsedDashboardCards).toEqual([]);
 
     const updated = await updatePreferences({
       spendingPerspective: 'INVOICE_MONTH',
-      dashboardCardsVisible: false,
+      collapsedDashboardCards: ['BUDGET', 'INVESTMENTS'],
     });
 
     expect(updated.data.spendingPerspective).toBe('INVOICE_MONTH');
-    expect(updated.data.dashboardCardsVisible).toBe(false);
+    expect(updated.data.collapsedDashboardCards).toEqual([
+      'BUDGET',
+      'INVESTMENTS',
+    ]);
     expect((await fetchDashboard()).perspective).toBe('INVOICE_MONTH');
 
     await login(backend.admin);
     const adminPreferences = await fetchPreferences();
     expect(adminPreferences.spendingPerspective).toBe('PURCHASE_DATE');
-    expect(adminPreferences.dashboardCardsVisible).toBe(true);
+    expect(adminPreferences.collapsedDashboardCards).toEqual([]);
 
     await login(backend.user);
     await updatePreferences({
       spendingPerspective: 'PURCHASE_DATE',
-      dashboardCardsVisible: true,
+      collapsedDashboardCards: [],
     });
   });
 

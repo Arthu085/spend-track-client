@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
+import { dashboardCardTitles } from '@/modules/dashboard/presentation/components/dashboard-card-titles';
 import type { TransactionCategory } from '@/modules/transaction-categories/domain/transaction-category.schema';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
 import { findDialog } from '@/test/find-dialog';
@@ -15,7 +16,11 @@ import {
   stubHttpRoutes,
 } from '@/test/http-stub';
 import { renderRoute } from '@/test/render-route';
-import type { Preferences } from '../../domain/preferences.schema';
+import {
+  type DashboardCard,
+  dashboardCardSchema,
+  type Preferences,
+} from '../../domain/preferences.schema';
 
 const sessionUser: UserDetail = {
   uuid: '6f1c2a54-2d0e-4a4b-9a43-2f1f1d7c9b10',
@@ -36,7 +41,7 @@ const defaults: Preferences = {
   spendingPerspectiveLabel: 'Data da compra',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
-  dashboardCardsVisible: true,
+  collapsedDashboardCards: [],
   updatedAt: null,
 };
 
@@ -155,34 +160,49 @@ describe('FinancialSettingsPage', () => {
     });
   });
 
-  it('saves whether the dashboard opens with its cards shown', async () => {
+  it('saves the default state of one dashboard card with the whole list', async () => {
     const { sent } = renderSettings({
+      'GET /preferences': envelope({
+        ...defaults,
+        collapsedDashboardCards: ['ACCOUNT_BALANCES'],
+      }),
       'PATCH /preferences': envelope(
-        { ...defaults, dashboardCardsVisible: false },
+        {
+          ...defaults,
+          collapsedDashboardCards: ['BUDGET', 'ACCOUNT_BALANCES'],
+        },
         'Preferências salvas',
       ),
     });
 
-    const hidden = await screen.findByRole('radio', {
-      name: i18n.t('preferences.dashboardCardsVisibility.hidden'),
-    });
-    expectSelected(
-      screen.getByRole('radio', {
-        name: i18n.t('preferences.dashboardCardsVisibility.shown'),
-      }),
-      true,
-    );
-    expectSelected(hidden, false);
+    const cardState = (card: DashboardCard) =>
+      screen.findByRole('radiogroup', {
+        name: i18n.t(dashboardCardTitles[card]),
+      });
+    const option = (group: HTMLElement, state: 'visible' | 'hidden') =>
+      within(group).getByRole('radio', {
+        name: i18n.t(`preferences.dashboardCardStates.${state}`),
+      });
 
-    fireEvent.click(hidden);
+    for (const card of dashboardCardSchema.options) {
+      expect(await cardState(card)).toBeInTheDocument();
+    }
+    const accounts = await cardState('ACCOUNT_BALANCES');
+    expectSelected(option(accounts, 'hidden'), true);
+    expectSelected(option(accounts, 'visible'), false);
+    const budget = await cardState('BUDGET');
+    expectSelected(option(budget, 'visible'), true);
+
+    fireEvent.click(option(budget, 'hidden'));
 
     expect(await screen.findByText('Preferências salvas')).toBeInTheDocument();
     expect(requestBody(sent('PATCH /preferences')[0])).toEqual({
-      dashboardCardsVisible: false,
+      collapsedDashboardCards: ['BUDGET', 'ACCOUNT_BALANCES'],
     });
     await waitFor(() => {
-      expectSelected(hidden, true);
+      expectSelected(option(budget, 'hidden'), true);
     });
+    expectSelected(option(accounts, 'hidden'), true);
   });
 
   it('lists expense categories by default and keeps global ones read-only', async () => {

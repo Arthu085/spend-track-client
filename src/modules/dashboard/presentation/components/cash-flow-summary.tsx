@@ -1,5 +1,6 @@
 import { Col, Flex, Progress, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import type { DashboardCard } from '@/modules/preferences/domain/preferences.schema';
 import { EqualHeightCard } from '@/shared/components/equal-height-card';
 import {
   isNegativeMoney,
@@ -8,9 +9,15 @@ import {
 } from '@/shared/money/money';
 import { MoneyText } from '@/shared/money/money-text';
 import type { DashboardAmounts } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { displaySharePercent, sharePercent } from './share-percent';
 
 type CashFlowKind = 'income' | 'expenses';
+
+const cashFlowCards = {
+  income: 'INCOME',
+  expenses: 'EXPENSES',
+} as const satisfies Record<CashFlowKind, DashboardCard>;
 
 const hasAmount = (amount: string) =>
   isPositiveMoney(amount) || isNegativeMoney(amount);
@@ -28,11 +35,12 @@ const CashFlowCard = ({ kind, amounts }: CashFlowCardProps) => {
   ] as const;
 
   return (
-    <EqualHeightCard>
-      <Typography.Text type="secondary">
-        {t(`dashboard.${kind}.title`)}
-      </Typography.Text>
-      <Typography.Title level={3} style={{ margin: '4px 0' }}>
+    <CollapsibleCard
+      card={cashFlowCards[kind]}
+      title={t(`dashboard.${kind}.title`)}
+      component={EqualHeightCard}
+    >
+      <Typography.Title level={3} style={{ margin: '0 0 4px' }}>
         <MoneyText
           amount={amounts.total}
           type={kind === 'income' ? 'success' : undefined}
@@ -63,7 +71,7 @@ const CashFlowCard = ({ kind, amounts }: CashFlowCardProps) => {
           {t(`dashboard.${kind}.empty`)}
         </Typography.Text>
       )}
-    </EqualHeightCard>
+    </CollapsibleCard>
   );
 };
 
@@ -107,11 +115,12 @@ const NetResultCard = ({ income, expenses }: CashFlowSummaryProps) => {
   const net = subtractMoney(income.total, expenses.total);
 
   return (
-    <EqualHeightCard>
-      <Typography.Text type="secondary">
-        {t('dashboard.net.title')}
-      </Typography.Text>
-      <Typography.Title level={3} style={{ margin: '4px 0' }}>
+    <CollapsibleCard
+      card="NET_RESULT"
+      title={t('dashboard.net.title')}
+      component={EqualHeightCard}
+    >
+      <Typography.Title level={3} style={{ margin: '0 0 4px' }}>
         <MoneyText amount={net} signed aria-label={t('dashboard.net.title')} />
       </Typography.Title>
       <Flex vertical gap="small">
@@ -132,7 +141,7 @@ const NetResultCard = ({ income, expenses }: CashFlowSummaryProps) => {
           />
         </Flex>
       </Flex>
-    </EqualHeightCard>
+    </CollapsibleCard>
   );
 };
 

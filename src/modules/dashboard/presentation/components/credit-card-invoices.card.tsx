@@ -1,5 +1,5 @@
 import { EyeOutlined } from '@ant-design/icons';
-import { Card, Empty, Flex, type TableColumnsType, Typography } from 'antd';
+import { Empty, Flex, type TableColumnsType, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
@@ -16,6 +16,7 @@ import type {
   DashboardCreditCards,
   DashboardPlannedCardCharge,
 } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { DetailsCollapse, DetailsLabel } from './details-collapse';
 import { PlannedDate } from './planned-date';
 import { ResponsiveTable } from './responsive-table';
@@ -148,7 +149,8 @@ export const CreditCardInvoicesCard = ({
   );
 
   return (
-    <Card
+    <CollapsibleCard
+      card="CREDIT_CARD_INVOICES"
       title={t('dashboard.creditCards.title')}
       extra={
         <Link to={AppRoutes.CREDIT_CARDS}>
@@ -258,6 +260,6 @@ export const CreditCardInvoicesCard = ({
         invoiceUuid={viewing.target}
         onClose={viewing.close}
       />
-    </Card>
+    </CollapsibleCard>
   );
 };

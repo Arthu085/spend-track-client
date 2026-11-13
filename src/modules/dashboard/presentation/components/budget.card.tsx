@@ -1,5 +1,5 @@
 import { WarningOutlined } from '@ant-design/icons';
-import { Badge, Card, Empty, Flex, Progress, Row, Typography } from 'antd';
+import { Badge, Empty, Flex, Progress, Row, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatMoney, isPositiveMoney } from '@/shared/money/money';
@@ -8,6 +8,7 @@ import type {
   DashboardBudgetLimit,
   DashboardSpendingGuidance,
 } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { displaySharePercent } from './share-percent';
 import { SpendingGuidanceFigures } from './spending-guidance-figures';
 
@@ -83,7 +84,8 @@ export const BudgetCard = ({
   const overallName = t('dashboard.budget.overall');
 
   return (
-    <Card
+    <CollapsibleCard
+      card="BUDGET"
       title={t(
         guidance ? 'dashboard.budget.title' : 'dashboard.budget.limitsTitle',
       )}
@@ -135,6 +137,6 @@ export const BudgetCard = ({
           </Empty>
         )}
       </Flex>
-    </Card>
+    </CollapsibleCard>
   );
 };
