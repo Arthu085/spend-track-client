@@ -1,40 +1,34 @@
-import { Card, Col, Flex, Grid, Row, Skeleton, theme } from 'antd';
+import { Col, Flex, Grid, Row, Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { EqualHeightCard } from '@/shared/components/equal-height-card';
-
-const figureSpan = { xs: 24, md: 12, xl: 8 };
+import { HeroBalancePanel, HeroCard } from './hero-card';
+import { heroLayout } from './hero-layout';
 
 const TitledCardSkeleton = () => (
   <EqualHeightCard loading title={<Skeleton.Input active size="small" />} />
 );
 
-const HeroSkeleton = () => {
-  const { token } = theme.useToken();
-
-  return (
-    <Card>
-      <Row gutter={[24, 24]}>
-        <Col {...figureSpan}>
-          <Skeleton active paragraph={{ rows: 2 }} />
-        </Col>
-        <Col {...figureSpan}>
-          <Skeleton active paragraph={{ rows: 2 }} />
-        </Col>
-        <Col xs={24} xl={8}>
-          <div
-            style={{
-              padding: token.padding,
-              background: token.colorFillAlter,
-              borderRadius: token.borderRadiusLG,
-            }}
-          >
-            <Skeleton active paragraph={{ rows: 3 }} />
-          </div>
-        </Col>
-      </Row>
-    </Card>
-  );
-};
+const HeroSkeleton = () => (
+  <HeroCard>
+    <Row gutter={[32, 24]}>
+      <Col {...heroLayout.balances}>
+        <HeroBalancePanel>
+          <Skeleton active paragraph={{ rows: 3 }} />
+        </HeroBalancePanel>
+      </Col>
+      <Col {...heroLayout.guidance}>
+        <Row gutter={[24, 24]}>
+          <Col {...heroLayout.figure}>
+            <Skeleton active paragraph={{ rows: 2 }} />
+          </Col>
+          <Col {...heroLayout.figure}>
+            <Skeleton active paragraph={{ rows: 2 }} />
+          </Col>
+        </Row>
+      </Col>
+    </Row>
+  </HeroCard>
+);
 
 export const DashboardControlsSkeleton = () => {
   const { md } = Grid.useBreakpoint();
