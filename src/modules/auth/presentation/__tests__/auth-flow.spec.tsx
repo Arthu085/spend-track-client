@@ -5,7 +5,7 @@ import { httpClient } from '@/core/http/http-client';
 import i18n from '@/core/i18n/i18n.config';
 import { AppRoutes } from '@/core/router/app-routes';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
-import { dashboardRoute } from '@/test/dashboard-fixture';
+import { dashboardRoutes } from '@/test/dashboard-fixture';
 import { findDialog } from '@/test/find-dialog';
 import {
   csrfResponse,
@@ -40,7 +40,7 @@ const user: UserDetail = {
 const envelope = (data: unknown) => ({ status: 200, data: { data, meta: {} } });
 
 const layoutRoutes = {
-  ...dashboardRoute,
+  ...dashboardRoutes,
   'GET /users/me/abilities': envelope([]),
   'GET /users/me/change-requests': envelope([]),
 };

@@ -1,7 +1,6 @@
 import { PlusCircleOutlined } from '@ant-design/icons';
 import {
   Button,
-  Card,
   Divider,
   Empty,
   Flex,
@@ -29,6 +28,7 @@ import type {
   DashboardAmounts,
   DashboardInvestments,
 } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { DetailsCollapse, DetailsLabel } from './details-collapse';
 import { ResponsiveTable } from './responsive-table';
 import { SavingPlansLabel, SavingPlansSection } from './saving-plans.section';
@@ -365,7 +365,8 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
   ].filter((item) => item !== false);
 
   return (
-    <Card
+    <CollapsibleCard
+      card="INVESTMENTS"
       title={t('dashboard.investments.title')}
       extra={
         hasInvestments && (
@@ -395,6 +396,6 @@ export const InvestmentsCard = ({ investments }: InvestmentsCardProps) => {
         investment={contributing.target?.investment}
         onClose={contributing.close}
       />
-    </Card>
+    </CollapsibleCard>
   );
 };

@@ -7,6 +7,7 @@ import type {
   DashboardAmounts,
   DashboardCategoryExpenses,
 } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { displaySharePercent } from './share-percent';
 
 interface ExpensesByCategoryCardProps {
@@ -22,7 +23,11 @@ export const ExpensesByCategoryCard = ({
   const money = (amount: string) => formatMoney(amount, i18n.language);
 
   return (
-    <EqualHeightCard title={t('dashboard.expensesByCategory.title')}>
+    <CollapsibleCard
+      card="EXPENSES_BY_CATEGORY"
+      title={t('dashboard.expensesByCategory.title')}
+      component={EqualHeightCard}
+    >
       {categories.length === 0 ? (
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -55,6 +60,6 @@ export const ExpensesByCategoryCard = ({
           ))}
         </Flex>
       )}
-    </EqualHeightCard>
+    </CollapsibleCard>
   );
 };

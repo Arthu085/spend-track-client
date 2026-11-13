@@ -334,8 +334,18 @@ overdue ones included, to the actual balance; the
 available balance subtracts what is still due on the invoices through the month and the planned recurring card
 charges expected on them (`creditCards.plannedDue`) from the projected one.
 
-While the first month loads, a skeleton shaped like the header controls and the page's sections
-holds their place. Moving to another month keeps the previous month's figures on screen, dimmed
+Each card (the overview, income, expenses, net result, budget limits, upcoming, expenses by
+category, credit card invoices, investments, and balances by account) has a collapse button next to
+its title and header links or actions. A collapsed card shows only that header, with its height
+fitted to it instead of matching the cards beside it, and does not render its content; the button
+names the card and exposes the state with `aria-expanded`. The page opens with the cards listed in
+the `collapsedDashboardCards` preference from `GET /preferences` collapsed and every other card
+expanded (all expanded when the preferences cannot load). Collapsing or expanding a card changes
+only the open page and never saves the preference. The "Needs attention" warning is not a card and
+cannot be collapsed.
+
+While the first month or the preferences load, a skeleton shaped like the header controls and the
+page's sections holds their place, so collapsed cards never flash open. Moving to another month keeps the previous month's figures on screen, dimmed
 and marked busy, while the navigator already shows the requested month (without its timing tag)
 with a spinner until it arrives, so further clicks move on from the requested month. When the
 dashboard cannot load, an error with the API message offers to try again and the month navigator
@@ -635,8 +645,10 @@ API derives from its movements: contributions minus withdrawals plus valuation a
 
 ### Financial settings
 
-`/settings` saves the spending perspective (purchase date or invoice month) and the dashboard's
-default month (current or next) as soon as they change. Its transaction categories panel is a `PaginatedTable`
+`/settings` saves the spending perspective (purchase date or invoice month), the dashboard's
+default month (current or next), and, for each dashboard card in turn, whether it opens visible or
+hidden (collapsed to its title) as soon as they change. Changing one card sends the whole
+`collapsedDashboardCards` list, which replaces the saved one. Its transaction categories panel is a `PaginatedTable`
 filtered by kind and status with the shared list filters (expense and active by default), with
 filters, page, and size kept in the URL. Categories follow the API order (stored name), so global
 names translated into another language may not be alphabetical. Global

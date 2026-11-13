@@ -9,7 +9,7 @@ const TitledCardSkeleton = () => (
 );
 
 const HeroSkeleton = () => (
-  <HeroCard>
+  <HeroCard title={<Skeleton.Input active size="small" />}>
     <Row gutter={[32, 24]}>
       <Col {...heroLayout.balances}>
         <HeroBalancePanel>
@@ -65,10 +65,10 @@ export const DashboardSkeleton = () => {
       <HeroSkeleton />
       <Row gutter={[16, 16]} align="stretch">
         <Col xs={24} md={12}>
-          <EqualHeightCard loading />
+          <TitledCardSkeleton />
         </Col>
         <Col xs={24} md={12}>
-          <EqualHeightCard loading />
+          <TitledCardSkeleton />
         </Col>
       </Row>
       <TitledCardSkeleton />

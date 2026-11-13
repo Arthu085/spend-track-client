@@ -1,17 +1,11 @@
 import { PlusOutlined } from '@ant-design/icons';
-import {
-  Card,
-  Empty,
-  Flex,
-  type TableColumnsType,
-  Tag,
-  Typography,
-} from 'antd';
+import { Empty, Flex, type TableColumnsType, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AppRoutes } from '@/core/router/app-routes';
 import { MoneyText } from '@/shared/money/money-text';
 import type { DashboardAccount } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { ResponsiveTable } from './responsive-table';
 
 interface AccountBalancesCardProps {
@@ -61,7 +55,10 @@ export const AccountBalancesCard = ({ accounts }: AccountBalancesCardProps) => {
   ];
 
   return (
-    <Card title={t('dashboard.accounts.title')}>
+    <CollapsibleCard
+      card="ACCOUNT_BALANCES"
+      title={t('dashboard.accounts.title')}
+    >
       {accounts.length === 0 ? (
         <Empty description={t('dashboard.accounts.empty')}>
           <Link to={AppRoutes.ACCOUNTS}>
@@ -90,6 +87,6 @@ export const AccountBalancesCard = ({ accounts }: AccountBalancesCardProps) => {
           })}
         />
       )}
-    </Card>
+    </CollapsibleCard>
   );
 };

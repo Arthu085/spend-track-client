@@ -9,7 +9,11 @@ import {
   buildInvestment,
   buildInvestmentMovement,
 } from '@/modules/investments/presentation/__tests__/investment-fixture';
-import type { Preferences } from '@/modules/preferences/domain/preferences.schema';
+import {
+  type DashboardCard,
+  dashboardCardSchema,
+  type Preferences,
+} from '@/modules/preferences/domain/preferences.schema';
 import type { UserDetail } from '@/modules/users/domain/user.schema';
 import {
   buildCreditCardInvoice,
@@ -33,6 +37,7 @@ import type {
   Dashboard,
   DashboardBudgetLimit,
 } from '../../domain/dashboard.schema';
+import { dashboardCardTitles } from '../components/dashboard-card-titles';
 import { formatMonthLabel } from '@/shared/date/month-ref';
 
 const sessionUser: UserDetail = {
@@ -78,6 +83,7 @@ const preferences: Preferences = {
   spendingPerspectiveLabel: 'Mês da fatura',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
+  collapsedDashboardCards: [],
   updatedAt: '2026-10-29T12:00:00.000Z',
 };
 
@@ -115,6 +121,7 @@ const renderDashboard = (
     'GET /users/me/abilities': envelope([]),
     'GET /users/me/change-requests': envelope([]),
     'GET /dashboard': (config) => envelope(monthOf(config)),
+    'GET /preferences': envelope(preferences),
     ...routes,
   });
   const rendered = renderRoute(path);
@@ -368,6 +375,125 @@ describe('DashboardPage', () => {
     });
     await waitFor(() => {
       expect(sent('GET /dashboard')).toHaveLength(2);
+    });
+  });
+
+  describe('card collapse', () => {
+    const cardToggle = (
+      page: HTMLElement,
+      card: DashboardCard,
+      action: 'collapse' | 'expand',
+    ) =>
+      within(page).findByRole('button', {
+        name: i18n.t(`dashboard.cards.${action}`, {
+          title: i18n.t(dashboardCardTitles[card]),
+        }),
+      });
+
+    const expectAllExpanded = async (page: HTMLElement) => {
+      for (const card of dashboardCardSchema.options) {
+        expect(await cardToggle(page, card, 'collapse')).toHaveAttribute(
+          'aria-expanded',
+          'true',
+        );
+      }
+    };
+
+    it('opens the cards collapsed by the preferences with only their header', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /preferences': envelope({
+          ...preferences,
+          collapsedDashboardCards: ['OVERVIEW', 'INCOME', 'ACCOUNT_BALANCES'],
+        }),
+      });
+
+      const page = await main();
+      const expandAccounts = await cardToggle(
+        page,
+        'ACCOUNT_BALANCES',
+        'expand',
+      );
+      expect(expandAccounts).toHaveAttribute('aria-expanded', 'false');
+      expect(expandAccounts).not.toHaveAttribute('aria-controls');
+      expect(
+        within(page).getByText(i18n.t('dashboard.accounts.title')),
+      ).toBeInTheDocument();
+      expect(within(page).queryByText('Nubank')).not.toBeInTheDocument();
+      expect(await cardToggle(page, 'OVERVIEW', 'expand')).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      );
+      expect(
+        within(page).getByText(i18n.t('dashboard.overview.title')),
+      ).toBeInTheDocument();
+      expect(
+        within(page).queryByLabelText(i18n.t('dashboard.balances.available')),
+      ).not.toBeInTheDocument();
+
+      const collapseUpcoming = await cardToggle(
+        page,
+        'UPCOMING_TRANSACTIONS',
+        'collapse',
+      );
+      expect(collapseUpcoming).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        document.getElementById(
+          collapseUpcoming.getAttribute('aria-controls') ?? '',
+        ),
+      ).toBeInTheDocument();
+      expect(
+        within(page).queryByLabelText(i18n.t('dashboard.income.title')),
+      ).not.toBeInTheDocument();
+      expect(
+        within(page).getByLabelText(i18n.t('dashboard.expenses.title')),
+      ).toBeInTheDocument();
+      expect(
+        (await cardToggle(page, 'INCOME', 'expand')).closest('.ant-card'),
+      ).toHaveStyle({ height: 'auto' });
+      expect(
+        (await cardToggle(page, 'EXPENSES', 'collapse')).closest('.ant-card'),
+      ).toHaveStyle({ height: '100%' });
+    });
+
+    it('collapses and expands one card at a time without saving the preference', async () => {
+      const { sent } = renderDashboard();
+
+      const page = await main();
+      expect(await within(page).findByText('Nubank')).toBeInTheDocument();
+
+      fireEvent.click(await cardToggle(page, 'ACCOUNT_BALANCES', 'collapse'));
+
+      const expand = await cardToggle(page, 'ACCOUNT_BALANCES', 'expand');
+      expect(expand).toHaveAttribute('aria-expanded', 'false');
+      expect(within(page).queryByText('Nubank')).not.toBeInTheDocument();
+      expect(
+        within(page).getByText(i18n.t('dashboard.accounts.title')),
+      ).toBeInTheDocument();
+      expect(
+        await cardToggle(page, 'UPCOMING_TRANSACTIONS', 'collapse'),
+      ).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        within(page).getByLabelText(i18n.t('dashboard.balances.available')),
+      ).toBeInTheDocument();
+
+      fireEvent.click(expand);
+
+      expect(await within(page).findByText('Nubank')).toBeInTheDocument();
+      await expectAllExpanded(page);
+      expect(sent('PATCH /preferences')).toHaveLength(0);
+    });
+
+    it('expands every card when the preferences cannot load', async () => {
+      renderDashboard(AppRoutes.DASHBOARD, {
+        'GET /preferences': {
+          status: 403,
+          data: { statusCode: 403, message: 'Proibido' },
+        },
+      });
+
+      const page = await main();
+      expect(await within(page).findByText('Nubank')).toBeInTheDocument();
+      await expectAllExpanded(page);
     });
   });
 

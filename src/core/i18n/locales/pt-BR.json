@@ -37,6 +37,13 @@
       "transaction": "Transação",
       "purchase": "Compra no cartão"
     },
+    "cards": {
+      "collapse": "Recolher {{title}}",
+      "expand": "Expandir {{title}}"
+    },
+    "overview": {
+      "title": "Visão geral"
+    },
     "period": {
       "loading": "Carregando o mês",
       "timing": {
@@ -841,7 +848,8 @@
     "title": "Preferências",
     "fields": {
       "spendingPerspective": "Perspectiva de gastos",
-      "defaultMonth": "Mês inicial do painel"
+      "defaultMonth": "Mês inicial do painel",
+      "collapsedDashboardCards": "Indicadores do painel"
     },
     "hints": {
       "spendingPerspective": "Define se os gastos no cartão contam pela data da compra ou pelo mês da fatura.",
@@ -854,6 +862,10 @@
     "defaultMonths": {
       "CURRENT": "Mês atual",
       "NEXT": "Próximo mês"
+    },
+    "dashboardCardStates": {
+      "visible": "Visível",
+      "hidden": "Oculto"
     }
   },
   "financialSettings": {

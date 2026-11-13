@@ -1,4 +1,5 @@
 import type { Dashboard } from '@/modules/dashboard/domain/dashboard.schema';
+import { buildPreferences } from './preferences-fixture';
 
 export const buildDashboard = (
   overrides: Partial<Dashboard> = {},
@@ -55,9 +56,13 @@ export const buildDashboard = (
   ...overrides,
 });
 
-export const dashboardRoute = {
+export const dashboardRoutes = {
   'GET /dashboard': {
     status: 200,
     data: { data: buildDashboard(), meta: {} },
+  },
+  'GET /preferences': {
+    status: 200,
+    data: { data: buildPreferences(), meta: {} },
   },
 };

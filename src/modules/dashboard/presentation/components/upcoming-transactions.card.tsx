@@ -23,6 +23,7 @@ import type {
   DashboardPeriod,
   DashboardUpcoming,
 } from '../../domain/dashboard.schema';
+import { CollapsibleCard } from './collapsible-card';
 import { transactionsOfMonth } from './month-links';
 import { PlannedDate } from './planned-date';
 import { ResponsiveTable } from './responsive-table';
@@ -102,8 +103,10 @@ export const UpcomingTransactionsCard = ({
   ];
 
   return (
-    <EqualHeightCard
+    <CollapsibleCard
+      card="UPCOMING_TRANSACTIONS"
       title={t('dashboard.upcoming.title')}
+      component={EqualHeightCard}
       extra={
         <Link to={transactionsOfMonth(period)}>
           {t('dashboard.upcoming.viewAll')}
@@ -168,6 +171,6 @@ export const UpcomingTransactionsCard = ({
           setConfirmingPending(false);
         }}
       />
-    </EqualHeightCard>
+    </CollapsibleCard>
   );
 };

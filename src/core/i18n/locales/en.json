@@ -37,6 +37,13 @@
       "transaction": "Transaction",
       "purchase": "Card purchase"
     },
+    "cards": {
+      "collapse": "Collapse {{title}}",
+      "expand": "Expand {{title}}"
+    },
+    "overview": {
+      "title": "Overview"
+    },
     "period": {
       "loading": "Loading the month",
       "timing": {
@@ -841,7 +848,8 @@
     "title": "Preferences",
     "fields": {
       "spendingPerspective": "Spending perspective",
-      "defaultMonth": "Dashboard starting month"
+      "defaultMonth": "Dashboard starting month",
+      "collapsedDashboardCards": "Dashboard cards"
     },
     "hints": {
       "spendingPerspective": "Whether card spending counts by purchase date or by invoice month.",
@@ -854,6 +862,10 @@
     "defaultMonths": {
       "CURRENT": "Current month",
       "NEXT": "Next month"
+    },
+    "dashboardCardStates": {
+      "visible": "Visible",
+      "hidden": "Hidden"
     }
   },
   "financialSettings": {

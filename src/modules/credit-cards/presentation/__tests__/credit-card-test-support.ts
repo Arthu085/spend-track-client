@@ -62,6 +62,7 @@ export const preferences: Preferences = {
   spendingPerspectiveLabel: 'Mês da fatura',
   defaultMonth: 'CURRENT',
   defaultMonthLabel: 'Mês atual',
+  collapsedDashboardCards: [],
   updatedAt: null,
 };
 
