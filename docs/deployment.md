@@ -6,9 +6,14 @@ static build served over HTTPS from the same origin as the API, for example
 client. Same-origin serving keeps the session cookies first-party and avoids cross-site cookie
 dependencies.
 
-The [API deployment guide](https://github.com/Arthu085/spend-track-api/blob/main/docs/deployment.md)
-is the primary runbook for backend secrets, trusted proxies, the database, migrations, mail, health
-checks, backups, and API updates.
+This repository ships a ready setup for one server running the API's production Compose stack: the
+Caddy rules in [`deploy/frontend.caddy`](../deploy/frontend.caddy), the release script
+[`deploy/release.sh`](../deploy/release.sh), and the **Deploy** workflow
+([`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml)). The
+[API deployment guide](https://github.com/Arthu085/spend-track-api/blob/main/docs/deployment.md)
+is the primary runbook for preparing the server, the Compose stack and its Caddy site, backend
+secrets, the database, migrations, mail, health checks, backups, and API updates. Deploy the API
+first: the frontend release joins its stack.
 
 ## Build a release
 
@@ -43,7 +48,7 @@ files out of release artifacts.
 Publish the complete `dist/` directory, including `index.html`, `assets/`, the generated icons,
 `manifest.webmanifest`, `sw.js`, and the `workbox-*.js` file. Store each build as a versioned release
 directory, such as `releases/<revision>/`, and point a `current` link at the served release so a
-switch is atomic. The web server needs read access only. The production client needs no Node.js
+switch is atomic. The [single-server deployment](#single-server-deployment) does exactly this. The web server needs read access only. The production client needs no Node.js
 process, source files, dependencies, or `.env` file. `npm run preview` is for local inspection, not
 production serving.
 
@@ -75,17 +80,14 @@ Configure the API for the public origin as its guide describes, including `CORS_
 the API port private. If a load balancer or CDN sits in front of the server, review the whole proxy
 chain so forwarding headers and caching still follow these rules.
 
-### Example: Caddy
+### Caddy
 
-This is one example of the rules above, not a requirement. It assumes Caddy runs on the host, serves
-the release directory, and reaches an API published only on `127.0.0.1:3000`. Caddy obtains and
-renews certificates and redirects HTTP to HTTPS automatically; persist its certificate storage.
+[`deploy/frontend.caddy`](../deploy/frontend.caddy) implements these rules for Caddy. The API stack's
+Caddyfile owns the site address, HTTPS, the `/api` proxy, and the private health checks, and imports
+this snippet for every other path:
 
 ```caddyfile
 app.example.com {
-    root * /srv/app/current
-    encode zstd gzip
-
     @health path /api/health /api/health/*
     handle @health {
         respond 404
@@ -93,31 +95,94 @@ app.example.com {
 
     @api path /api /api/*
     handle @api {
-        reverse_proxy 127.0.0.1:3000
-    }
-
-    handle /assets/* {
-        header Cache-Control "public, max-age=31536000, immutable"
-        file_server
-    }
-
-    @static path_regexp static \.[^/]+$
-    handle @static {
-        header Cache-Control "no-cache"
-        file_server
+        reverse_proxy api:3000
     }
 
     handle {
-        header Cache-Control "no-cache"
-        try_files {path} /index.html
-        file_server
+        import /srv/frontend/current/*.caddy
+        respond "Frontend not deployed" 503
     }
 }
 ```
 
-`handle` keeps the `/api` prefix; `handle_path` would strip it. If Caddy runs in a container, mount
-the release read-only and use the API's address on the private network instead of `127.0.0.1`.
-Validate the configuration with `caddy validate` before reloading the service.
+The snippet serves `/srv/frontend/current/dist`: existing files under `/assets/` are immutable, every
+other file and the `index.html` fallback is revalidated, and a missing file with an extension returns
+404 without caching. Each release carries its own copy of the snippet, so a release and its serving
+rules switch and roll back together. `handle` keeps the `/api` prefix; `handle_path` would strip it.
+Another server or CDN must apply the same rules itself.
+
+## Single-server deployment
+
+Prepare the server and deploy the API first, as the
+[API deployment guide](https://github.com/Arthu085/spend-track-api/blob/main/docs/deployment.md)
+describes; this repository adds its releases to that stack.
+
+### GitHub configuration
+
+Create a `production` environment in this repository (Settings → Environments), set **Deployment
+branches** to the default branch only, and optionally add required reviewers. The SSH values,
+`DEPLOY_PATH`, and `APP_DOMAIN` are the same as in the API repository.
+
+| Name                   | Kind     | Value                                                                         |
+| ---------------------- | -------- | ----------------------------------------------------------------------------- |
+| `SSH_HOST`, `SSH_USER` | Variable | Server address and deploy user                                                |
+| `SSH_PORT`             | Variable | Optional; default `22`                                                        |
+| `DEPLOY_PATH`          | Variable | The API stack's directory, such as `/srv/spend-track`                         |
+| `APP_DOMAIN`           | Variable | Public hostname without scheme; the build uses `https://$APP_DOMAIN`          |
+| `VITE_APP_NAME`        | Variable | Optional; default `Spend Track` ([environment](../README.md#environment))     |
+| `VITE_APP_MARK`        | Variable | Optional; default `ST`, the short mark for the collapsed sidebar and manifest |
+| `SSH_PRIVATE_KEY`      | Secret   | The deploy user's private key                                                 |
+| `SSH_KNOWN_HOSTS`      | Secret   | The server's verified `ssh-keyscan` line; host keys are always checked        |
+
+### Deploy
+
+Run **Deploy** from the Actions tab (`workflow_dispatch`) on the default branch, for the first
+release and every update. The workflow:
+
+1. stops unless it runs on the default branch and the CI workflow succeeded for the exact commit;
+2. installs dependencies and builds with `VITE_API_URL=https://$APP_DOMAIN`, packages `dist/` with
+   `frontend.caddy`, and keeps the package as a workflow artifact for 30 days;
+3. over SSH with a pinned host key, installs `release.sh` in `DEPLOY_PATH/frontend/` and runs
+   `release.sh activate`;
+4. requests `/`, `/login`, `/sw.js`, and `/manifest.webmanifest` over HTTPS and, if any fails, rolls
+   back to the previous release.
+
+`release.sh activate` extracts the package into `frontend/releases/<UTC time>-<commit>/`, copies the
+previous release's own hashed assets that the new build lacks (so open tabs and lazy-loaded routes
+keep working for one more release), switches the `current` link atomically, and reloads Caddy. If
+Caddy rejects the new snippet, the previous release stays active. It keeps the five newest releases
+plus `current` and `previous` (`KEEP_RELEASES` changes the count).
+
+### Automatic deployment
+
+Manual deployment is the default. To also deploy every push to the default branch once CI passes,
+uncomment the `workflow_run` trigger in the workflow (adjust `branches` if the default branch is not
+`main`). Manual runs keep working. Before enabling it:
+
+- **Branch restrictions.** Keep the `production` environment limited to the default branch. The
+  workflow also deploys only CI runs that succeeded for a `push` to the default branch of this
+  repository, never pull requests or forks.
+- **Approval.** Required reviewers on the environment make each automatic run wait for approval;
+  remove them only when every merge may go live.
+- **Concurrency.** Deployments run one at a time per repository. A waiting deployment replaces an
+  older waiting one, so a burst of merges deploys the newest commit; the running one is never
+  cancelled.
+- **Rollback.** A failed public check rolls back to the previous release, but after a manual
+  rollback the next merge deploys again: revert the faulty commit first.
+- **API first.** The API repository deploys independently, so a frontend change that needs new API
+  behavior must merge after that API change is in production.
+
+### Rollback
+
+On the server, switch back to the previous release; running it again rolls forward:
+
+```sh
+/srv/spend-track/frontend/release.sh rollback
+```
+
+To deploy an older commit instead, re-run its earlier successful **Deploy** run, which rebuilds it
+with the environment's current variables. A rolled-back release keeps the variables it was built
+with. API rollback and database restore follow the API guide.
 
 ## Release checks
 
@@ -158,8 +223,9 @@ update prompt in detail.
 
 Build and check each revision before publishing it. Upload a complete release directory, copy the
 previous release's hashed `/assets/` files into it so open tabs and lazy-loaded routes keep working,
-then switch `current` atomically. Do not delete old assets while clients may still reference them.
-The update prompt lets users reload into the new release; until then, an open tab keeps its version.
+then switch `current` atomically; `release.sh` does all three. Do not delete old assets while clients
+may still reference them. The update prompt lets users reload into the new release; until then, an
+open tab keeps its version.
 
 Coordinate the client revision with the API release and its migrations. To roll back the client,
 point `current` at the previous complete release; it keeps the public variables it was built with.

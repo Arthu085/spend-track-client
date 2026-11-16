@@ -101,8 +101,8 @@ only from `localhost` or HTTPS. The icons are generated from
 ## Production deployment
 
 [`docs/deployment.md`](docs/deployment.md) covers release builds, same-origin HTTPS hosting, SPA
-fallback and cache rules, PWA checks, updates, and rollback. Serve the built `dist/` with a static
-web server; `npm run preview` is a local validation tool.
+fallback and cache rules, PWA checks, the single-server **Deploy** workflow, updates, and rollback.
+`npm run preview` is a local validation tool, not a production server.
 
 ## Editor
 
@@ -118,7 +118,8 @@ npm run format:check && npm run lint:check && npm run typecheck && npm test && n
 
 GitHub Actions runs this gate on pull requests targeting `main` and pushes to `main`, after a clean
 `npm ci` using the Node version from `.nvmrc`. A separate job runs the
-[API integration tests](#api-integration-tests).
+[API integration tests](#api-integration-tests), and another checks the deployment files: ShellCheck
+on `deploy/release.sh` and `caddy validate` on `deploy/frontend.caddy`.
 
 ## API integration tests
 
