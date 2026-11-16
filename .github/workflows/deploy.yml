@@ -1,0 +1,154 @@
+name: Deploy
+
+# Manual by default. To deploy every commit on main after CI passes, uncomment workflow_run below;
+# docs/deployment.md#deploy describes the change.
+on:
+  workflow_dispatch:
+  # workflow_run:
+  #   workflows: [CI]
+  #   types: [completed]
+  #   branches: [main]
+
+# One deployment at a time; a queued deployment waits instead of cancelling the running one.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+jobs:
+  ci-status:
+    name: Require successful CI
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    steps:
+      - name: Check CI for the commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          runs="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$DEPLOY_SHA&status=success&per_page=1" --jq '.total_count')"
+          if [ "$runs" -eq 0 ]; then
+            echo "::error::Commit $DEPLOY_SHA has no successful CI run. Wait for CI to pass on it, then deploy again."
+            exit 1
+          fi
+
+  deploy:
+    name: Build and deploy to the server
+    needs: ci-status
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://${{ vars.APP_DOMAIN }}
+    env:
+      APP_DOMAIN: ${{ vars.APP_DOMAIN }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The API is served from the same origin, so the public domain is also the API origin.
+      - name: Build
+        run: |
+          if [ -z "$APP_DOMAIN" ]; then
+            echo "::error::APP_DOMAIN is not set in the production environment; see docs/deployment.md#github-configuration."
+            exit 1
+          fi
+          VITE_API_URL="https://$APP_DOMAIN" npm run build
+        env:
+          VITE_APP_NAME: ${{ vars.VITE_APP_NAME || 'Spend Track' }}
+          VITE_APP_MARK: ${{ vars.VITE_APP_MARK || 'ST' }}
+
+      - name: Package release
+        id: release
+        run: |
+          id="$(date -u +%Y%m%dT%H%M%SZ)-${DEPLOY_SHA::12}"
+          mkdir release
+          cp -R dist release/dist
+          cp deploy/frontend.caddy release/frontend.caddy
+          tar -C release -czf "frontend-$id.tar.gz" dist frontend.caddy
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ steps.release.outputs.id }}
+          path: frontend-${{ steps.release.outputs.id }}.tar.gz
+          retention-days: 30
+
+      - name: Configure SSH
+        env:
+          SSH_HOST: ${{ vars.SSH_HOST }}
+          SSH_USER: ${{ vars.SSH_USER }}
+          SSH_PORT: ${{ vars.SSH_PORT || '22' }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          for name in SSH_HOST SSH_USER SSH_PRIVATE_KEY SSH_KNOWN_HOSTS DEPLOY_PATH; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not set in the production environment; see docs/deployment.md#github-configuration."
+              exit 1
+            fi
+          done
+          if ! [[ $DEPLOY_PATH =~ ^/[A-Za-z0-9._/-]+$ ]]; then
+            echo "::error::DEPLOY_PATH must be an absolute path of letters, digits, '.', '_', '-', and '/'."
+            exit 1
+          fi
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName $SSH_HOST
+            User $SSH_USER
+            Port $SSH_PORT
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+            ServerAliveInterval 30
+          EOF
+
+      - name: Upload and activate the release
+        env:
+          RELEASE_ID: ${{ steps.release.outputs.id }}
+        run: |
+          ssh deploy-target "test -f '$DEPLOY_PATH/compose.yml'" || {
+            echo "::error::$DEPLOY_PATH/compose.yml is missing on the server. Deploy the API first."
+            exit 1
+          }
+          ssh deploy-target "mkdir -p '$DEPLOY_PATH/frontend' && cat > '$DEPLOY_PATH/frontend/release.sh' && chmod 755 '$DEPLOY_PATH/frontend/release.sh'" < deploy/release.sh
+          ssh deploy-target "cat > '$DEPLOY_PATH/frontend/$RELEASE_ID.tar.gz'" < "frontend-$RELEASE_ID.tar.gz"
+          ssh deploy-target "'$DEPLOY_PATH/frontend/release.sh' activate '$DEPLOY_PATH/frontend/$RELEASE_ID.tar.gz' '$RELEASE_ID'"
+
+      - name: Check the public site
+        id: public-check
+        run: |
+          check() {
+            curl --fail --silent --show-error --output /dev/null \
+              --retry 10 --retry-delay 3 --retry-all-errors --max-time 10 "https://$APP_DOMAIN$1"
+          }
+          check /
+          check /login
+          check /sw.js
+          check /manifest.webmanifest
+
+      - name: Roll back after a failed check
+        if: failure() && steps.public-check.outcome == 'failure'
+        run: ssh deploy-target "'$DEPLOY_PATH/frontend/release.sh' rollback"
