@@ -47,6 +47,26 @@ jobs:
           VITE_APP_NAME: Spend Track
           VITE_APP_MARK: ST
 
+  deployment-config:
+    name: Deployment configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check scripts
+        run: shellcheck deploy/release.sh
+
+      # Validates the snippet inside a site block shaped like the API stack's Caddyfile.
+      - name: Check Caddy snippet
+        run: |
+          site="$RUNNER_TEMP/caddy"
+          mkdir -p "$site"
+          printf 'app.example.com {\n\thandle {\n\t\timport /srv/frontend.caddy\n\t}\n}\n' > "$site/Caddyfile"
+          docker run --rm \
+            -v "$site:/etc/caddy:ro" \
+            -v "$PWD/deploy/frontend.caddy:/srv/frontend.caddy:ro" \
+            caddy:2.10-alpine caddy validate --config /etc/caddy/Caddyfile
+
   api-integration:
     name: API integration tests
     runs-on: ubuntu-latest
