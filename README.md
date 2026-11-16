@@ -101,10 +101,8 @@ only from `localhost` or HTTPS. The icons are generated from
 ## Production deployment
 
 [`docs/deployment.md`](docs/deployment.md) covers release builds, same-origin HTTPS hosting, SPA
-fallback and cache rules, PWA checks, updates, and rollback. Serve the built `dist/` with a static
-web server; `npm run preview` is a local validation tool. For a single server running the API's
-production Compose stack, the **Deploy** workflow builds the release in GitHub Actions and activates
-it through SSH with the Caddy rules in [`deploy/`](deploy).
+fallback and cache rules, PWA checks, the single-server **Deploy** workflow, updates, and rollback.
+`npm run preview` is a local validation tool, not a production server.
 
 ## Editor
 

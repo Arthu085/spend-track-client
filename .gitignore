@@ -27,3 +27,10 @@ dev-dist
 *.njsproj
 *.sln
 *.sw?
+
+# Release state, if deploy/release.sh runs from a checkout
+/deploy/releases/
+/deploy/current
+/deploy/previous
+/deploy/.release.lock
+*.tar.gz

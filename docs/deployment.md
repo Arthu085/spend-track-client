@@ -113,11 +113,15 @@ Another server or CDN must apply the same rules itself.
 
 ## Single-server deployment
 
+Prepare the server and deploy the API first, as the
+[API deployment guide](https://github.com/Arthu085/spend-track-api/blob/main/docs/deployment.md)
+describes; this repository adds its releases to that stack.
+
 ### GitHub configuration
 
-Create a `production` environment in this repository (Settings → Environments), restrict its
-deployment branches to `main`, and optionally add required reviewers. The SSH values, `DEPLOY_PATH`,
-and `APP_DOMAIN` are the same as in the API repository.
+Create a `production` environment in this repository (Settings → Environments), set **Deployment
+branches** to the default branch only, and optionally add required reviewers. The SSH values,
+`DEPLOY_PATH`, and `APP_DOMAIN` are the same as in the API repository.
 
 | Name                   | Kind     | Value                                                                         |
 | ---------------------- | -------- | ----------------------------------------------------------------------------- |
@@ -132,9 +136,10 @@ and `APP_DOMAIN` are the same as in the API repository.
 
 ### Deploy
 
-Run **Deploy** from the Actions tab (`workflow_dispatch`) on `main`. The workflow:
+Run **Deploy** from the Actions tab (`workflow_dispatch`) on the default branch, for the first
+release and every update. The workflow:
 
-1. stops unless the CI workflow succeeded for the exact commit;
+1. stops unless it runs on the default branch and the CI workflow succeeded for the exact commit;
 2. installs dependencies and builds with `VITE_API_URL=https://$APP_DOMAIN`, packages `dist/` with
    `frontend.caddy`, and keeps the package as a workflow artifact for 30 days;
 3. over SSH with a pinned host key, installs `release.sh` in `DEPLOY_PATH/frontend/` and runs
@@ -148,8 +153,24 @@ keep working for one more release), switches the `current` link atomically, and 
 Caddy rejects the new snippet, the previous release stays active. It keeps the five newest releases
 plus `current` and `previous` (`KEEP_RELEASES` changes the count).
 
-To deploy every commit on `main` after CI passes, uncomment the `workflow_run` trigger in the
-workflow; it then deploys the commit CI tested and skips runs whose CI failed.
+### Automatic deployment
+
+Manual deployment is the default. To also deploy every push to the default branch once CI passes,
+uncomment the `workflow_run` trigger in the workflow (adjust `branches` if the default branch is not
+`main`). Manual runs keep working. Before enabling it:
+
+- **Branch restrictions.** Keep the `production` environment limited to the default branch. The
+  workflow also deploys only CI runs that succeeded for a `push` to the default branch of this
+  repository, never pull requests or forks.
+- **Approval.** Required reviewers on the environment make each automatic run wait for approval;
+  remove them only when every merge may go live.
+- **Concurrency.** Deployments run one at a time per repository. A waiting deployment replaces an
+  older waiting one, so a burst of merges deploys the newest commit; the running one is never
+  cancelled.
+- **Rollback.** A failed public check rolls back to the previous release, but after a manual
+  rollback the next merge deploys again: revert the faulty commit first.
+- **API first.** The API repository deploys independently, so a frontend change that needs new API
+  behavior must merge after that API change is in production.
 
 ### Rollback
 

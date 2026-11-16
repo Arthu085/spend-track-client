@@ -2,9 +2,6 @@
 # Activates or rolls back a frontend release served by the API stack's Caddy. Installed as
 # DEPLOY_PATH/frontend/release.sh; Caddy serves DEPLOY_PATH/frontend/current/dist and imports
 # DEPLOY_PATH/frontend/current/frontend.caddy.
-#
-# Usage: release.sh activate <archive.tar.gz> <release-id>
-#        release.sh rollback
 
 set -euo pipefail
 
@@ -21,7 +18,10 @@ fail() {
 }
 
 usage() {
-  sed -n '6,7p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//' >&2
+  cat >&2 <<'EOF'
+Usage: release.sh activate <archive.tar.gz> <release-id>
+       release.sh rollback
+EOF
   exit 2
 }
 
@@ -99,18 +99,17 @@ rollback() {
   switch_to "$previous"
 }
 
+case "${1:-} $#" in
+  'activate 3' | 'rollback 1') ;;
+  *) usage ;;
+esac
+
 mkdir -p "$RELEASES_DIR"
 exec 9>"$FRONTEND_DIR/.release.lock"
 flock -n 9 || fail 'another frontend release is running'
 
-case "${1:-}" in
-  activate)
-    [[ $# -eq 3 ]] || usage
-    activate "$2" "$3"
-    ;;
-  rollback)
-    [[ $# -eq 1 ]] || usage
-    rollback
-    ;;
-  *) usage ;;
-esac
+if [[ $1 == activate ]]; then
+  activate "$2" "$3"
+else
+  rollback
+fi
